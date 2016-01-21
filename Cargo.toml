@@ -1,0 +1,12 @@
+[package]
+name = "jemallocator"
+version = "0.1.0"
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+
+[dependencies]
+jemalloc-sys = { path = "jemalloc-sys", version = "0.1.0" }
+
+[dependencies.libc]
+git = "https://github.com/alexcrichton/libc"
+features = ["no-std"]
+branch = "no-std"
