@@ -2,27 +2,34 @@ language: rust
 rust:
   - nightly
 sudo: false
+install:
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then OS=unknown-linux-gnu; else OS=apple-darwin; fi
+  - export TARGET=$ARCH-$OS
+  - curl -sO https://static.rust-lang.org/dist/rust-$TRAVIS_RUST_VERSION-$TARGET.tar.gz
+  - tar xf rust-$TRAVIS_RUST_VERSION-$TARGET.tar.gz
+  - rm -rf $HOME/rust/lib/rustlib/$TARGET
+  - mv rust-$TRAVIS_RUST_VERSION-$TARGET/rust-std-$TARGET/lib/rustlib/$TARGET $HOME/rust/lib/rustlib
 before_script:
   - pip install 'travis-cargo<0.2' --user && export PATH=$HOME/.local/bin:$PATH
 script:
-  - cargo build --verbose
-  - cargo test --verbose
+  - cargo build --verbose --target $TARGET
+  - cargo test --verbose --target $TARGET
   - cargo doc
 after_success:
   - travis-cargo --only nightly doc-upload
-  - travis-cargo coveralls --no-sudo
 os:
   - linux
   - osx
 env:
   global:
     secure: aKlo1krLfMfRoS11SYTAzsmrwGlXcwv+OmdEIdCfa7z2uMDiKrv5icMZokWIdgj3QoLppCJX9mEvxWNr53f0JoMCP8lsWj/ut64Qh9qUhderoNNb3w03YbnQeI051UlqFwdSDqyrBaVybItCEps2F//hPqAo7tRrAWXPLkVHz8ynbFZ03NDnoZy3cW62yDNEzWnDtm5n0BA1Dx7JP8klB9SAQfMwhurBf+WlyEcUQczYYL8NKZGLQMC3sQgnlI8TA2Uopz5iWSfhW4zAaIcDWbgP6Ni1T/OEZiwk6zd0Qi65hF7sM2qZ+RVvWlgvKWzCbbT9dAezKrAz59NQlOc0DWy5hCbymJ2I4kOil27IMexm0Z2h+LiOZFhP3wt7kqucCUJr8yuYoiu9Sn2sQQ2E0fMFCoKdEQNX3PsB3vfBcmxL4IQuKyvvgfC7lUhewTVmOWwcrbCcik5RMxgPkAyFHoJstP/u9l/QKfbcwMUo68Sj9hFlGxxdcevL8wrOseE2cPCqzIKi33V9TriUoTNlY8IORD+QBL9Nps98Qj+A0wvjVE1IuLOfQhooyP1lzpobsQMWkke1DnKMqIeDyROwpsSgXCowQAk7kz5it85juL+xxsarDkHCJCCDCP4V4V2GDPyl+JuEhiN+VIxb8T64nXyMh18y0gTMXAFmtSr6R6Q=
+  matrix:
+    - ARCH=x86_64
+    - ARCH=i686
 notifications:
   email:
     on_success: never
 addons:
   apt:
     packages:
-      - libcurl4-openssl-dev
-      - libelf-dev
-      - libdw-dev
+      - g++-multilib
