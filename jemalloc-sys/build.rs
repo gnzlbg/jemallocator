@@ -87,7 +87,7 @@ fn main() {
     run(&mut cmd);
     run(Command::new("make")
                 .current_dir(&build_dir)
-                .arg("install_lib")
+                .arg("install_lib_static")
                 .arg("install_include")
                 .arg("-j").arg(env::var("NUM_JOBS").unwrap()));
 
