@@ -11,9 +11,12 @@ script:
 after_success:
   - travis-cargo --only nightly doc-upload
   - travis-cargo coveralls --no-sudo
+os:
+  - linux
+  - osx
 env:
   global:
-    secure: LZMkQQJT5LqLQQ8JyakjvHNqqMPy8lm/SyC+H5cKUVI/xk7xRuti4eKY937N8uSmbff2m9ZYlG6cNwIOfk/nWn8YsqxA8Wg/xugubWzqGuqu+NQ4IZVa7INT2Fiqyk5SPCh8B5fo2x7OBJ24SCkWb2p8bEWAuW8XdZZOdmi3H2I=
+    secure: aKlo1krLfMfRoS11SYTAzsmrwGlXcwv+OmdEIdCfa7z2uMDiKrv5icMZokWIdgj3QoLppCJX9mEvxWNr53f0JoMCP8lsWj/ut64Qh9qUhderoNNb3w03YbnQeI051UlqFwdSDqyrBaVybItCEps2F//hPqAo7tRrAWXPLkVHz8ynbFZ03NDnoZy3cW62yDNEzWnDtm5n0BA1Dx7JP8klB9SAQfMwhurBf+WlyEcUQczYYL8NKZGLQMC3sQgnlI8TA2Uopz5iWSfhW4zAaIcDWbgP6Ni1T/OEZiwk6zd0Qi65hF7sM2qZ+RVvWlgvKWzCbbT9dAezKrAz59NQlOc0DWy5hCbymJ2I4kOil27IMexm0Z2h+LiOZFhP3wt7kqucCUJr8yuYoiu9Sn2sQQ2E0fMFCoKdEQNX3PsB3vfBcmxL4IQuKyvvgfC7lUhewTVmOWwcrbCcik5RMxgPkAyFHoJstP/u9l/QKfbcwMUo68Sj9hFlGxxdcevL8wrOseE2cPCqzIKi33V9TriUoTNlY8IORD+QBL9Nps98Qj+A0wvjVE1IuLOfQhooyP1lzpobsQMWkke1DnKMqIeDyROwpsSgXCowQAk7kz5it85juL+xxsarDkHCJCCDCP4V4V2GDPyl+JuEhiN+VIxb8T64nXyMh18y0gTMXAFmtSr6R6Q=
 notifications:
   email:
     on_success: never
