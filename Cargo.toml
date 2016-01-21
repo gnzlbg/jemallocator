@@ -14,8 +14,4 @@ A Rust allocator backed by jemalloc
 
 [dependencies]
 jemalloc-sys = { path = "jemalloc-sys", version = "0.1.0" }
-
-[dependencies.libc]
-git = "https://github.com/alexcrichton/libc"
-features = ["no-std"]
-branch = "no-std"
+libc = { version = "0.2", features = ["no-std"] }
