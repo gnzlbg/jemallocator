@@ -8,6 +8,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#![no_std]
+
 extern crate libc;
 
 use libc::{c_int, c_void, size_t};

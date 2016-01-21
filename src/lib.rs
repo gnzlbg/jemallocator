@@ -46,39 +46,39 @@ fn align_to_flags(align: usize) -> c_int {
 }
 
 #[no_mangle]
-pub extern "C" fn __rust_allocate(size: usize, align: usize) -> *mut u8 {
+pub extern fn __rust_allocate(size: usize, align: usize) -> *mut u8 {
     let flags = align_to_flags(align);
     unsafe { ffi::mallocx(size as size_t, flags) as *mut u8 }
 }
 
 #[no_mangle]
-pub extern "C" fn __rust_reallocate(ptr: *mut u8,
-                                    _old_size: usize,
-                                    size: usize,
-                                    align: usize)
-                                    -> *mut u8 {
+pub extern fn __rust_reallocate(ptr: *mut u8,
+                                _old_size: usize,
+                                size: usize,
+                                align: usize)
+                                -> *mut u8 {
     let flags = align_to_flags(align);
     unsafe { ffi::rallocx(ptr as *mut c_void, size as size_t, flags) as *mut u8 }
 }
 
 #[no_mangle]
-pub extern "C" fn __rust_reallocate_inplace(ptr: *mut u8,
-                                            _old_size: usize,
-                                            size: usize,
-                                            align: usize)
-                                            -> usize {
+pub extern fn __rust_reallocate_inplace(ptr: *mut u8,
+                                        _old_size: usize,
+                                        size: usize,
+                                        align: usize)
+                                        -> usize {
     let flags = align_to_flags(align);
     unsafe { ffi::xallocx(ptr as *mut c_void, size as size_t, 0, flags) as usize }
 }
 
 #[no_mangle]
-pub extern "C" fn __rust_deallocate(ptr: *mut u8, old_size: usize, align: usize) {
+pub extern fn __rust_deallocate(ptr: *mut u8, old_size: usize, align: usize) {
     let flags = align_to_flags(align);
     unsafe { ffi::sdallocx(ptr as *mut c_void, old_size as size_t, flags) }
 }
 
 #[no_mangle]
-pub extern "C" fn __rust_usable_size(size: usize, align: usize) -> usize {
+pub extern fn __rust_usable_size(size: usize, align: usize) -> usize {
     let flags = align_to_flags(align);
     unsafe { ffi::nallocx(size as size_t, flags) as usize }
 }
@@ -92,4 +92,14 @@ pub extern fn pthread_atfork(_prefork: *mut u8,
                              _postfork_parent: *mut u8,
                              _postfork_child: *mut u8) -> i32 {
     0
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn smoke() {
+        let ptr = super::__rust_allocate(100, 8);
+        assert!(!ptr.is_null());
+        super::__rust_deallocate(ptr, 100, 8);
+    }
 }
