@@ -69,7 +69,19 @@ fn main() {
         //        locking, but requires passing an option due to a historical
         //        default with jemalloc.
         cmd.arg("--disable-lazy-lock");
-    } else if target.contains("ios") || target.contains("android") {
+    } else if target.contains("ios") {
+        cmd.arg("--disable-tls");
+    } else if target.contains("android") {
+        // We force android to have prefixed symbols because apparently
+        // replacement of the libc allocator doesn't quite work. When this was
+        // tested (unprefixed symbols), it was found that the `realpath`
+        // function in libc would allocate with libc malloc (not jemalloc
+        // malloc), and then the standard library would free with jemalloc free,
+        // causing a segfault.
+        //
+        // If the test suite passes, however, without symbol prefixes then we
+        // should be good to go!
+        cmd.arg("--with-jemalloc-prefix=je_");
         cmd.arg("--disable-tls");
     }
 
