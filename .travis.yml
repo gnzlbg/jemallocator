@@ -5,8 +5,7 @@ sudo: false
 install:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then OS=unknown-linux-gnu; else OS=apple-darwin; fi
   - export TARGET=$ARCH-$OS
-  - curl https://static.rust-lang.org/rustup.sh |
-    sh -s -- --add-target=$TARGET --disable-sudo -y --prefix=`rustc --print sysroot`
+  - rustup target list | egrep '\(installed\)|\(default\)' | grep $TARGET || rustup target add $TARGET
 before_script:
   - pip install 'travis-cargo<0.2' --user && export PATH=$HOME/.local/bin:$PATH
 script:
