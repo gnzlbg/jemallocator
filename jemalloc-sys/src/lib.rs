@@ -14,18 +14,16 @@ extern crate libc;
 
 use libc::{c_int, c_void, size_t};
 
-extern {
+extern "C" {
     #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios"),
                link_name = "je_mallocx")]
     pub fn mallocx(size: size_t, flags: c_int) -> *mut c_void;
     #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios"),
                link_name = "je_rallocx")]
-    pub fn rallocx(ptr: *mut c_void, size: size_t,
-                   flags: c_int) -> *mut c_void;
+    pub fn rallocx(ptr: *mut c_void, size: size_t, flags: c_int) -> *mut c_void;
     #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios"),
                link_name = "je_xallocx")]
-    pub fn xallocx(ptr: *mut c_void, size: size_t, extra: size_t,
-                      flags: c_int) -> size_t;
+    pub fn xallocx(ptr: *mut c_void, size: size_t, extra: size_t, flags: c_int) -> size_t;
     #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios"),
                link_name = "je_sdallocx")]
     pub fn sdallocx(ptr: *mut c_void, size: size_t, flags: c_int);
