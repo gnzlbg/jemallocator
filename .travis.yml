@@ -11,6 +11,7 @@ before_script:
 script:
   - cargo build --verbose --target $TARGET
   - cargo test --verbose --target $TARGET
+  - cargo test --verbose --target $TARGET -p jemalloc-sys
   - cargo doc
 after_success:
   - travis-cargo --only nightly doc-upload
