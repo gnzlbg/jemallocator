@@ -12,7 +12,7 @@
 #![allocator]
 #![no_std]
 
-extern crate jemalloc_sys as ffi;
+pub extern crate jemalloc_sys as ffi;
 extern crate libc;
 
 use libc::{c_int, size_t, c_void};
