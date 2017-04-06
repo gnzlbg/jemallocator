@@ -16,6 +16,7 @@ extern crate jemalloc_sys as ffi;
 extern crate libc;
 
 use libc::{c_int, size_t, c_void};
+use core::{mem, ptr};
 
 // The minimum alignment guaranteed by the architecture. This value is used to
 // add fast paths for low alignment values. In practice, the alignment is a
@@ -46,39 +47,39 @@ fn align_to_flags(align: usize) -> c_int {
 }
 
 #[no_mangle]
-pub extern fn __rust_allocate(size: usize, align: usize) -> *mut u8 {
+pub extern "C" fn __rust_allocate(size: usize, align: usize) -> *mut u8 {
     let flags = align_to_flags(align);
     unsafe { ffi::mallocx(size as size_t, flags) as *mut u8 }
 }
 
 #[no_mangle]
-pub extern fn __rust_reallocate(ptr: *mut u8,
-                                _old_size: usize,
-                                size: usize,
-                                align: usize)
-                                -> *mut u8 {
+pub extern "C" fn __rust_reallocate(ptr: *mut u8,
+                                    _old_size: usize,
+                                    size: usize,
+                                    align: usize)
+                                    -> *mut u8 {
     let flags = align_to_flags(align);
     unsafe { ffi::rallocx(ptr as *mut c_void, size as size_t, flags) as *mut u8 }
 }
 
 #[no_mangle]
-pub extern fn __rust_reallocate_inplace(ptr: *mut u8,
-                                        _old_size: usize,
-                                        size: usize,
-                                        align: usize)
-                                        -> usize {
+pub extern "C" fn __rust_reallocate_inplace(ptr: *mut u8,
+                                            _old_size: usize,
+                                            size: usize,
+                                            align: usize)
+                                            -> usize {
     let flags = align_to_flags(align);
     unsafe { ffi::xallocx(ptr as *mut c_void, size as size_t, 0, flags) as usize }
 }
 
 #[no_mangle]
-pub extern fn __rust_deallocate(ptr: *mut u8, old_size: usize, align: usize) {
+pub extern "C" fn __rust_deallocate(ptr: *mut u8, old_size: usize, align: usize) {
     let flags = align_to_flags(align);
     unsafe { ffi::sdallocx(ptr as *mut c_void, old_size as size_t, flags) }
 }
 
 #[no_mangle]
-pub extern fn __rust_usable_size(size: usize, align: usize) -> usize {
+pub extern "C" fn __rust_usable_size(size: usize, align: usize) -> usize {
     let flags = align_to_flags(align);
     unsafe { ffi::nallocx(size as size_t, flags) as usize }
 }
@@ -88,18 +89,77 @@ pub extern fn __rust_usable_size(size: usize, align: usize) -> usize {
 // are available.
 #[no_mangle]
 #[cfg(target_os = "android")]
-pub extern fn pthread_atfork(_prefork: *mut u8,
-                             _postfork_parent: *mut u8,
-                             _postfork_child: *mut u8) -> i32 {
+pub extern "C" fn pthread_atfork(_prefork: *mut u8,
+                                 _postfork_parent: *mut u8,
+                                 _postfork_child: *mut u8)
+                                 -> i32 {
     0
+}
+
+/// Fetch the value of options `name`.
+///
+/// Please note that if you want to fetch a string, use char* instead of &str or cstring.
+pub unsafe fn mallctl_fetch<T>(name: &[u8], t: &mut T) -> Result<(), i32> {
+    // make sure name is a valid c string.
+    if name.is_empty() || *name.last().unwrap() != 0 {
+        return Err(libc::EINVAL);
+    }
+    let mut t_size = mem::size_of::<T>();
+    let t_ptr = t as *mut T as *mut _;
+    let code = ffi::mallctl(name.as_ptr() as *const _,
+                            t_ptr,
+                            &mut t_size,
+                            ptr::null_mut(),
+                            0);
+    if code != 0 {
+        return Err(code);
+    }
+    Ok(())
+}
+
+/// Set a value to option `name`.
+///
+/// Please note that if you want to set a string, use char* instead of &str or cstring.
+pub unsafe fn mallctl_set<T>(name: &[u8], mut t: T) -> Result<(), i32> {
+    // make sure name is a valid c string.
+    if name.is_empty() || *name.last().unwrap() != 0 {
+        return Err(libc::EINVAL);
+    }
+    let size = mem::size_of::<T>();
+    let code = ffi::mallctl(name.as_ptr() as *const _,
+                            ptr::null_mut(),
+                            ptr::null_mut(),
+                            &mut t as *mut T as *mut _,
+                            size);
+    if code != 0 {
+        return Err(code);
+    }
+    Ok(())
 }
 
 #[cfg(test)]
 mod tests {
+    use libc;
+
     #[test]
     fn smoke() {
         let ptr = super::__rust_allocate(100, 8);
         assert!(!ptr.is_null());
         super::__rust_deallocate(ptr, 100, 8);
+    }
+
+    #[test]
+    fn test_mallctl() {
+        let mut epoch: u64 = 0;
+        unsafe {
+            assert_eq!(super::mallctl_fetch(b"", &mut epoch), Err(libc::EINVAL));
+            assert_eq!(super::mallctl_fetch(b"epoch", &mut epoch),
+                       Err(libc::EINVAL));
+            super::mallctl_fetch(b"epoch\0", &mut epoch).unwrap();
+            assert!(epoch > 0);
+            assert_eq!(super::mallctl_set(b"", &mut epoch), Err(libc::EINVAL));
+            assert_eq!(super::mallctl_set(b"epoch", &mut epoch), Err(libc::EINVAL));
+            super::mallctl_set(b"epoch\0", &mut epoch).unwrap();
+        }
     }
 }
