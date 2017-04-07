@@ -157,9 +157,9 @@ mod tests {
                        Err(libc::EINVAL));
             super::mallctl_fetch(b"epoch\0", &mut epoch).unwrap();
             assert!(epoch > 0);
-            assert_eq!(super::mallctl_set(b"", &mut epoch), Err(libc::EINVAL));
-            assert_eq!(super::mallctl_set(b"epoch", &mut epoch), Err(libc::EINVAL));
-            super::mallctl_set(b"epoch\0", &mut epoch).unwrap();
+            assert_eq!(super::mallctl_set(b"", epoch), Err(libc::EINVAL));
+            assert_eq!(super::mallctl_set(b"epoch", epoch), Err(libc::EINVAL));
+            super::mallctl_set(b"epoch\0", epoch).unwrap();
         }
     }
 }
