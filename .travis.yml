@@ -9,6 +9,7 @@ install:
 before_script:
   - pip install 'travis-cargo<0.2' --user && export PATH=$HOME/.local/bin:$PATH
 script:
+  - export RUST_BACKTRACE=1
   - cargo build --verbose --target $TARGET
   - cargo test --verbose --target $TARGET
   - cargo test --verbose --target $TARGET -p jemalloc-sys
