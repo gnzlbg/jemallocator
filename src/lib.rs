@@ -33,6 +33,8 @@ const MIN_ALIGN: usize = 8;
               target_arch = "powerpc64le")))]
 const MIN_ALIGN: usize = 16;
 
+const MALLOCX_ZERO: c_int = 0x40;
+
 // MALLOCX_ALIGN(a) macro
 fn mallocx_align(a: usize) -> c_int {
     a.trailing_zeros() as c_int
@@ -49,6 +51,12 @@ fn align_to_flags(align: usize) -> c_int {
 #[no_mangle]
 pub extern "C" fn __rust_allocate(size: usize, align: usize) -> *mut u8 {
     let flags = align_to_flags(align);
+    unsafe { ffi::mallocx(size as size_t, flags) as *mut u8 }
+}
+
+#[no_mangle]
+pub extern "C" fn __rust_allocate_zeroed(size: usize, align: usize) -> *mut u8 {
+    let flags = align_to_flags(align) | MALLOCX_ZERO;
     unsafe { ffi::mallocx(size as size_t, flags) as *mut u8 }
 }
 
