@@ -56,8 +56,12 @@ pub extern "C" fn __rust_allocate(size: usize, align: usize) -> *mut u8 {
 
 #[no_mangle]
 pub extern "C" fn __rust_allocate_zeroed(size: usize, align: usize) -> *mut u8 {
-    let flags = align_to_flags(align) | MALLOCX_ZERO;
-    unsafe { ffi::mallocx(size as size_t, flags) as *mut u8 }
+    if align <= MIN_ALIGN {
+        unsafe { ffi::calloc(size as size_t, 1) as *mut u8 }
+    } else {
+        let flags = align_to_flags(align) | MALLOCX_ZERO;
+        unsafe { ffi::mallocx(size as size_t, flags) as *mut u8 }
+    }
 }
 
 #[no_mangle]

@@ -19,6 +19,9 @@ extern "C" {
                link_name = "je_mallocx")]
     pub fn mallocx(size: size_t, flags: c_int) -> *mut c_void;
     #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios"),
+               link_name = "je_calloc")]
+    pub fn calloc(size: size_t, flags: c_int) -> *mut c_void;
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios"),
                link_name = "je_rallocx")]
     pub fn rallocx(ptr: *mut c_void, size: size_t, flags: c_int) -> *mut c_void;
     #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios"),
