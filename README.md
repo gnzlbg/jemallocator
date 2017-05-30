@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/alexcrichton/jemallocator.svg?branch=master)](https://travis-ci.org/alexcrichton/jemallocator)
 
-[Documentation](http://alexcrichton.com/jemallocator)
+[Documentation](https://docs.rs/jemallocator)
 
 A nightly-only Rust allocator crate which links to jemalloc and forces all Rust
 allocations to use jemalloc as well.

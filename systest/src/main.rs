@@ -5,7 +5,7 @@ extern crate alloc_system;
 extern crate jemalloc_sys;
 extern crate libc;
 
-use libc::*;
+use libc::c_int;
 use jemalloc_sys::*;
 
 include!(concat!(env!("OUT_DIR"), "/all.rs"));

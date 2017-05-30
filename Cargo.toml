@@ -7,10 +7,16 @@ readme = "README.md"
 keywords = ["allocator"]
 repository = "https://github.com/alexcrichton/jemallocator"
 homepage = "https://github.com/alexcrichton/jemallocator"
-documentation = "http://alexcrichton.com/jemallocator"
+documentation = "https://docs.rs/jemallocator"
 description = """
 A Rust allocator backed by jemalloc
 """
+
+[lib]
+test = false
+
+[workspace]
+members = ["systest"]
 
 [dependencies]
 jemalloc-sys = { path = "jemalloc-sys", version = "0.1.0" }

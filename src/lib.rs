@@ -33,8 +33,6 @@ const MIN_ALIGN: usize = 8;
               target_arch = "powerpc64le")))]
 const MIN_ALIGN: usize = 16;
 
-const MALLOCX_ZERO: c_int = 0x40;
-
 // MALLOCX_ALIGN(a) macro
 fn mallocx_align(a: usize) -> c_int {
     a.trailing_zeros() as c_int
@@ -59,7 +57,7 @@ pub extern "C" fn __rust_allocate_zeroed(size: usize, align: usize) -> *mut u8 {
     if align <= MIN_ALIGN {
         unsafe { ffi::calloc(size as size_t, 1) as *mut u8 }
     } else {
-        let flags = align_to_flags(align) | MALLOCX_ZERO;
+        let flags = align_to_flags(align) | ffi::MALLOCX_ZERO;
         unsafe { ffi::mallocx(size as size_t, flags) as *mut u8 }
     }
 }
@@ -110,7 +108,8 @@ pub extern "C" fn pthread_atfork(_prefork: *mut u8,
 
 /// Fetch the value of options `name`.
 ///
-/// Please note that if you want to fetch a string, use char* instead of &str or cstring.
+/// Please note that if you want to fetch a string, use char* instead of &str or
+/// cstring.
 pub unsafe fn mallctl_fetch<T>(name: &[u8], t: &mut T) -> Result<(), i32> {
     // make sure name is a valid c string.
     if name.is_empty() || *name.last().unwrap() != 0 {
@@ -131,7 +130,8 @@ pub unsafe fn mallctl_fetch<T>(name: &[u8], t: &mut T) -> Result<(), i32> {
 
 /// Set a value to option `name`.
 ///
-/// Please note that if you want to set a string, use char* instead of &str or cstring.
+/// Please note that if you want to set a string, use char* instead of &str or
+/// cstring.
 pub unsafe fn mallctl_set<T>(name: &[u8], mut t: T) -> Result<(), i32> {
     // make sure name is a valid c string.
     if name.is_empty() || *name.last().unwrap() != 0 {
@@ -147,31 +147,4 @@ pub unsafe fn mallctl_set<T>(name: &[u8], mut t: T) -> Result<(), i32> {
         return Err(code);
     }
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    use libc;
-
-    #[test]
-    fn smoke() {
-        let ptr = super::__rust_allocate(100, 8);
-        assert!(!ptr.is_null());
-        super::__rust_deallocate(ptr, 100, 8);
-    }
-
-    #[test]
-    fn test_mallctl() {
-        let mut epoch: u64 = 0;
-        unsafe {
-            assert_eq!(super::mallctl_fetch(b"", &mut epoch), Err(libc::EINVAL));
-            assert_eq!(super::mallctl_fetch(b"epoch", &mut epoch),
-                       Err(libc::EINVAL));
-            super::mallctl_fetch(b"epoch\0", &mut epoch).unwrap();
-            assert!(epoch > 0);
-            assert_eq!(super::mallctl_set(b"", epoch), Err(libc::EINVAL));
-            assert_eq!(super::mallctl_set(b"epoch", epoch), Err(libc::EINVAL));
-            super::mallctl_set(b"epoch\0", epoch).unwrap();
-        }
-    }
 }
