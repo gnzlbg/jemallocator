@@ -67,8 +67,6 @@ fn main() {
         cmd.arg("--enable-debug");
     }
 
-    // Turn off broken quarantine (see jemalloc/jemalloc#161)
-    cmd.arg("--disable-fill");
     if env::var_os("CARGO_FEATURE_PROFILING").is_some() {
         cmd.arg("--enable-prof");
     }

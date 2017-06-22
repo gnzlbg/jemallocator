@@ -69,3 +69,16 @@ extern "C" {
                               cbopaque: *mut c_void,
                               opts: *const c_char);
 }
+
+// These symbols are used by jemalloc on android but the really old android
+// we're building on doesn't have them defined, so just make sure the symbols
+// are available.
+#[no_mangle]
+#[cfg(target_os = "android")]
+#[doc(hidden)]
+pub extern "C" fn pthread_atfork(_prefork: *mut u8,
+                                 _postfork_parent: *mut u8,
+                                 _postfork_child: *mut u8)
+                                 -> i32 {
+    0
+}
