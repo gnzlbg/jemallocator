@@ -18,7 +18,11 @@ jemallocator = "0.1"
 Rust:
 
 ```rust
+#![feature(global_allocator)]
 extern crate jemallocator;
+
+#[global_allocator]
+static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
 ```
 
 And that's it! Once you've linked to this crate then jemalloc will be used for
