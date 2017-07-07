@@ -8,15 +8,24 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![feature(allocator)]
-#![allocator]
-#![no_std]
+//! Bindings for jemalloc as an allocator
+//!
+//! This crate provides bindings to jemalloc as a memory allocator for Rust.
+//! This crate mainly exports, one type, `Jemalloc`, which implements the
+//! `Alloc` trait and is suitable both as a memory allocator and as a
+//! global allocator.
+
+#![feature(allocator_api)]
+#![deny(missing_docs)]
 
 extern crate jemalloc_sys as ffi;
 extern crate libc;
 
-use libc::{c_int, size_t, c_void};
-use core::{mem, ptr};
+use std::mem;
+use std::ptr;
+use std::heap::{Alloc, Layout, Excess, CannotReallocInPlace, AllocErr, System};
+
+use libc::{c_int, c_void};
 
 // The minimum alignment guaranteed by the architecture. This value is used to
 // add fast paths for low alignment values. In practice, the alignment is a
@@ -46,64 +55,168 @@ fn align_to_flags(align: usize) -> c_int {
     }
 }
 
-#[no_mangle]
-pub extern "C" fn __rust_allocate(size: usize, align: usize) -> *mut u8 {
-    let flags = align_to_flags(align);
-    unsafe { ffi::mallocx(size as size_t, flags) as *mut u8 }
-}
+/// Handle to the jemalloc allocator
+///
+/// This type and a reference to this type both implement the `Alloc` trait,
+///
+/// allowing usage of this `Jemalloc` type both in collections and as a global
+/// allocator.
+pub struct Jemalloc;
 
-#[no_mangle]
-pub extern "C" fn __rust_allocate_zeroed(size: usize, align: usize) -> *mut u8 {
-    if align <= MIN_ALIGN {
-        unsafe { ffi::calloc(size as size_t, 1) as *mut u8 }
-    } else {
-        let flags = align_to_flags(align) | ffi::MALLOCX_ZERO;
-        unsafe { ffi::mallocx(size as size_t, flags) as *mut u8 }
+unsafe impl Alloc for Jemalloc {
+    #[inline]
+    unsafe fn alloc(&mut self, layout: Layout) -> Result<*mut u8, AllocErr> {
+        (&*self).alloc(layout)
+    }
+
+    #[inline]
+    unsafe fn alloc_zeroed(&mut self, layout: Layout)
+        -> Result<*mut u8, AllocErr>
+    {
+        (&*self).alloc_zeroed(layout)
+    }
+
+    #[inline]
+    unsafe fn dealloc(&mut self, ptr: *mut u8, layout: Layout) {
+        (&*self).dealloc(ptr, layout)
+    }
+
+    #[inline]
+    unsafe fn realloc(&mut self,
+                      ptr: *mut u8,
+                      old_layout: Layout,
+                      new_layout: Layout) -> Result<*mut u8, AllocErr> {
+        (&*self).realloc(ptr, old_layout, new_layout)
+    }
+
+    fn oom(&mut self, err: AllocErr) -> ! {
+        (&*self).oom(err)
+    }
+
+    #[inline]
+    fn usable_size(&self, layout: &Layout) -> (usize, usize) {
+        (&self).usable_size(layout)
+    }
+
+    #[inline]
+    unsafe fn alloc_excess(&mut self, layout: Layout) -> Result<Excess, AllocErr> {
+        (&*self).alloc_excess(layout)
+    }
+
+    #[inline]
+    unsafe fn realloc_excess(&mut self,
+                             ptr: *mut u8,
+                             layout: Layout,
+                             new_layout: Layout) -> Result<Excess, AllocErr> {
+        (&*self).realloc_excess(ptr, layout, new_layout)
+    }
+
+    #[inline]
+    unsafe fn grow_in_place(&mut self,
+                            ptr: *mut u8,
+                            layout: Layout,
+                            new_layout: Layout) -> Result<(), CannotReallocInPlace> {
+        (&*self).grow_in_place(ptr, layout, new_layout)
+    }
+
+    #[inline]
+    unsafe fn shrink_in_place(&mut self,
+                              ptr: *mut u8,
+                              layout: Layout,
+                              new_layout: Layout) -> Result<(), CannotReallocInPlace> {
+        (&*self).shrink_in_place(ptr, layout, new_layout)
     }
 }
 
-#[no_mangle]
-pub extern "C" fn __rust_reallocate(ptr: *mut u8,
-                                    _old_size: usize,
-                                    size: usize,
-                                    align: usize)
-                                    -> *mut u8 {
-    let flags = align_to_flags(align);
-    unsafe { ffi::rallocx(ptr as *mut c_void, size as size_t, flags) as *mut u8 }
-}
+unsafe impl<'a> Alloc for &'a Jemalloc {
+    #[inline]
+    unsafe fn alloc(&mut self, layout: Layout) -> Result<*mut u8, AllocErr> {
+        let flags = align_to_flags(layout.align());
+        let ptr = ffi::mallocx(layout.size(), flags);
+        if ptr.is_null() {
+            Err(AllocErr::Exhausted { request: layout })
+        } else {
+            Ok(ptr as *mut u8)
+        }
+    }
 
-#[no_mangle]
-pub extern "C" fn __rust_reallocate_inplace(ptr: *mut u8,
-                                            _old_size: usize,
-                                            size: usize,
-                                            align: usize)
-                                            -> usize {
-    let flags = align_to_flags(align);
-    unsafe { ffi::xallocx(ptr as *mut c_void, size as size_t, 0, flags) as usize }
-}
+    #[inline]
+    unsafe fn alloc_zeroed(&mut self, layout: Layout)
+        -> Result<*mut u8, AllocErr>
+    {
+        let ptr = if layout.align() <= MIN_ALIGN {
+            ffi::calloc(layout.size(), 1)
+        } else {
+            let flags = align_to_flags(layout.align()) | ffi::MALLOCX_ZERO;
+            ffi::mallocx(layout.size(), flags)
+        };
+        if ptr.is_null() {
+            Err(AllocErr::Exhausted { request: layout })
+        } else {
+            Ok(ptr as *mut u8)
+        }
+    }
 
-#[no_mangle]
-pub extern "C" fn __rust_deallocate(ptr: *mut u8, old_size: usize, align: usize) {
-    let flags = align_to_flags(align);
-    unsafe { ffi::sdallocx(ptr as *mut c_void, old_size as size_t, flags) }
-}
+    #[inline]
+    unsafe fn dealloc(&mut self, ptr: *mut u8, layout: Layout) {
+        let flags = align_to_flags(layout.align());
+        ffi::sdallocx(ptr as *mut c_void, layout.size(), flags)
+    }
 
-#[no_mangle]
-pub extern "C" fn __rust_usable_size(size: usize, align: usize) -> usize {
-    let flags = align_to_flags(align);
-    unsafe { ffi::nallocx(size as size_t, flags) as usize }
-}
+    #[inline]
+    unsafe fn realloc(&mut self,
+                      ptr: *mut u8,
+                      old_layout: Layout,
+                      new_layout: Layout) -> Result<*mut u8, AllocErr> {
+        if old_layout.align() != new_layout.align() {
+            return Err(AllocErr::Unsupported { details: "cannot change align" })
+        }
+        let flags = align_to_flags(new_layout.align());
+        let ptr = ffi::rallocx(ptr as *mut c_void, new_layout.size(), flags);
+        if ptr.is_null() {
+            Err(AllocErr::Exhausted { request: new_layout })
+        } else {
+            Ok(ptr as *mut u8)
+        }
+    }
 
-// These symbols are used by jemalloc on android but the really old android
-// we're building on doesn't have them defined, so just make sure the symbols
-// are available.
-#[no_mangle]
-#[cfg(target_os = "android")]
-pub extern "C" fn pthread_atfork(_prefork: *mut u8,
-                                 _postfork_parent: *mut u8,
-                                 _postfork_child: *mut u8)
-                                 -> i32 {
-    0
+    fn oom(&mut self, err: AllocErr) -> ! {
+        System.oom(err)
+    }
+
+    #[inline]
+    fn usable_size(&self, layout: &Layout) -> (usize, usize) {
+        let flags = align_to_flags(layout.align());
+        unsafe {
+            let max = ffi::nallocx(layout.size(), flags);
+            (layout.size(), max)
+        }
+    }
+
+    #[inline]
+    unsafe fn grow_in_place(&mut self,
+                            ptr: *mut u8,
+                            old_layout: Layout,
+                            new_layout: Layout) -> Result<(), CannotReallocInPlace> {
+        self.shrink_in_place(ptr, old_layout, new_layout)
+    }
+
+    #[inline]
+    unsafe fn shrink_in_place(&mut self,
+                              ptr: *mut u8,
+                              old_layout: Layout,
+                              new_layout: Layout) -> Result<(), CannotReallocInPlace> {
+        if old_layout.align() != new_layout.align() {
+            return Err(CannotReallocInPlace)
+        }
+        let flags = align_to_flags(new_layout.align());
+        let size = ffi::xallocx(ptr as *mut c_void, new_layout.size(), 0, flags);
+        if size >= new_layout.size() {
+            Err(CannotReallocInPlace)
+        } else {
+            Ok(())
+        }
+    }
 }
 
 /// Fetch the value of options `name`.
