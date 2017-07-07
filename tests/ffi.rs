@@ -1,3 +1,5 @@
+#![feature(global_allocator)]
+
 extern crate libc;
 extern crate jemalloc_sys as ffi;
 extern crate jemallocator;
@@ -6,6 +8,10 @@ use std::ptr;
 use std::mem;
 
 use libc::{c_void, c_char};
+use jemallocator::Jemalloc;
+
+#[global_allocator]
+static A: Jemalloc = Jemalloc;
 
 #[test]
 fn test_basic_alloc() {

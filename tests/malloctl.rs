@@ -1,10 +1,13 @@
-#![feature(allocator_api)]
+#![feature(global_allocator, allocator_api)]
 
 extern crate libc;
 extern crate jemallocator;
 
 use std::heap::{Alloc, Layout};
 use jemallocator::Jemalloc;
+
+#[global_allocator]
+static A: Jemalloc = Jemalloc;
 
 #[test]
 fn smoke() {
