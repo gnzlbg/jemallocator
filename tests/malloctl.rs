@@ -1,24 +1,31 @@
+#![feature(allocator_api)]
+
 extern crate libc;
-extern crate jemallocator as alloc;
+extern crate jemallocator;
+
+use std::heap::{Alloc, Layout};
+use jemallocator::Jemalloc;
 
 #[test]
 fn smoke() {
-    let ptr = alloc::__rust_allocate(100, 8);
-    assert!(!ptr.is_null());
-    alloc::__rust_deallocate(ptr, 100, 8);
+    let layout = Layout::from_size_align(100, 8).unwrap();
+    unsafe {
+        let ptr = Jemalloc.alloc(layout.clone()).unwrap_or_else(|e| Jemalloc.oom(e));
+        Jemalloc.dealloc(ptr, layout);
+    }
 }
 
 #[test]
 fn test_mallctl() {
     let mut epoch: u64 = 0;
     unsafe {
-        assert_eq!(alloc::mallctl_fetch(b"", &mut epoch), Err(libc::EINVAL));
-        assert_eq!(alloc::mallctl_fetch(b"epoch", &mut epoch),
+        assert_eq!(jemallocator::mallctl_fetch(b"", &mut epoch), Err(libc::EINVAL));
+        assert_eq!(jemallocator::mallctl_fetch(b"epoch", &mut epoch),
                    Err(libc::EINVAL));
-        alloc::mallctl_fetch(b"epoch\0", &mut epoch).unwrap();
+        jemallocator::mallctl_fetch(b"epoch\0", &mut epoch).unwrap();
         assert!(epoch > 0);
-        assert_eq!(alloc::mallctl_set(b"", epoch), Err(libc::EINVAL));
-        assert_eq!(alloc::mallctl_set(b"epoch", epoch), Err(libc::EINVAL));
-        alloc::mallctl_set(b"epoch\0", epoch).unwrap();
+        assert_eq!(jemallocator::mallctl_set(b"", epoch), Err(libc::EINVAL));
+        assert_eq!(jemallocator::mallctl_set(b"epoch", epoch), Err(libc::EINVAL));
+        jemallocator::mallctl_set(b"epoch\0", epoch).unwrap();
     }
 }
