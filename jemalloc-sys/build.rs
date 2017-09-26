@@ -55,7 +55,7 @@ fn main() {
 
     cmd.arg("--with-jemalloc-prefix=_rjem_");
 
-    if cfg!(feature = "debug-jemalloc") {
+    if env::var_os("CARGO_FEATURE_DEBUG").is_some() {
         cmd.arg("--enable-debug");
     }
 

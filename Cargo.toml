@@ -24,3 +24,4 @@ libc = "0.2.8"
 
 [features]
 profiling = ["jemalloc-sys/profiling"]
+debug = ["jemalloc-sys/debug"]

@@ -23,3 +23,4 @@ gcc = "0.3"
 
 [features]
 profiling = []
+debug = []
