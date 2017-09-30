@@ -8,7 +8,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-extern crate gcc;
+extern crate cc;
 
 use std::env;
 use std::fs;
@@ -35,7 +35,7 @@ fn main() {
 
     fs::create_dir_all(&build_dir).unwrap();
 
-    let compiler = gcc::Config::new().get_compiler();
+    let compiler = cc::Build::new().get_compiler();
     let cflags = compiler.args().iter().map(|s| s.to_str().unwrap())
                          .collect::<Vec<_>>().join(" ");
 
