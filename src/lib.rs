@@ -219,6 +219,22 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
     }
 }
 
+/// Return the usable size of the allocation pointed to by ptr.
+///
+/// The return value may be larger than the size that was requested during allocation.
+/// This function is not a mechanism for in-place `realloc()`;
+/// rather it is provided solely as a tool for introspection purposes.
+/// Any discrepancy between the requested allocation size
+/// and the size reported by this function should not be depended on,
+/// since such behavior is entirely implementation-dependent.
+///
+/// # Unsafety
+///
+/// `ptr` must have been allocated by `Jemalloc` and must not have been freed yet.
+pub unsafe fn usable_size<T: Sized>(ptr: *const T) -> usize {
+    ffi::malloc_usable_size(ptr as *const c_void)
+}
+
 /// Fetch the value of options `name`.
 ///
 /// Please note that if you want to fetch a string, use char* instead of &str or
