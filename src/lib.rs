@@ -231,7 +231,7 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
 /// # Unsafety
 ///
 /// `ptr` must have been allocated by `Jemalloc` and must not have been freed yet.
-pub unsafe fn usable_size<T: Sized>(ptr: *const T) -> usize {
+pub unsafe fn usable_size<T>(ptr: *const T) -> usize {
     ffi::malloc_usable_size(ptr as *const c_void)
 }
 
