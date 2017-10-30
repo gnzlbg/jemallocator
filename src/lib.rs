@@ -18,7 +18,7 @@
 #![feature(allocator_api)]
 #![deny(missing_docs)]
 
-extern crate jemalloc_sys as ffi;
+pub extern crate jemalloc_sys as ffi;
 extern crate libc;
 
 use std::mem;
@@ -145,7 +145,7 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
         -> Result<*mut u8, AllocErr>
     {
         let ptr = if layout.align() <= MIN_ALIGN {
-            ffi::calloc(layout.size(), 1)
+            ffi::calloc(1, layout.size())
         } else {
             let flags = align_to_flags(layout.align()) | ffi::MALLOCX_ZERO;
             ffi::mallocx(layout.size(), flags)
