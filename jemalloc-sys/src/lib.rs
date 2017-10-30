@@ -20,7 +20,7 @@ extern "C" {
     #[link_name = "_rjem_mallocx"]
     pub fn mallocx(size: size_t, flags: c_int) -> *mut c_void;
     #[link_name = "_rjem_calloc"]
-    pub fn calloc(size: size_t, flags: size_t) -> *mut c_void;
+    pub fn calloc(num: size_t, size: size_t) -> *mut c_void;
     #[link_name = "_rjem_rallocx"]
     pub fn rallocx(ptr: *mut c_void, size: size_t, flags: c_int) -> *mut c_void;
     #[link_name = "_rjem_xallocx"]

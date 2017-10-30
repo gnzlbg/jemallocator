@@ -145,7 +145,7 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
         -> Result<*mut u8, AllocErr>
     {
         let ptr = if layout.align() <= MIN_ALIGN {
-            ffi::calloc(layout.size(), 1)
+            ffi::calloc(1, layout.size())
         } else {
             let flags = align_to_flags(layout.align()) | ffi::MALLOCX_ZERO;
             ffi::mallocx(layout.size(), flags)
