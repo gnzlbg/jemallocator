@@ -18,7 +18,7 @@
 #![feature(allocator_api)]
 #![deny(missing_docs)]
 
-extern crate jemalloc_sys as ffi;
+pub extern crate jemalloc_sys as ffi;
 extern crate libc;
 
 use std::mem;
