@@ -18,7 +18,7 @@
 #![feature(allocator_api)]
 #![deny(missing_docs)]
 
-pub extern crate jemalloc_sys as ffi;
+extern crate jemalloc_sys;
 extern crate libc;
 
 use std::mem;
@@ -276,4 +276,9 @@ pub unsafe fn mallctl_set<T>(name: &[u8], mut t: T) -> Result<(), i32> {
         return Err(code);
     }
     Ok(())
+}
+
+/// Raw bindings to jemalloc
+pub mod ffi {
+    pub use jemalloc_sys::*;
 }
