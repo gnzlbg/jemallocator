@@ -17,14 +17,31 @@ use libc::{c_int, c_void, size_t, c_char};
 pub const MALLOCX_ZERO: c_int = 0x40;
 
 extern "C" {
+    // Standard API
+    #[link_name = "_rjem_malloc"]
+    pub fn malloc(size: size_t) -> *mut c_void;
+    #[link_name = "_rjem_calloc"]
+    pub fn calloc(number: size_t, size: size_t) -> *mut c_void;
+    #[link_name = "_rjem_posix_memalign"]
+    pub fn posix_memalign(ptr: *mut *mut c_void, alignment: size_t, size: size_t) -> c_int;
+    #[link_name = "_rjem_aligned_alloc"]
+    pub fn aligned_alloc(alignment: size_t, size: size_t) -> *mut c_void;
+    #[link_name = "_rjem_realloc"]
+    pub fn realloc(ptr: *mut c_void, size: size_t) -> *mut c_void;
+    #[link_name = "_rjem_free"]
+    pub fn free(ptr: *mut c_void);
+
+    // Non-standard API
     #[link_name = "_rjem_mallocx"]
     pub fn mallocx(size: size_t, flags: c_int) -> *mut c_void;
-    #[link_name = "_rjem_calloc"]
-    pub fn calloc(num: size_t, size: size_t) -> *mut c_void;
     #[link_name = "_rjem_rallocx"]
     pub fn rallocx(ptr: *mut c_void, size: size_t, flags: c_int) -> *mut c_void;
     #[link_name = "_rjem_xallocx"]
     pub fn xallocx(ptr: *mut c_void, size: size_t, extra: size_t, flags: c_int) -> size_t;
+    #[link_name = "_rjem_sallocx"]
+    pub fn sallocx(ptr: *const c_void, flags: c_int) -> size_t;
+    #[link_name = "_rjem_dallocx"]
+    pub fn dallocx(ptr: *mut c_void, flags: c_int);
     #[link_name = "_rjem_sdallocx"]
     pub fn sdallocx(ptr: *mut c_void, size: size_t, flags: c_int);
     #[link_name = "_rjem_nallocx"]
