@@ -70,7 +70,7 @@ extern "C" {
 
     // stats
     #[link_name = "_rjem_malloc_stats_print"]
-    pub fn malloc_stats_print(write_cb: extern "C" fn(*mut c_void, *const c_char),
+    pub fn malloc_stats_print(write_cb: Option<unsafe extern "C" fn(*mut c_void, *const c_char)>,
                               cbopaque: *mut c_void,
                               opts: *const c_char);
 }
