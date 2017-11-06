@@ -67,7 +67,16 @@ fn main() {
     cmd.arg(format!("--prefix={}", out_dir.display()));
 
     run(&mut cmd);
-    run(Command::new("make")
+
+    let make = if host.contains("bitrig") || host.contains("dragonfly") ||
+        host.contains("freebsd") || host.contains("netbsd") ||
+        host.contains("openbsd") {
+        "gmake"
+    } else {
+        "make"
+    };
+
+    run(Command::new(make)
                 .current_dir(&build_dir)
                 .arg("install_lib_static")
                 .arg("install_include")
