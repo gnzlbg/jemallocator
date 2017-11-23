@@ -25,6 +25,7 @@ macro_rules! rt {
         fn $name(b: &mut Bencher) {
             b.iter(|| unsafe {
                 let ptr = jemalloc::mallocx($nbytes, $flags | jemalloc::MALLOCX_ZERO);
+                test::black_box(ptr);
                 jemalloc::sdallocx(ptr, $nbytes, $flags);
             });
         }
@@ -40,6 +41,7 @@ macro_rules! rt_calloc {
         fn $name(b: &mut Bencher) {
             b.iter(|| unsafe {
                 let ptr = jemalloc::calloc(1, $nbytes);
+                test::black_box(ptr);
                 jemalloc::sdallocx(ptr, $nbytes, $flags);
             });
         }

@@ -29,6 +29,7 @@ macro_rules! rt_checked {
             b.iter(|| unsafe {
                 let layout = Layout::from_size_align($nbytes, $align).unwrap();
                 let ptr = Jemalloc.alloc(layout.clone()).unwrap();
+                test::black_box(ptr);
                 Jemalloc.dealloc(ptr, layout);
             });
         }
@@ -42,6 +43,7 @@ macro_rules! rt_unchecked {
             b.iter(|| unsafe {
                 let layout = Layout::from_size_align_unchecked($nbytes, $align);
                 let ptr = Jemalloc.alloc(layout.clone()).unwrap();
+                test::black_box(ptr);
                 Jemalloc.dealloc(ptr, layout);
             });
         }

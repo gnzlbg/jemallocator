@@ -25,6 +25,7 @@ macro_rules! rt_alloc {
             b.iter(|| unsafe {
                 let layout = Layout::from_size_align($nbytes, $align).unwrap();
                 let ptr = Jemalloc.alloc(layout.clone()).unwrap();
+                test::black_box(ptr);
                 Jemalloc.dealloc(ptr, layout);
             });
         }
@@ -38,6 +39,7 @@ macro_rules! rt_alloc_excess_unused {
             b.iter(|| unsafe {
                 let layout = Layout::from_size_align($nbytes, $align).unwrap();
                 let Excess(ptr, _) = Jemalloc.alloc_excess(layout.clone()).unwrap();
+                test::black_box(ptr);
                 Jemalloc.dealloc(ptr, layout); 
             });
         }
@@ -51,6 +53,7 @@ macro_rules! rt_alloc_excess_used {
             b.iter(|| unsafe {
                 let layout = Layout::from_size_align($nbytes, $align).unwrap();
                 let Excess(ptr, excess) = Jemalloc.alloc_excess(layout.clone()).unwrap();
+                test::black_box(ptr);
                 test::black_box(excess);
                 Jemalloc.dealloc(ptr, layout); 
             });
