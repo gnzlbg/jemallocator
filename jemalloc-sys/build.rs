@@ -39,8 +39,23 @@ fn main() {
     let cflags = compiler.args().iter().map(|s| s.to_str().unwrap())
                          .collect::<Vec<_>>().join(" ");
 
+
+    let configure = src_dir.join("jemalloc/configure");
+    if !configure.exists() {
+        // maybe forgot to update git submodules?
+        let mut git_cmd = Command::new("git");
+        git_cmd.arg("submodule")
+            .arg("update")
+            .arg("--init")
+            .arg("--recursive");
+        run (&mut git_cmd);
+    }
+    if !configure.exists() {
+        panic!("jemalloc/configure does not exist");
+    }
+
     let mut cmd = Command::new("sh");
-    cmd.arg(src_dir.join("jemalloc/configure").to_str().unwrap()
+    cmd.arg(configure.to_str().unwrap()
                    .replace("C:\\", "/c/")
                    .replace("\\", "/"))
        .current_dir(&build_dir)
