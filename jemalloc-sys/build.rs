@@ -16,8 +16,18 @@ use std::path::PathBuf;
 use std::process::Command;
 
 fn main() {
-    let target = env::var("TARGET").unwrap();
-    let host = env::var("HOST").unwrap();
+    let target = env::var("TARGET").expect("TARGET was not set");
+    let host = env::var("HOST").expect("HOST was not set");
+    let unsupported_targets = [
+        "rumprun", "bitrig", "openbsd", "msvc",
+        "emscripten", "fuchsia", "redox", "wasm32",
+    ];
+    for i in &unsupported_targets {
+        if target.contains(i) {
+            panic!("jemalloc does not support target: {}", target);
+        }
+    }
+
     let out_dir = PathBuf::from(env::var_os("OUT_DIR").unwrap());
     let build_dir = out_dir.join("build");
     let src_dir = env::current_dir().unwrap();
