@@ -15,14 +15,13 @@
 //! `Alloc` trait and is suitable both as a memory allocator and as a
 //! global allocator.
 
-#![feature(allocator_api)]
+#![feature(allocator_api, core_intrinsics)]
 #![deny(missing_docs)]
 
 extern crate jemalloc_sys;
 extern crate libc;
 
-use std::mem;
-use std::ptr;
+use std::{intrinsics, mem, ptr};
 use std::heap::{Alloc, Layout, Excess, CannotReallocInPlace, AllocErr, System};
 
 use libc::{c_int, c_void};
@@ -51,7 +50,7 @@ fn layout_to_flags(layout: &Layout) -> c_int {
     // alignment is greater than the size, however, then this hits a sort of odd
     // case where we still need to ask for a custom alignment. See #25 for more
     // info.
-    if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
+        if intrinsics::likely(layout.align() <= MIN_ALIGN && layout.align() <= layout.size()) {
         0
     } else {
         ffi::MALLOCX_ALIGN(layout.align())
@@ -136,7 +135,7 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
     unsafe fn alloc(&mut self, layout: Layout) -> Result<*mut u8, AllocErr> {
         let flags = layout_to_flags(&layout);
         let ptr = ffi::mallocx(layout.size(), flags);
-        if ptr.is_null() {
+        if intrinsics::unlikely(ptr.is_null()) {
             Err(AllocErr::Exhausted { request: layout })
         } else {
             Ok(ptr as *mut u8)
@@ -147,13 +146,13 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
     unsafe fn alloc_zeroed(&mut self, layout: Layout)
         -> Result<*mut u8, AllocErr>
     {
-        let ptr = if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
+        let ptr = if intrinsics::likely(layout.align() <= MIN_ALIGN && layout.align() <= layout.size()) {
             ffi::calloc(1, layout.size())
         } else {
             let flags = layout_to_flags(&layout) | ffi::MALLOCX_ZERO;
             ffi::mallocx(layout.size(), flags)
         };
-        if ptr.is_null() {
+        if intrinsics::unlikely(ptr.is_null()) {
             Err(AllocErr::Exhausted { request: layout })
         } else {
             Ok(ptr as *mut u8)
@@ -183,12 +182,12 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
                       ptr: *mut u8,
                       old_layout: Layout,
                       new_layout: Layout) -> Result<*mut u8, AllocErr> {
-        if old_layout.align() != new_layout.align() {
+        if intrinsics::unlikely(old_layout.align() != new_layout.align()) {
             return Err(AllocErr::Unsupported { details: "cannot change align" })
         }
         let flags = layout_to_flags(&new_layout);
         let ptr = ffi::rallocx(ptr as *mut c_void, new_layout.size(), flags);
-        if ptr.is_null() {
+        if intrinsics::unlikely(ptr.is_null()) {
             Err(AllocErr::Exhausted { request: new_layout })
         } else {
             Ok(ptr as *mut u8)
@@ -239,12 +238,12 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
                               ptr: *mut u8,
                               old_layout: Layout,
                               new_layout: Layout) -> Result<(), CannotReallocInPlace> {
-        if old_layout.align() != new_layout.align() {
+        if intrinsics::unlikely(old_layout.align() != new_layout.align()) {
             return Err(CannotReallocInPlace)
         }
         let flags = layout_to_flags(&new_layout);
         let size = ffi::xallocx(ptr as *mut c_void, new_layout.size(), 0, flags);
-        if size >= new_layout.size() {
+        if intrinsics::unlikely(size >= new_layout.size()) {
             Err(CannotReallocInPlace)
         } else {
             Ok(())
