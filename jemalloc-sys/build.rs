@@ -57,7 +57,7 @@ fn main() {
 
     let compiler = cc::Build::new().get_compiler();
     let cflags = compiler.args().iter().map(|s| s.to_str().unwrap())
-                             .collect::<Vec<_>>().join(" ");
+                         .collect::<Vec<_>>().join(" ");
 
 
     let configure = src_dir.join("jemalloc/configure");
