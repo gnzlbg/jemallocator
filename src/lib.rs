@@ -48,6 +48,11 @@ fn mallocx_align(a: usize) -> c_int {
 }
 
 fn align_to_flags(align: usize, size: usize) -> c_int {
+    // If our alignment is less than the minimum alignment they we may not
+    // have to pass special flags asking for a higher alignment. If the
+    // alignment is greater than the size, however, then this hits a sort of odd
+    // case where we still need to ask for a custom alignment. See #25 for more
+    // info.
     if align <= MIN_ALIGN && align <= size {
         0
     } else {
