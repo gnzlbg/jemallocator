@@ -163,6 +163,18 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
     }
 
     #[inline]
+    unsafe fn alloc_excess(&mut self, layout: Layout) -> Result<Excess, AllocErr> {
+        let flags = align_to_flags(layout.align());
+        let ptr = ffi::mallocx(layout.size(), flags);
+        if ptr.is_null() {
+            Err(AllocErr::Exhausted { request: layout })
+        } else {
+            let excess = ffi::nallocx(layout.size(), flags);
+            Ok(Excess(ptr as *mut u8, excess))
+        }
+    }
+
+    #[inline]
     unsafe fn dealloc(&mut self, ptr: *mut u8, layout: Layout) {
         let flags = align_to_flags(layout.align(), layout.size());
         ffi::sdallocx(ptr as *mut c_void, layout.size(), flags)
@@ -182,6 +194,24 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
             Err(AllocErr::Exhausted { request: new_layout })
         } else {
             Ok(ptr as *mut u8)
+        }
+    }
+
+    #[inline]
+    unsafe fn realloc_excess(&mut self,
+                      ptr: *mut u8,
+                      old_layout: Layout,
+                      new_layout: Layout) -> Result<Excess, AllocErr> {
+        if old_layout.align() != new_layout.align() {
+            return Err(AllocErr::Unsupported { details: "cannot change align" })
+        }
+        let flags = align_to_flags(new_layout.align());
+        let ptr = ffi::rallocx(ptr as *mut c_void, new_layout.size(), flags);
+        if ptr.is_null() {
+            Err(AllocErr::Exhausted { request: new_layout })
+        } else {
+            let excess = ffi::nallocx(new_layout.size(), flags);
+            Ok(Excess(ptr as *mut u8, excess))
         }
     }
 
