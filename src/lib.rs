@@ -47,8 +47,8 @@ fn mallocx_align(a: usize) -> c_int {
     a.trailing_zeros() as c_int
 }
 
-fn align_to_flags(align: usize) -> c_int {
-    if align <= MIN_ALIGN {
+fn align_to_flags(align: usize, size: usize) -> c_int {
+    if align <= MIN_ALIGN && align <= size {
         0
     } else {
         mallocx_align(align)
@@ -131,7 +131,7 @@ unsafe impl Alloc for Jemalloc {
 unsafe impl<'a> Alloc for &'a Jemalloc {
     #[inline]
     unsafe fn alloc(&mut self, layout: Layout) -> Result<*mut u8, AllocErr> {
-        let flags = align_to_flags(layout.align());
+        let flags = align_to_flags(layout.align(), layout.size());
         let ptr = ffi::mallocx(layout.size(), flags);
         if ptr.is_null() {
             Err(AllocErr::Exhausted { request: layout })
@@ -144,10 +144,10 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
     unsafe fn alloc_zeroed(&mut self, layout: Layout)
         -> Result<*mut u8, AllocErr>
     {
-        let ptr = if layout.align() <= MIN_ALIGN {
+        let ptr = if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
             ffi::calloc(1, layout.size())
         } else {
-            let flags = align_to_flags(layout.align()) | ffi::MALLOCX_ZERO;
+            let flags = align_to_flags(layout.align(), layout.size()) | ffi::MALLOCX_ZERO;
             ffi::mallocx(layout.size(), flags)
         };
         if ptr.is_null() {
@@ -159,7 +159,7 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
 
     #[inline]
     unsafe fn dealloc(&mut self, ptr: *mut u8, layout: Layout) {
-        let flags = align_to_flags(layout.align());
+        let flags = align_to_flags(layout.align(), layout.size());
         ffi::sdallocx(ptr as *mut c_void, layout.size(), flags)
     }
 
@@ -171,7 +171,7 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
         if old_layout.align() != new_layout.align() {
             return Err(AllocErr::Unsupported { details: "cannot change align" })
         }
-        let flags = align_to_flags(new_layout.align());
+        let flags = align_to_flags(new_layout.align(), new_layout.size());
         let ptr = ffi::rallocx(ptr as *mut c_void, new_layout.size(), flags);
         if ptr.is_null() {
             Err(AllocErr::Exhausted { request: new_layout })
@@ -186,7 +186,7 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
 
     #[inline]
     fn usable_size(&self, layout: &Layout) -> (usize, usize) {
-        let flags = align_to_flags(layout.align());
+        let flags = align_to_flags(layout.align(), layout.size());
         unsafe {
             let max = ffi::nallocx(layout.size(), flags);
             (layout.size(), max)
@@ -209,7 +209,7 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
         if old_layout.align() != new_layout.align() {
             return Err(CannotReallocInPlace)
         }
-        let flags = align_to_flags(new_layout.align());
+        let flags = align_to_flags(new_layout.align(), new_layout.size());
         let size = ffi::xallocx(ptr as *mut c_void, new_layout.size(), 0, flags);
         if size >= new_layout.size() {
             Err(CannotReallocInPlace)
