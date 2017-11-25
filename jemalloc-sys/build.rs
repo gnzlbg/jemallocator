@@ -51,19 +51,6 @@ fn main() {
 
 
     let configure = src_dir.join("jemalloc/configure");
-    if !configure.exists() {
-        // maybe forgot to update git submodules?
-        let mut git_cmd = Command::new("git");
-        git_cmd.arg("submodule")
-            .arg("update")
-            .arg("--init")
-            .arg("--recursive");
-        run (&mut git_cmd);
-    }
-    if !configure.exists() {
-        panic!("jemalloc/configure does not exist");
-    }
-
     let mut cmd = Command::new("sh");
     cmd.arg(configure.to_str().unwrap()
                    .replace("C:\\", "/c/")
