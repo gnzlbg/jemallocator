@@ -4,8 +4,6 @@ sudo: false
 
 matrix:
   include:
-    - env: BENCHES
-      script: cargo bench
     - env: TARGET=x86_64-unknown-linux-gnu NO_ADD=1
     - env: TARGET=i686-unknown-linux-gnu
       addons:
