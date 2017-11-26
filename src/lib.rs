@@ -45,15 +45,18 @@ const MIN_ALIGN: usize = 8;
 const MIN_ALIGN: usize = 16;
 
 fn layout_to_flags(layout: &Layout) -> c_int {
-    // If our alignment is less than the minimum alignment they we may not
-    // have to pass special flags asking for a higher alignment. If the
-    // alignment is greater than the size, however, then this hits a sort of odd
-    // case where we still need to ask for a custom alignment. See #25 for more
-    // info.
-        if intrinsics::likely(layout.align() <= MIN_ALIGN && layout.align() <= layout.size()) {
-        0
-    } else {
-        ffi::MALLOCX_ALIGN(layout.align())
+    unsafe {
+        // If our alignment is less than the minimum alignment they we may not
+        // have to pass special flags asking for a higher alignment. If the
+        // alignment is greater than the size, however, then this hits a sort of odd
+        // case where we still need to ask for a custom alignment. See #25 for more
+        // info.
+        if intrinsics::likely(layout.align() <= MIN_ALIGN
+                              && layout.align() <= layout.size()) {
+            0
+        } else {
+            ffi::MALLOCX_ALIGN(layout.align())
+        }
     }
 }
 
@@ -146,7 +149,8 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
     unsafe fn alloc_zeroed(&mut self, layout: Layout)
         -> Result<*mut u8, AllocErr>
     {
-        let ptr = if intrinsics::likely(layout.align() <= MIN_ALIGN && layout.align() <= layout.size()) {
+        let ptr = if intrinsics::likely(layout.align() <= MIN_ALIGN
+                                        && layout.align() <= layout.size()) {
             ffi::calloc(1, layout.size())
         } else {
             let flags = layout_to_flags(&layout) | ffi::MALLOCX_ZERO;
@@ -163,7 +167,7 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
     unsafe fn alloc_excess(&mut self, layout: Layout) -> Result<Excess, AllocErr> {
         let flags = layout_to_flags(&layout);
         let ptr = ffi::mallocx(layout.size(), flags);
-        if ptr.is_null() {
+        if intrinsics::unlikely(ptr.is_null()) {
             Err(AllocErr::Exhausted { request: layout })
         } else {
             let excess = ffi::nallocx(layout.size(), flags);
@@ -199,12 +203,12 @@ unsafe impl<'a> Alloc for &'a Jemalloc {
                       ptr: *mut u8,
                       old_layout: Layout,
                       new_layout: Layout) -> Result<Excess, AllocErr> {
-        if old_layout.align() != new_layout.align() {
+        if intrinsics::unlikely(old_layout.align() != new_layout.align()) {
             return Err(AllocErr::Unsupported { details: "cannot change align" })
         }
         let flags = layout_to_flags(&new_layout);
         let ptr = ffi::rallocx(ptr as *mut c_void, new_layout.size(), flags);
-        if ptr.is_null() {
+        if intrinsics::unlikely(ptr.is_null()) {
             Err(AllocErr::Exhausted { request: new_layout })
         } else {
             let excess = ffi::nallocx(new_layout.size(), flags);
