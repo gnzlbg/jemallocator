@@ -34,41 +34,39 @@ fn mallocx_align(a: usize) -> c_int {
     a.trailing_zeros() as c_int
 }
 
-// FIXME: replace with utils::align_to_flags
-fn align_to_flags(align: usize) -> c_int {
-    if align <= MIN_ALIGN {
+fn layout_to_flags(layout: &Layout) -> c_int {
+    if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
         0
     } else {
-        mallocx_align(align)
+        mallocx_align(layout.align())
     }
 }
 
-
 macro_rules! rt_mallocx {
-    ($name:ident, $nbytes:expr, $align:expr) => {
+    ($name:ident, $size:expr, $align:expr) => {
         #[bench]
         fn $name(b: &mut Bencher) {
             b.iter(|| unsafe {
                 use jemallocator::ffi as jemalloc;
-                let flags = align_to_flags($align);
-                let ptr = jemalloc::mallocx($nbytes, flags);
+                let flags = layout_to_flags(&Layout::from_size_align($size, $align).unwrap());
+                let ptr = jemalloc::mallocx($size, flags);
                 test::black_box(ptr);
-                jemalloc::sdallocx(ptr, $nbytes, flags);
+                jemalloc::sdallocx(ptr, $size, flags);
             });
         }
     }
 }
 
 macro_rules! rt_mallocx_nallocx {
-    ($name:ident, $nbytes:expr, $align:expr) => {
+    ($name:ident, $size:expr, $align:expr) => {
         #[bench]
         fn $name(b: &mut Bencher) {
             b.iter(|| unsafe {
                 use jemallocator::ffi as jemalloc;
-                let flags = align_to_flags($align);
-                let ptr = jemalloc::mallocx($nbytes, flags);
+                let flags = layout_to_flags(&Layout::from_size_align($size, $align).unwrap());
+                let ptr = jemalloc::mallocx($size, flags);
                 test::black_box(ptr);
-                let rsz = jemalloc::nallocx($nbytes, flags);
+                let rsz = jemalloc::nallocx($size, flags);
                 test::black_box(rsz);
                 jemalloc::sdallocx(ptr, rsz, flags);
             });
@@ -77,11 +75,11 @@ macro_rules! rt_mallocx_nallocx {
 }
 
 macro_rules! rt_alloc_layout_checked {
-    ($name:ident, $nbytes:expr, $align:expr) => {
+    ($name:ident, $size:expr, $align:expr) => {
         #[bench]
         fn $name(b: &mut Bencher) {
             b.iter(|| unsafe {
-                let layout = Layout::from_size_align($nbytes, $align).unwrap();
+                let layout = Layout::from_size_align($size, $align).unwrap();
                 let ptr = Jemalloc.alloc(layout.clone()).unwrap();
                 test::black_box(ptr);
                 Jemalloc.dealloc(ptr, layout);
@@ -91,11 +89,11 @@ macro_rules! rt_alloc_layout_checked {
 }
 
 macro_rules! rt_alloc_layout_unchecked {
-    ($name:ident, $nbytes:expr, $align:expr) => {
+    ($name:ident, $size:expr, $align:expr) => {
         #[bench]
         fn $name(b: &mut Bencher) {
             b.iter(|| unsafe {
-                let layout = Layout::from_size_align_unchecked($nbytes, $align);
+                let layout = Layout::from_size_align_unchecked($size, $align);
                 let ptr = Jemalloc.alloc(layout.clone()).unwrap();
                 test::black_box(ptr);
                 Jemalloc.dealloc(ptr, layout);
@@ -105,11 +103,11 @@ macro_rules! rt_alloc_layout_unchecked {
 }
 
 macro_rules! rt_alloc_excess_unused {
-    ($name:ident, $nbytes:expr, $align:expr) => {
+    ($name:ident, $size:expr, $align:expr) => {
         #[bench]
         fn $name(b: &mut Bencher) {
             b.iter(|| unsafe {
-                let layout = Layout::from_size_align($nbytes, $align).unwrap();
+                let layout = Layout::from_size_align($size, $align).unwrap();
                 let Excess(ptr, _) = Jemalloc.alloc_excess(layout.clone()).unwrap();
                 test::black_box(ptr);
                 Jemalloc.dealloc(ptr, layout); 
@@ -119,11 +117,11 @@ macro_rules! rt_alloc_excess_unused {
 }
 
 macro_rules! rt_alloc_excess_used {
-    ($name:ident, $nbytes:expr, $align:expr) => {
+    ($name:ident, $size:expr, $align:expr) => {
         #[bench]
         fn $name(b: &mut Bencher) {
             b.iter(|| unsafe {
-                let layout = Layout::from_size_align($nbytes, $align).unwrap();
+                let layout = Layout::from_size_align($size, $align).unwrap();
                 let Excess(ptr, excess) = Jemalloc.alloc_excess(layout.clone()).unwrap();
                 test::black_box(ptr);
                 test::black_box(excess);
@@ -134,46 +132,47 @@ macro_rules! rt_alloc_excess_used {
 }
 
 macro_rules! rt_mallocx_zeroed {
-    ($name:ident, $nbytes:expr, $align:expr) => {
+    ($name:ident, $size:expr, $align:expr) => {
         #[bench]
         fn $name(b: &mut Bencher) {
             b.iter(|| unsafe {
                 use jemallocator::ffi as jemalloc;
-                let flags = align_to_flags($align);
-                let ptr = jemalloc::mallocx($nbytes, flags | jemalloc::MALLOCX_ZERO);
+                let flags = layout_to_flags(&Layout::from_size_align($size, $align).unwrap());
+                let ptr = jemalloc::mallocx($size, flags | jemalloc::MALLOCX_ZERO);
                 test::black_box(ptr);
-                jemalloc::sdallocx(ptr, $nbytes, flags);
+                jemalloc::sdallocx(ptr, $size, flags);
             });
         }
     }
 }
 
 macro_rules! rt_calloc {
-    ($name:ident, $nbytes:expr, $align:expr) => {
+    ($name:ident, $size:expr, $align:expr) => {
         #[bench]
         fn $name(b: &mut Bencher) {
             b.iter(|| unsafe {
                 use jemallocator::ffi as jemalloc;
-                let flags = align_to_flags($align);
-                let ptr = jemalloc::calloc(1, $nbytes);
+                let flags = layout_to_flags(&Layout::from_size_align($size, $align).unwrap());
+                test::black_box(flags);
+                let ptr = jemalloc::calloc(1, $size);
                 test::black_box(ptr);
-                jemalloc::sdallocx(ptr, $nbytes, flags);
+                jemalloc::sdallocx(ptr, $size, 0);
             });
         }
     }
 }
 
 macro_rules! rt_realloc_naive {
-    ($name:ident, $nbytes:expr, $align:expr) => {
+    ($name:ident, $size:expr, $align:expr) => {
         #[bench]
         fn $name(b: &mut Bencher) {
             b.iter(|| unsafe {
-                let layout = Layout::from_size_align($nbytes, $align).unwrap();
+                let layout = Layout::from_size_align($size, $align).unwrap();
                 let ptr = Jemalloc.alloc(layout.clone()).unwrap();
                 test::black_box(ptr);
 
                 // navie realloc:
-                let new_layout = Layout::from_size_align(2 * $nbytes, $align).unwrap();
+                let new_layout = Layout::from_size_align(2 * $size, $align).unwrap();
                 let ptr = {
                     let new_ptr = Jemalloc.alloc(new_layout.clone()).unwrap();
                     ptr::copy_nonoverlapping(
@@ -190,15 +189,15 @@ macro_rules! rt_realloc_naive {
 }
 
 macro_rules! rt_realloc {
-    ($name:ident, $nbytes:expr, $align:expr) => {
+    ($name:ident, $size:expr, $align:expr) => {
         #[bench]
         fn $name(b: &mut Bencher) {
             b.iter(|| unsafe {
-                let layout = Layout::from_size_align($nbytes, $align).unwrap();
+                let layout = Layout::from_size_align($size, $align).unwrap();
                 let ptr = Jemalloc.alloc(layout.clone()).unwrap();
                 test::black_box(ptr);
 
-                let new_layout = Layout::from_size_align(2 * $nbytes, $align).unwrap();
+                let new_layout = Layout::from_size_align(2 * $size, $align).unwrap();
                 let ptr = Jemalloc.realloc(ptr, layout, new_layout.clone()).unwrap();
                 test::black_box(ptr);
 
@@ -209,15 +208,15 @@ macro_rules! rt_realloc {
 }
 
 macro_rules! rt_realloc_excess_unused {
-    ($name:ident, $nbytes:expr, $align:expr) => {
+    ($name:ident, $size:expr, $align:expr) => {
         #[bench]
         fn $name(b: &mut Bencher) {
             b.iter(|| unsafe {
-                let layout = Layout::from_size_align($nbytes, $align).unwrap();
+                let layout = Layout::from_size_align($size, $align).unwrap();
                 let ptr = Jemalloc.alloc(layout.clone()).unwrap();
                 test::black_box(ptr);
 
-                let new_layout = Layout::from_size_align(2 * $nbytes, $align).unwrap();
+                let new_layout = Layout::from_size_align(2 * $size, $align).unwrap();
                 let Excess(ptr, _) = Jemalloc.realloc_excess(
                     ptr, layout, new_layout.clone()
                 ).unwrap();
@@ -230,15 +229,15 @@ macro_rules! rt_realloc_excess_unused {
 }
 
 macro_rules! rt_realloc_excess_used {
-    ($name:ident, $nbytes:expr, $align:expr) => {
+    ($name:ident, $size:expr, $align:expr) => {
         #[bench]
         fn $name(b: &mut Bencher) {
             b.iter(|| unsafe {
-                let layout = Layout::from_size_align($nbytes, $align).unwrap();
+                let layout = Layout::from_size_align($size, $align).unwrap();
                 let ptr = Jemalloc.alloc(layout.clone()).unwrap();
                 test::black_box(ptr);
 
-                let new_layout = Layout::from_size_align(2 * $nbytes, $align).unwrap();
+                let new_layout = Layout::from_size_align(2 * $size, $align).unwrap();
                 let Excess(ptr, excess) = Jemalloc.realloc_excess(
                     ptr, layout, new_layout.clone()
                 ).unwrap();
