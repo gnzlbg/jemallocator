@@ -1,3 +1,5 @@
+//! Benchmarks the cost of the different allocation functions by doing a
+//! roundtrip (allocate, deallocate).
 #![feature(test, global_allocator, allocator_api)]
 
 extern crate jemallocator;
