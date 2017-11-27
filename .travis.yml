@@ -22,10 +22,8 @@ matrix:
       after_success:
         - travis-cargo --only nightly doc-upload
 
-before_script:
-  - if [ -z "$NO_ADD" ]; then rustup target add $TARGET; fi
-
 script:
+  - if [ -z "$NO_ADD" ]; then rustup target add $TARGET; fi
   - cargo run --target $TARGET --manifest-path systest/Cargo.toml
   - cargo build --target $TARGET
   - cargo build --target $TARGET --features profiling
