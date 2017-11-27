@@ -45,7 +45,9 @@ fn main() {
                    .replace("\\", "/"))
        .current_dir(&build_dir)
        .env("CC", compiler.path())
-       .env("CFLAGS", cflags);
+       .env("CFLAGS", cflags.clone())
+       .env("CPPFLAGS", cflags.clone())
+       .arg("--disable-cxx") ;
 
     if target.contains("ios") {
         cmd.arg("--disable-tls");
