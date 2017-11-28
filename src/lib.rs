@@ -45,11 +45,6 @@ const MIN_ALIGN: usize = 8;
               target_arch = "sparc64")))]
 const MIN_ALIGN: usize = 16;
 
-// MALLOCX_ALIGN(a) macro
-fn mallocx_align(a: usize) -> c_int {
-    a.trailing_zeros() as c_int
-}
-
 fn layout_to_flags(layout: &Layout) -> c_int {
     // If our alignment is less than the minimum alignment they we may not
     // have to pass special flags asking for a higher alignment. If the
@@ -59,7 +54,7 @@ fn layout_to_flags(layout: &Layout) -> c_int {
     if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
         0
     } else {
-        mallocx_align(layout.align())
+        ffi::MALLOCX_ALIGN(layout.align())
     }
 }
 

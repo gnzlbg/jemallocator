@@ -87,3 +87,11 @@ pub extern "C" fn pthread_atfork(_prefork: *mut u8,
                                  -> i32 {
     0
 }
+
+/// Computes `flags` from `align`.
+///
+/// Equivalent to the MALLOCX_ALIGN(a) macro.
+#[inline]
+pub fn MALLOCX_ALIGN(aling: usize) -> c_int {
+    aling.trailing_zeros() as c_int
+}
