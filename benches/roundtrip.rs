@@ -1,10 +1,11 @@
 //! Benchmarks the cost of the different allocation functions by doing a
 //! roundtrip (allocate, deallocate).
-#![feature(test, global_allocator, allocator_api)]
+#![feature(test, global_allocator, allocator_api, core_intrinsics)]
 
 extern crate jemallocator;
 extern crate test;
 extern crate libc;
+use std::intrinsics;
 
 use std::heap::{Alloc, Layout, Excess};
 use std::ptr;
@@ -30,15 +31,19 @@ const MIN_ALIGN: usize = 16;
 
 
 // FIXME: replace with utils::mallocx_align
+#[inline(always)]
 fn mallocx_align(a: usize) -> c_int {
     a.trailing_zeros() as c_int
 }
 
+#[inline(always)]
 fn layout_to_flags(layout: &Layout) -> c_int {
-    if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
-        0
-    } else {
-        mallocx_align(layout.align())
+    unsafe {
+        if intrinsics::likely(layout.align() <= MIN_ALIGN && layout.align() <= layout.size()) {
+            0
+        } else {
+            mallocx_align(layout.align())
+        }
     }
 }
 
