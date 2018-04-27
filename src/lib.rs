@@ -22,9 +22,10 @@
 extern crate jemalloc_sys;
 extern crate libc;
 
-use core::mem;
-use core::ptr::{self, NonNull};
-use core::heap::{GlobalAlloc, Alloc, Layout, Opaque, Excess, CannotReallocInPlace, AllocErr};
+use std::mem;
+use std::ptr::{self, NonNull};
+use std::heap::{GlobalAlloc, Alloc, Layout, Opaque, Excess,
+                CannotReallocInPlace, AllocErr};
 
 use libc::{c_int, c_void};
 
