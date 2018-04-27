@@ -15,7 +15,7 @@
 //! `Alloc` trait and is suitable both as a memory allocator and as a
 //! global allocator.
 
-#![feature(allocator_api, nonnull_cast)]
+#![feature(allocator_api)]
 #![deny(missing_docs)]
 #![no_std]
 
