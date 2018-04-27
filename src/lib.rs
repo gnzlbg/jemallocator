@@ -17,13 +17,14 @@
 
 #![feature(allocator_api, nonnull_cast)]
 #![deny(missing_docs)]
+#![no_std]
 
 extern crate jemalloc_sys;
 extern crate libc;
 
-use std::mem;
-use std::ptr::{self, NonNull};
-use std::heap::{GlobalAlloc, Alloc, Layout, Opaque, Excess, CannotReallocInPlace, AllocErr};
+use core::mem;
+use core::ptr::{self, NonNull};
+use core::heap::{GlobalAlloc, Alloc, Layout, Opaque, Excess, CannotReallocInPlace, AllocErr};
 
 use libc::{c_int, c_void};
 
