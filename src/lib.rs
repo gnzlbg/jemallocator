@@ -23,7 +23,7 @@ extern crate libc;
 
 use std::mem;
 use std::ptr::{self, NonNull};
-use std::heap::{GlobalAlloc, Alloc, Layout, Opaque, Excess, CannotReallocInPlace, AllocErr, System};
+use std::heap::{GlobalAlloc, Alloc, Layout, Opaque, Excess, CannotReallocInPlace, AllocErr};
 
 use libc::{c_int, c_void};
 
@@ -100,11 +100,6 @@ unsafe impl GlobalAlloc for Jemalloc {
         let ptr = ffi::rallocx(ptr as *mut c_void, new_size, flags);
         ptr as *mut Opaque
     }
-
-    #[inline]
-    fn oom(&self) -> ! {
-        System.oom()
-    }
 }
 
 unsafe impl Alloc for Jemalloc {
@@ -156,11 +151,6 @@ unsafe impl Alloc for Jemalloc {
         } else {
             Err(AllocErr)
         }
-    }
-
-    #[inline]
-    fn oom(&mut self) -> ! {
-        System.oom()
     }
 
     #[inline]
