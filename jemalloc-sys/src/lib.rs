@@ -18,48 +18,82 @@ pub const MALLOCX_ZERO: c_int = 0x40;
 
 extern "C" {
     // Standard API
-    #[link_name = "_rjem_malloc"]
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_malloc")]
     pub fn malloc(size: size_t) -> *mut c_void;
-    #[link_name = "_rjem_calloc"]
-    pub fn calloc(number: size_t, size: size_t) -> *mut c_void;
-    #[link_name = "_rjem_posix_memalign"]
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_calloc")]
+    pub fn calloc(size: size_t, flags: size_t) -> *mut c_void;
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_posix_memalign")]
     pub fn posix_memalign(ptr: *mut *mut c_void, alignment: size_t, size: size_t) -> c_int;
-    #[link_name = "_rjem_aligned_alloc"]
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_aligned_alloc")]
     pub fn aligned_alloc(alignment: size_t, size: size_t) -> *mut c_void;
-    #[link_name = "_rjem_realloc"]
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_realloc")]
     pub fn realloc(ptr: *mut c_void, size: size_t) -> *mut c_void;
-    #[link_name = "_rjem_free"]
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_free")]
     pub fn free(ptr: *mut c_void);
 
     // Non-standard API
-    #[link_name = "_rjem_mallocx"]
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_mallocx")]
     pub fn mallocx(size: size_t, flags: c_int) -> *mut c_void;
-    #[link_name = "_rjem_rallocx"]
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_rallocx")]
     pub fn rallocx(ptr: *mut c_void, size: size_t, flags: c_int) -> *mut c_void;
-    #[link_name = "_rjem_xallocx"]
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_xallocx")]
     pub fn xallocx(ptr: *mut c_void, size: size_t, extra: size_t, flags: c_int) -> size_t;
-    #[link_name = "_rjem_sallocx"]
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_sallocx")]
     pub fn sallocx(ptr: *const c_void, flags: c_int) -> size_t;
-    #[link_name = "_rjem_dallocx"]
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_dallocx")]
     pub fn dallocx(ptr: *mut c_void, flags: c_int);
-    #[link_name = "_rjem_sdallocx"]
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_sdallocx")]
     pub fn sdallocx(ptr: *mut c_void, size: size_t, flags: c_int);
-    #[link_name = "_rjem_nallocx"]
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_nallocx")]
     pub fn nallocx(size: size_t, flags: c_int) -> size_t;
-    #[link_name = "_rjem_malloc_usable_size"]
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_malloc_usable_size")]
     pub fn malloc_usable_size(ptr: *const c_void) -> size_t;
 
     // mallctl
-    #[link_name = "_rjem_mallctl"]
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_mallctl")]
     pub fn mallctl(name: *const c_char,
                    oldp: *mut c_void,
                    oldpenp: *mut size_t,
                    newp: *mut c_void,
                    newlen: size_t)
                    -> c_int;
-    #[link_name = "_rjem_mallctlnametomib"]
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_mallctlnametomib")]
     pub fn mallctlnametomib(name: *const c_char, mibp: *mut size_t, miblenp: *mut size_t) -> c_int;
-    #[link_name = "_rjem_mallctlbymib"]
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_mallctlbymib")]
     pub fn mallctlbymib(mib: *const size_t,
                         miblen: size_t,
                         oldp: *mut c_void,
@@ -69,7 +103,9 @@ extern "C" {
                         -> c_int;
 
     // stats
-    #[link_name = "_rjem_malloc_stats_print"]
+    #[cfg_attr(any(target_os = "macos", target_os = "android", target_os = "ios",
+                   target_os = "dragonfly", target_os = "windows", target_env = "musl"),
+               link_name = "je_malloc_stats_print")]
     pub fn malloc_stats_print(write_cb: extern "C" fn(*mut c_void, *const c_char),
                               cbopaque: *mut c_void,
                               opts: *const c_char);
