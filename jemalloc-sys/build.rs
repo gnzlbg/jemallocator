@@ -77,12 +77,6 @@ fn main() {
         cmd.arg("--with-lg-quantum=4");
     }
 
-    if target.contains("ios") {
-        cmd.arg("--disable-tls");
-    } else if target.contains("android") {
-        cmd.arg("--disable-tls");
-    }
-
     cmd.arg("--with-jemalloc-prefix=_rjem_");
 
     if env::var_os("CARGO_FEATURE_DEBUG").is_some() {
