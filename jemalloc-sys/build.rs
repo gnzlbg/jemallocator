@@ -73,14 +73,6 @@ fn main() {
     let jemalloc_src_dir = src_dir.join("jemalloc");
     println!("JEMALLOC_SRC_DIR={:?}", jemalloc_src_dir);
 
-    // Clean files from previous run:
-    let mut cmd = Command::new("git");
-    cmd.arg("clean")
-        .arg("-x") // clean ignored files
-        .arg("-f") // remove files
-        .current_dir(jemalloc_src_dir.clone());
-    run(&mut cmd);
-
     // Run autogen:
     let autogen = jemalloc_src_dir.join("autogen.sh");
     let mut cmd = Command::new("sh");

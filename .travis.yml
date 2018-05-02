@@ -68,7 +68,6 @@ script:
     cd jemalloc
     git checkout -b rc1 b8f4c730eff28edee4b583ff5b6ee1fac0f26c27
     cd ../..
-  - ls /project/jemalloc-sys/jemalloc
   - cargo install cross
   - cross run --target $TARGET --manifest-path systest/Cargo.toml
   - export JEMALLOC_SYS_RUN_TESTS=1
