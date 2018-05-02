@@ -91,6 +91,13 @@ fn main() {
         run(&mut cmd);
     }
 
+    let cflags = if target == "i586-unknown-linux-gnu" || target == "i686-unknown-linux-gnu" {
+        format!("{} -Wl,-melf_i386 ",cflags.clone())
+    } else {
+        cflags
+    };
+    println!("CFLAGS={:?}", cflags);
+
     // Run configure:
     let configure = jemalloc_src_dir.join("configure");
     let mut cmd = Command::new("sh");
