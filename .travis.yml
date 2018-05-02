@@ -52,7 +52,7 @@ matrix:
         - travis-cargo --only nightly doc-upload
 
   allow_failures:
-    - env: TARGET=aarch64-linux-android
+    - env: TARGET=arm-linux-androideabi
     - env: TARGET=armv7-linux-androideabi
     - env: TARGET=arm-unknown-linux-musleabi
     - env: TARGET=armv7-unknown-linux-musleabihf
@@ -63,6 +63,7 @@ matrix:
 script:
   - cargo install cross
   - cross run --target $TARGET --manifest-path systest/Cargo.toml
+  - export JEMALLOC_SYS_RUN_TESTS=1
   - cross build --target $TARGET
   - cross build --target $TARGET --features profiling
   - cross build --target $TARGET --features debug

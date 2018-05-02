@@ -28,6 +28,17 @@ fn gnu_target(target: &str) -> String {
 fn main() {
     let target = env::var("TARGET").expect("TARGET was not set");
     let host = env::var("HOST").expect("HOST was not set");
+    let num_jobs = env::var("NUM_JOBS").expect("NUM_JOBS was not set");
+    let out_dir = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR was not set"));
+    println!("TARGET={}", target.clone());
+    println!("HOST={}", host.clone());
+    println!("NUM_JOBS={}", num_jobs.clone());
+    println!("OUT_DIR={:?}", out_dir);
+    let build_dir = out_dir.join("build");
+    println!("BUILD_DIR={:?}", build_dir);
+    let src_dir = env::current_dir().expect("failed to get current directory");
+    println!("SRC_DIR={:?}", src_dir);
+
     let unsupported_targets = [
         "rumprun", "bitrig", "openbsd", "msvc",
         "emscripten", "fuchsia", "redox", "wasm32",
@@ -38,11 +49,8 @@ fn main() {
         }
     }
 
-    let out_dir = PathBuf::from(env::var_os("OUT_DIR").unwrap());
-    let build_dir = out_dir.join("build");
-    let src_dir = env::current_dir().unwrap();
-
     if let Some(jemalloc) = env::var_os("JEMALLOC_OVERRIDE") {
+        println!("jemalloc override set");
         let jemalloc = PathBuf::from(jemalloc);
         println!("cargo:rustc-link-search=native={}",
                  jemalloc.parent().unwrap().display());
@@ -54,13 +62,42 @@ fn main() {
     }
 
     fs::create_dir_all(&build_dir).unwrap();
-
-    let compiler = cc::Build::new().get_compiler();
+    // Disable -Wextra warnings - jemalloc doesn't compile free of warnings with
+    // it enabled: https://github.com/jemalloc/jemalloc/issues/1196
+    let compiler = cc::Build::new().extra_warnings(false).get_compiler();
     let cflags = compiler.args().iter().map(|s| s.to_str().unwrap())
                          .collect::<Vec<_>>().join(" ");
+    println!("CC={:?}", compiler.path());
+    println!("CFLAGS={:?}", cflags);
 
+    let jemalloc_src_dir = src_dir.join("jemalloc");
+    println!("JEMALLOC_SRC_DIR={:?}", jemalloc_src_dir);
 
-    let configure = src_dir.join("jemalloc/configure");
+    // Clean files from previous run:
+    let mut cmd = Command::new("git");
+    cmd.arg("clean")
+        .arg("-x") // clean ignored files
+        .arg("-f") // remove files
+        .current_dir(jemalloc_src_dir.clone());
+    run(&mut cmd);
+
+    // Run autogen:
+    let autogen = jemalloc_src_dir.join("autogen.sh");
+    let mut cmd = Command::new("sh");
+    cmd.arg(autogen.to_str().unwrap())
+       .current_dir(jemalloc_src_dir.clone());
+    run(&mut cmd);
+
+    // Run make distclean (otherwise configure fails when one changes the
+    // jemalloc prefix, see:
+    // https://github.com/jemalloc/jemalloc/issues/1174#issuecomment-385063745)
+    let mut cmd = Command::new("make");
+    cmd.arg("distclean")
+       .current_dir(jemalloc_src_dir.clone());
+    run(&mut cmd);
+
+    // Run configure:
+    let configure = jemalloc_src_dir.join("configure");
     let mut cmd = Command::new("sh");
     cmd.arg(configure.to_str().unwrap()
                    .replace("C:\\", "/c/")
@@ -69,7 +106,8 @@ fn main() {
        .env("CC", compiler.path())
        .env("CFLAGS", cflags.clone())
        .env("CPPFLAGS", cflags.clone())
-       .arg("--disable-cxx") ;
+       .arg("--disable-cxx")
+        ;
 
     // jemalloc's configure doesn't detect this value
     // automatically for this target:
@@ -80,10 +118,12 @@ fn main() {
     cmd.arg("--with-jemalloc-prefix=_rjem_");
 
     if env::var_os("CARGO_FEATURE_DEBUG").is_some() {
+        println!("CARGO_FEATURE_DEBUG set");
         cmd.arg("--enable-debug");
     }
 
     if env::var_os("CARGO_FEATURE_PROFILING").is_some() {
+        println!("CARGO_FEATURE_PROFILING set set");
         cmd.arg("--enable-prof");
     }
     cmd.arg(format!("--host={}", gnu_target(&target)));
@@ -100,11 +140,32 @@ fn main() {
         "make"
     };
 
+    // Make:
     run(Command::new(make)
-                .current_dir(&build_dir)
-                .arg("install_lib_static")
-                .arg("install_include")
-                .arg("-j").arg(env::var("NUM_JOBS").unwrap()));
+        .current_dir(&build_dir)
+        .arg("-j").arg(num_jobs.clone()));
+
+    if env::var_os("JEMALLOC_SYS_RUN_TESTS").is_some() {
+        println!("JEMALLOC_SYS_RUN_TESTS set: building and running jemalloc tests...");
+        // Make tests:
+        run(Command::new(make)
+            .current_dir(&build_dir)
+            .arg("-j").arg(num_jobs.clone())
+            .arg("tests"));
+
+        // Run tests:
+        run(Command::new(make)
+            .current_dir(&build_dir)
+            .arg("check"));
+    }
+
+    // Make install:
+    run(Command::new(make)
+        .current_dir(&build_dir)
+        .arg("install_lib_static")
+        .arg("install_include")
+        .arg("-j").arg(num_jobs.clone()));
+
 
     println!("cargo:root={}", out_dir.display());
 
