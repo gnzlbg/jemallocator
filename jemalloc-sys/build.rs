@@ -70,8 +70,27 @@ fn main() {
     println!("CC={:?}", compiler.path());
     println!("CFLAGS={:?}", cflags);
 
-    let jemalloc_src_dir = src_dir.join("jemalloc");
+    let jemalloc_src_dir = out_dir.join("jemalloc");
     println!("JEMALLOC_SRC_DIR={:?}", jemalloc_src_dir);
+
+    if jemalloc_src_dir.exists() {
+        std::fs::remove_dir_all(jemalloc_src_dir.clone()).unwrap();
+    }
+
+    // Get jemalloc
+    let mut cmd = Command::new("git");
+    cmd.arg("clone")
+       .arg("https://github.com/jemalloc/jemalloc.git")
+       .arg(jemalloc_src_dir.clone());
+    run (&mut cmd);
+
+    // Switch to the jemalloc 5.1 rc1 commit:
+    let mut cmd = Command::new("git");
+    cmd.arg("checkout")
+       .arg("-b")
+       .arg("rc1")
+       .arg("b8f4c730eff28edee4b583ff5b6ee1fac0f26c27")
+       .current_dir(jemalloc_src_dir.clone());
 
     // Configuration files
     let config_files = ["configure", "VERSION"];
@@ -97,18 +116,16 @@ fn main() {
 
         for f in &config_files {
             let mut cmd = Command::new("diff");
-            cmd.arg(f)
-                .arg(format!("../configure/{}", f))
-                .current_dir(jemalloc_src_dir.clone());
+            cmd.arg(jemalloc_src_dir.join(f))
+               .arg(format!("configure/{}", f));
             run(&mut cmd);
         }
     } else {
         // Copy the configuration files to jemalloc's source directory
         for f in &config_files {
             let mut cmd = Command::new("cp");
-            cmd.arg(format!("../configure/{}", f))
-                .arg(f)
-                .current_dir(jemalloc_src_dir.clone());
+            cmd.arg(format!("configure/{}", f))
+               .arg(jemalloc_src_dir.join(f));
             run(&mut cmd);
         }
     }
