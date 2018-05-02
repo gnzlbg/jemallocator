@@ -21,6 +21,7 @@ if [[ ${TARGET} = *"windows"* ]] || \
     export JEMALLOC_SYS_VERIFY_CONFIGURE=1
 else
     cargo install cross
+    build -t jemallocator/${TARGET}:0.1 ci/docker/${TARGET}
 fi
 
 # Make sure TARGET is installed when using cargo:
