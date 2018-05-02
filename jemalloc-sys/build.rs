@@ -73,20 +73,23 @@ fn main() {
     let jemalloc_src_dir = src_dir.join("jemalloc");
     println!("JEMALLOC_SRC_DIR={:?}", jemalloc_src_dir);
 
-    // Run autogen:
-    let autogen = jemalloc_src_dir.join("autogen.sh");
-    let mut cmd = Command::new("sh");
-    cmd.arg(autogen.to_str().unwrap())
-       .current_dir(jemalloc_src_dir.clone());
-    run(&mut cmd);
+    // If the configure file does not exist, run autogen and distclean:
+    if !jemalloc_src_dir.join("configure").exists() {
+        // Run autogen:
+        let autogen = jemalloc_src_dir.join("autogen.sh");
+        let mut cmd = Command::new("sh");
+        cmd.arg(autogen.to_str().unwrap())
+            .current_dir(jemalloc_src_dir.clone());
+        run(&mut cmd);
 
-    // Run make distclean (otherwise configure fails when one changes the
-    // jemalloc prefix, see:
-    // https://github.com/jemalloc/jemalloc/issues/1174#issuecomment-385063745)
-    let mut cmd = Command::new("make");
-    cmd.arg("distclean")
-       .current_dir(jemalloc_src_dir.clone());
-    run(&mut cmd);
+        // Run make distclean (otherwise configure fails when one changes the
+        // jemalloc prefix, see:
+        // https://github.com/jemalloc/jemalloc/issues/1174#issuecomment-385063745)
+        let mut cmd = Command::new("make");
+        cmd.arg("distclean")
+            .current_dir(jemalloc_src_dir.clone());
+        run(&mut cmd);
+    }
 
     // Run configure:
     let configure = jemalloc_src_dir.join("configure");

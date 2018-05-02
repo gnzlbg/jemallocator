@@ -19,6 +19,8 @@ rm -rf jemalloc
 git clone https://github.com/jemalloc/jemalloc.git
 cd jemalloc
 git checkout -b rc1 b8f4c730eff28edee4b583ff5b6ee1fac0f26c27
+./autogen.sh
+make distclean
 cd ../..
 
 # Use cargo on native CI platforms:
