@@ -11,7 +11,7 @@ export RUST_TEST_NOCAPTURE=1
 export CARGO_CMD=cross
 
 # Runs jemalloc tests using "make check":
-export JEMALLOC_SYS_RUN_TESTS=1
+#export JEMALLOC_SYS_RUN_TESTS=1
 
 # FIXME when jemalloc 5.1 is released
 # This fetches the jemalloc 5.1rc1 commit manually
