@@ -8,8 +8,8 @@ environment:
   - TARGET: x86_64-pc-windows-msvc
   - TARGET: i686-pc-windows-msvc
   - TARGET: i586-pc-windows-msvc
-  - TARGET: i686-pc-windows-gnu
   - TARGET: x86_64-pc-windows-gnu
+  - TARGET: i686-pc-windows-gnu
 
 install:
   - ps: >-
@@ -27,7 +27,7 @@ install:
 build: false
 
 test_script:
-  - C:\msys64\usr\bin\sh ci\run.sh
+  - sh ci\run.sh
 
 branches:
   only:
