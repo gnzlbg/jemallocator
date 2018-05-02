@@ -73,8 +73,13 @@ fn main() {
     let jemalloc_src_dir = src_dir.join("jemalloc");
     println!("JEMALLOC_SRC_DIR={:?}", jemalloc_src_dir);
 
-    // If the configure file does not exist, run autogen and distclean:
-    if !jemalloc_src_dir.join("configure").exists() {
+    // Configuration files
+    let config_files = ["configure", "VERSION"];
+
+    // Verify that the configuration files are up-to-date
+    if env::var_os("JEMALLOC_SYS_VERIFY_CONFIGURE").is_some() {
+        assert!(!jemalloc_src_dir.join("configure").exists(),
+                "the jemalloc source directory cannot contain configuration files like 'configure' and 'VERSION'");
         // Run autogen:
         let autogen = jemalloc_src_dir.join("autogen.sh");
         let mut cmd = Command::new("sh");
@@ -89,14 +94,24 @@ fn main() {
         cmd.arg("distclean")
             .current_dir(jemalloc_src_dir.clone());
         run(&mut cmd);
-    }
 
-    let cflags = if target == "i586-unknown-linux-gnu" || target == "i686-unknown-linux-gnu" {
-        format!("{} -Wl,-melf_i386 ",cflags.clone())
+        for f in &config_files {
+            let mut cmd = Command::new("diff");
+            cmd.arg(f)
+                .arg(format!("../configure/{}", f))
+                .current_dir(jemalloc_src_dir.clone());
+            run(&mut cmd);
+        }
     } else {
-        cflags
-    };
-    println!("CFLAGS={:?}", cflags);
+        // Copy the configuration files to jemalloc's source directory
+        for f in &config_files {
+            let mut cmd = Command::new("cp");
+            cmd.arg(format!("../configure/{}", f))
+                .arg(f)
+                .current_dir(jemalloc_src_dir.clone());
+            run(&mut cmd);
+        }
+    }
 
     // Run configure:
     let configure = jemalloc_src_dir.join("configure");
