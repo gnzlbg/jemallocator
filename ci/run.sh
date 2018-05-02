@@ -10,6 +10,7 @@ export RUST_TEST_THREADS=1
 export RUST_TEST_NOCAPTURE=1
 export CARGO_CMD=cross
 
+# Runs jemalloc tests using "make check":
 export JEMALLOC_SYS_RUN_TESTS=1
 
 # FIXME when jemalloc 5.1 is released
@@ -35,9 +36,9 @@ if [[ ${CARGO_CMD} == "cargo" ]]; then
     rustup target add ${TARGET} || true
 fi
 
-${CARGO_CMD} build --target $TARGET
-${CARGO_CMD} build --target $TARGET --features profiling
-${CARGO_CMD} build --target $TARGET --features debug
-${CARGO_CMD} build --target $TARGET --features 'debug profiling'
-${CARGO_CMD} test --target $TARGET
-${CARGO_CMD} test --target $TARGET --release
+${CARGO_CMD} build -vv --target $TARGET
+${CARGO_CMD} build -vv --target $TARGET --features profiling
+${CARGO_CMD} build -vv --target $TARGET --features debug
+${CARGO_CMD} build -vv --target $TARGET --features 'debug profiling'
+${CARGO_CMD} test -vv --target $TARGET
+${CARGO_CMD} test -vv --target $TARGET --release

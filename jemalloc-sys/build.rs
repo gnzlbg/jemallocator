@@ -102,7 +102,7 @@ fn main() {
        .env("CFLAGS", cflags.clone())
        .env("CPPFLAGS", cflags.clone())
        .arg("--disable-cxx")
-        ;
+    ;
 
     // jemalloc's configure doesn't detect this value
     // automatically for this target:

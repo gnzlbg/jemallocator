@@ -34,8 +34,10 @@ matrix:
     # OSX
     - env: TARGET=i686-apple-darwin
       os: osx
+      osx_image: xcode9.2
     - env: TARGET=x86_64-apple-darwin
       os: osx
+      osx_image: xcode9.2
 
     # Windows
     #- env: TARGET=x86_64-pc-windows-gnu
