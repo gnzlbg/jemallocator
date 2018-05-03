@@ -1,6 +1,6 @@
 language: rust
 rust: nightly
-sudo: false
+sudo: required
 services: docker
 dist: precise
 
