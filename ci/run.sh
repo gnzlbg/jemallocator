@@ -20,7 +20,7 @@ if [[ ${TARGET} = *"windows"* ]] || \
     export CARGO_CMD=cargo
     export JEMALLOC_SYS_VERIFY_CONFIGURE=1
 else
-    cargo install cross
+    cargo install cross || echo "cross is already installed"
 fi
 
 # Make sure TARGET is installed when using cargo:
