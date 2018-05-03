@@ -137,7 +137,7 @@ fn main() {
             .replace("C:\\", "/c/")
             .replace("\\", "/"),
     ).current_dir(&build_dir)
-        .env("CC", compiler.path())
+        .env("CC", format!("{} {}", compiler.path(), cflags.clone()))
         .env("CFLAGS", cflags.clone())
         .env("CPPFLAGS", cflags.clone())
         .arg("--disable-cxx");

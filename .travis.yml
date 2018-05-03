@@ -2,6 +2,7 @@ language: rust
 rust: nightly
 sudo: false
 services: docker
+cache: cargo
 
 matrix:
   include:
