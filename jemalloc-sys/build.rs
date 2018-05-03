@@ -78,6 +78,7 @@ fn main() {
     }
 
     // Get jemalloc 5.1rc1 and extract it
+    assert!(out_dir.exists(), "OUT_DIR does not exist");
     let jemalloc_zip_file = out_dir.join("jemalloc.zip");
     let mut cmd = Command::new("wget");
     cmd.arg("-O")
@@ -104,19 +105,9 @@ fn main() {
     if env::var_os("JEMALLOC_SYS_VERIFY_CONFIGURE").is_some() {
         assert!(!jemalloc_src_dir.join("configure").exists(),
                 "the jemalloc source directory cannot contain configuration files like 'configure' and 'VERSION'");
-        // Run autogen:
-        let autogen = jemalloc_src_dir.join("autogen.sh");
-        let mut cmd = Command::new("sh");
-        cmd.arg(autogen.to_str().unwrap())
-            .current_dir(jemalloc_src_dir.clone());
-        run(&mut cmd);
-
-        // Run make distclean (otherwise configure fails when one changes the
-        // jemalloc prefix, see:
-        // https://github.com/jemalloc/jemalloc/issues/1174#issuecomment-385063745)
-        let mut cmd = Command::new("make");
-        cmd.arg("distclean")
-            .current_dir(jemalloc_src_dir.clone());
+        // Run autoconf:
+        let mut cmd = Command::new("autoconf");
+        cmd.current_dir(jemalloc_src_dir.clone());
         run(&mut cmd);
 
         for f in &config_files {
