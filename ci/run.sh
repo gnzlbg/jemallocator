@@ -18,9 +18,12 @@ if [[ ${TARGET} = *"windows"* ]] || \
        [[ ${TARGET} = *"x86_64-unknown-linux-gnu"* ]] || [[ ${TARGET} = *"i686-unknown-linux-gnu"* ]] || [[ ${TARGET} = *"i586-unknown-linux-gnu"* ]] \
        || [[ ${TARGET} = *"apple"* ]]; then
     export CARGO_CMD=cargo
-    export JEMALLOC_SYS_VERIFY_CONFIGURE=1
 else
     cargo install cross || echo "cross is already installed"
+fi
+
+if [[ ${TARGET} = *"x86_64-unknown-linux-gnu"* ]]; then
+    export JEMALLOC_SYS_VERIFY_CONFIGURE=1
 fi
 
 # Make sure TARGET is installed when using cargo:
