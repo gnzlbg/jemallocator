@@ -13,16 +13,6 @@ export CARGO_CMD=cross
 # Runs jemalloc tests using "make check":
 #export JEMALLOC_SYS_RUN_TESTS=1
 
-# FIXME when jemalloc 5.1 is released, should just be:
-# git submodule init --update --recursive
-# This fetches the jemalloc 5.1rc1 commit manually
-cd jemalloc-sys
-rm -rf jemalloc
-git clone https://github.com/jemalloc/jemalloc.git
-cd jemalloc
-git checkout -b rc1 b8f4c730eff28edee4b583ff5b6ee1fac0f26c27
-cd ../..
-
 # Use cargo on native CI platforms:
 if [[ ${TARGET} = *"windows"* ]] || \
        [[ ${TARGET} = *"x86_64-unknown-linux-gnu"* ]] || [[ ${TARGET} = *"i686-unknown-linux-gnu"* ]] || [[ ${TARGET} = *"i586-unknown-linux-gnu"* ]] \

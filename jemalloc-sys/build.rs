@@ -77,25 +77,12 @@ fn main() {
         std::fs::remove_dir_all(jemalloc_src_dir.clone()).unwrap();
     }
 
-    // Get jemalloc 5.1rc1 and extract it
+    // Copy jemalloc submodule to the OUT_DIR
     assert!(out_dir.exists(), "OUT_DIR does not exist");
-    let jemalloc_zip_file = out_dir.join("jemalloc.zip");
-    let mut cmd = Command::new("wget");
-    cmd.arg("-O")
-       .arg(jemalloc_zip_file.clone())
-       .arg("https://github.com/jemalloc/jemalloc/archive/b8f4c730eff28edee4b583ff5b6ee1fac0f26c27.zip");
-    run (&mut cmd);
-
-    let mut cmd = Command::new("unzip");
-    cmd.arg("-o")
-       .arg("jemalloc.zip")
-       .current_dir(out_dir.clone());
-    run (&mut cmd);
-
-    let mut cmd = Command::new("mv");
-    cmd.arg("jemalloc-b8f4c730eff28edee4b583ff5b6ee1fac0f26c27")
+    let mut cmd = Command::new("cp");
+    cmd.arg("-rf")
        .arg("jemalloc")
-        .current_dir(out_dir.clone());
+        .arg(jemalloc_src_dir);
     run (&mut cmd);
 
     // Configuration files
