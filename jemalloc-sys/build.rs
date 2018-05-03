@@ -40,8 +40,14 @@ fn main() {
     println!("SRC_DIR={:?}", src_dir);
 
     let unsupported_targets = [
-        "rumprun", "bitrig", "openbsd", "msvc",
-        "emscripten", "fuchsia", "redox", "wasm32",
+        "rumprun",
+        "bitrig",
+        "openbsd",
+        "msvc",
+        "emscripten",
+        "fuchsia",
+        "redox",
+        "wasm32",
     ];
     for i in &unsupported_targets {
         if target.contains(i) {
@@ -52,21 +58,31 @@ fn main() {
     if let Some(jemalloc) = env::var_os("JEMALLOC_OVERRIDE") {
         println!("jemalloc override set");
         let jemalloc = PathBuf::from(jemalloc);
-        println!("cargo:rustc-link-search=native={}",
-                 jemalloc.parent().unwrap().display());
+        println!(
+            "cargo:rustc-link-search=native={}",
+            jemalloc.parent().unwrap().display()
+        );
         let stem = jemalloc.file_stem().unwrap().to_str().unwrap();
         let name = jemalloc.file_name().unwrap().to_str().unwrap();
-        let kind = if name.ends_with(".a") {"static"} else {"dylib"};
+        let kind = if name.ends_with(".a") {
+            "static"
+        } else {
+            "dylib"
+        };
         println!("cargo:rustc-link-lib={}={}", kind, &stem[3..]);
-        return
+        return;
     }
 
     fs::create_dir_all(&build_dir).unwrap();
     // Disable -Wextra warnings - jemalloc doesn't compile free of warnings with
     // it enabled: https://github.com/jemalloc/jemalloc/issues/1196
     let compiler = cc::Build::new().extra_warnings(false).get_compiler();
-    let cflags = compiler.args().iter().map(|s| s.to_str().unwrap())
-                         .collect::<Vec<_>>().join(" ");
+    let cflags = compiler
+        .args()
+        .iter()
+        .map(|s| s.to_str().unwrap())
+        .collect::<Vec<_>>()
+        .join(" ");
     println!("CC={:?}", compiler.path());
     println!("CFLAGS={:?}", cflags);
 
@@ -80,10 +96,8 @@ fn main() {
     // Copy jemalloc submodule to the OUT_DIR
     assert!(out_dir.exists(), "OUT_DIR does not exist");
     let mut cmd = Command::new("cp");
-    cmd.arg("-rf")
-       .arg("jemalloc")
-        .arg(jemalloc_src_dir.clone());
-    run (&mut cmd);
+    cmd.arg("-rf").arg("jemalloc").arg(jemalloc_src_dir.clone());
+    run(&mut cmd);
 
     // Configuration files
     let config_files = ["configure", "VERSION"];
@@ -100,7 +114,7 @@ fn main() {
         for f in &config_files {
             let mut cmd = Command::new("diff");
             cmd.arg(jemalloc_src_dir.join(f))
-               .arg(format!("configure/{}", f));
+                .arg(format!("configure/{}", f));
             run(&mut cmd);
         }
     } else {
@@ -108,7 +122,7 @@ fn main() {
         for f in &config_files {
             let mut cmd = Command::new("cp");
             cmd.arg(format!("configure/{}", f))
-               .arg(jemalloc_src_dir.join(f));
+                .arg(jemalloc_src_dir.join(f));
             run(&mut cmd);
         }
     }
@@ -116,15 +130,17 @@ fn main() {
     // Run configure:
     let configure = jemalloc_src_dir.join("configure");
     let mut cmd = Command::new("sh");
-    cmd.arg(configure.to_str().unwrap()
-                   .replace("C:\\", "/c/")
-                   .replace("\\", "/"))
-       .current_dir(&build_dir)
-       .env("CC", compiler.path())
-       .env("CFLAGS", cflags.clone())
-       .env("CPPFLAGS", cflags.clone())
-       .arg("--disable-cxx")
-    ;
+    cmd.arg(
+        configure
+            .to_str()
+            .unwrap()
+            .replace("C:\\", "/c/")
+            .replace("\\", "/"),
+    ).current_dir(&build_dir)
+        .env("CC", compiler.path())
+        .env("CFLAGS", cflags.clone())
+        .env("CPPFLAGS", cflags.clone())
+        .arg("--disable-cxx");
 
     // jemalloc's configure doesn't detect this value
     // automatically for this target:
@@ -149,9 +165,9 @@ fn main() {
 
     run(&mut cmd);
 
-    let make = if host.contains("bitrig") || host.contains("dragonfly") ||
-        host.contains("freebsd") || host.contains("netbsd") ||
-        host.contains("openbsd") {
+    let make = if host.contains("bitrig") || host.contains("dragonfly") || host.contains("freebsd")
+        || host.contains("netbsd") || host.contains("openbsd")
+    {
         "gmake"
     } else {
         "make"
@@ -160,20 +176,20 @@ fn main() {
     // Make:
     run(Command::new(make)
         .current_dir(&build_dir)
-        .arg("-j").arg(num_jobs.clone()));
+        .arg("-j")
+        .arg(num_jobs.clone()));
 
     if env::var_os("JEMALLOC_SYS_RUN_TESTS").is_some() {
         println!("JEMALLOC_SYS_RUN_TESTS set: building and running jemalloc tests...");
         // Make tests:
         run(Command::new(make)
             .current_dir(&build_dir)
-            .arg("-j").arg(num_jobs.clone())
+            .arg("-j")
+            .arg(num_jobs.clone())
             .arg("tests"));
 
         // Run tests:
-        run(Command::new(make)
-            .current_dir(&build_dir)
-            .arg("check"));
+        run(Command::new(make).current_dir(&build_dir).arg("check"));
     }
 
     // Make install:
@@ -181,8 +197,8 @@ fn main() {
         .current_dir(&build_dir)
         .arg("install_lib_static")
         .arg("install_include")
-        .arg("-j").arg(num_jobs.clone()));
-
+        .arg("-j")
+        .arg(num_jobs.clone()));
 
     println!("cargo:root={}", out_dir.display());
 
@@ -213,7 +229,10 @@ fn run(cmd: &mut Command) {
         Err(e) => panic!("failed to execute command: {}", e),
     };
     if !status.success() {
-        panic!("command did not execute successfully: {:?}\n\
-                expected success, got: {}", cmd, status);
+        panic!(
+            "command did not execute successfully: {:?}\n\
+             expected success, got: {}",
+            cmd, status
+        );
     }
 }
