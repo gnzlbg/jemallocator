@@ -82,7 +82,7 @@ fn main() {
     let mut cmd = Command::new("cp");
     cmd.arg("-rf")
        .arg("jemalloc")
-        .arg(jemalloc_src_dir);
+        .arg(jemalloc_src_dir.clone());
     run (&mut cmd);
 
     // Configuration files
