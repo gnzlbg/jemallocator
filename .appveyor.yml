@@ -7,9 +7,11 @@ environment:
   matrix:
     - TARGET: x86_64-pc-windows-gnu
     - TARGET: i686-pc-windows-gnu
-    allow_failures:
-      - TARGET: x86_64-pc-windows-gnu
-      - TARGET: i686-pc-windows-gnu
+
+matrix:
+  allow_failures:
+    - TARGET: x86_64-pc-windows-gnu
+    - TARGET: i686-pc-windows-gnu
 
 install:
   - ps: >-
