@@ -9,10 +9,12 @@
 // except according to those terms.
 
 extern crate cc;
+extern crate fs_extra;
 
 use std::env;
 use std::fs;
-use std::path::PathBuf;
+use std::fs::File;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 fn gnu_target(target: &str) -> String {
@@ -90,14 +92,19 @@ fn main() {
     println!("JEMALLOC_SRC_DIR={:?}", jemalloc_src_dir);
 
     if jemalloc_src_dir.exists() {
-        std::fs::remove_dir_all(jemalloc_src_dir.clone()).unwrap();
+        fs::remove_dir_all(jemalloc_src_dir.clone()).unwrap();
     }
 
     // Copy jemalloc submodule to the OUT_DIR
     assert!(out_dir.exists(), "OUT_DIR does not exist");
-    let mut cmd = Command::new("cp");
-    cmd.arg("-rf").arg("jemalloc").arg(jemalloc_src_dir.clone());
-    run(&mut cmd);
+    let mut copy_options = fs_extra::dir::CopyOptions::new();
+    copy_options.overwrite = true;
+    copy_options.copy_inside = true;
+    fs_extra::dir::copy(
+        Path::new("jemalloc"),
+        jemalloc_src_dir.clone(),
+        &copy_options,
+    ).expect("failed to copy jemalloc source code to OUT_DIR");
 
     // Configuration files
     let config_files = ["configure", "VERSION"];
@@ -112,18 +119,27 @@ fn main() {
         run(&mut cmd);
 
         for f in &config_files {
-            let mut cmd = Command::new("diff");
-            cmd.arg(jemalloc_src_dir.join(f))
-                .arg(format!("configure/{}", f));
-            run(&mut cmd);
+            use std::io::Read;
+            let mut file = File::open(jemalloc_src_dir.join(f)).expect("file not found");
+            let mut source_contents = String::new();
+            file.read_to_string(&mut source_contents)
+                .expect("failed to read file");
+            let mut file =
+                File::open(Path::new(&format!("configure/{}", f))).expect("file not found");
+            let mut reference_contents = String::new();
+            file.read_to_string(&mut reference_contents)
+                .expect("failed to read file");
+            if source_contents != reference_contents {
+                panic!("the file \"{}\" differs from the jemalloc source and the reference in \"jemalloc-sys/configure/{}\"", jemalloc_src_dir.join(f).display(), f);
+            }
         }
     } else {
         // Copy the configuration files to jemalloc's source directory
         for f in &config_files {
-            let mut cmd = Command::new("cp");
-            cmd.arg(format!("configure/{}", f))
-                .arg(jemalloc_src_dir.join(f));
-            run(&mut cmd);
+            fs::copy(
+                Path::new(&format!("configure/{}", f)),
+                jemalloc_src_dir.join(f),
+            ).expect("failed to copy config file to OUT_DIR");
         }
     }
 
