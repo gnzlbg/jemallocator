@@ -1,6 +1,6 @@
 # jemallocator
 
-[![Build Status](https://travis-ci.org/alexcrichton/jemallocator.svg?branch=master)](https://travis-ci.org/alexcrichton/jemallocator)
+[![Build Status](https://travis-ci.org/alexcrichton/jemallocator.svg?branch=master)](https://travis-ci.org/alexcrichton/jemallocator) [![Build Status](https://ci.appveyor.com/api/projects/status/github/alexcrichton/jemallocator?branch=master&svg=true)](https://ci.appveyor.com/project/alexcrichton/jemallocator/branch/master)
 
 [Documentation](https://docs.rs/jemallocator)
 
