@@ -5,11 +5,11 @@ environment:
   RUSTFLAGS: -Clink-args=/OPT:NOICF
 
   matrix:
-  - TARGET: x86_64-pc-windows-msvc
-  - TARGET: i686-pc-windows-msvc
-  - TARGET: i586-pc-windows-msvc
   - TARGET: x86_64-pc-windows-gnu
   - TARGET: i686-pc-windows-gnu
+    allow_failures:
+      - TARGET: x86_64-pc-windows-gnu
+      - TARGET: i686-pc-windows-gnu
 
 install:
   - ps: >-

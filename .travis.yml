@@ -2,7 +2,6 @@ language: rust
 rust: nightly
 sudo: false
 services: docker
-cache: cargo
 
 matrix:
   include:
@@ -48,10 +47,6 @@ matrix:
       os: osx
       osx_image: xcode9.2
 
-    # Emscripten
-    - env: TARGET=asmjs-unknown-emscripten
-    - env: TARGET=wasm32-unknown-emscripten
-
     - env: DOCUMENTATION
       install: pip install 'travis-cargo<0.2' --user && export PATH=$HOME/.local/bin:$PATH
       script: cargo doc
@@ -64,8 +59,6 @@ matrix:
     - env: TARGET=arm-unknown-linux-musleabi
     - env: TARGET=armv7-unknown-linux-musleabihf
     - env: TARGET=sparc64-unknown-linux-gnu
-    - env: TARGET=asmjs-unknown-emscripten
-    - env: TARGET=wasm32-unknown-emscripten
 
 script: ci/run.sh
 env:
