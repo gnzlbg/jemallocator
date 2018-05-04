@@ -92,6 +92,7 @@ pub extern "C" fn pthread_atfork(_prefork: *mut u8,
 ///
 /// Equivalent to the MALLOCX_ALIGN(a) macro.
 #[inline]
+#[allow(non_snake_case)]
 pub fn MALLOCX_ALIGN(aling: usize) -> c_int {
     aling.trailing_zeros() as c_int
 }

@@ -24,7 +24,8 @@ extern crate libc;
 
 use core::mem;
 use core::ptr::{self, NonNull};
-use core::heap::{GlobalAlloc, Alloc, Layout, Opaque, Excess, CannotReallocInPlace, AllocErr};
+use core::heap::{GlobalAlloc, Alloc, Layout, Opaque, Excess,
+                 CannotReallocInPlace, AllocErr};
 
 use libc::{c_int, c_void};
 
