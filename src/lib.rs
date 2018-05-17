@@ -48,7 +48,7 @@ const MIN_ALIGN: usize = 8;
 const MIN_ALIGN: usize = 16;
 
 fn layout_to_flags(align: usize, size: usize) -> c_int {
-    // If our alignment is less than the minimum alignment they we may not
+    // If our alignment is less than the minimum alignment, then we may not
     // have to pass special flags asking for a higher alignment. If the
     // alignment is greater than the size, however, then this hits a sort of odd
     // case where we still need to ask for a custom alignment. See #25 for more
