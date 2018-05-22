@@ -41,6 +41,8 @@ fn main() {
     let src_dir = env::current_dir().expect("failed to get current directory");
     println!("SRC_DIR={:?}", src_dir);
 
+    let disable_bg_thread = !env::var("CARGO_FEATURE_bg_thread").is_ok();
+
     let unsupported_targets = [
         "rumprun",
         "bitrig",
@@ -165,6 +167,10 @@ fn main() {
         cmd.arg("--with-lg-quantum=4");
         // See: https://github.com/jemalloc/jemalloc/issues/999
         cmd.arg("--disable-thp");
+    }
+
+    if disable_bg_thread {
+        cmd.arg("--with-malloc-conf=background_thread:false");
     }
 
     cmd.arg("--with-jemalloc-prefix=_rjem_");
