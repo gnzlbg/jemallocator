@@ -12,10 +12,10 @@
 //!
 //! This crate provides bindings to jemalloc as a memory allocator for Rust.
 //! This crate mainly exports, one type, `Jemalloc`, which implements the
-//! `Alloc` trait and is suitable both as a memory allocator and as a
-//! global allocator.
+//! `GlobalAlloc` trait and optionally the `Alloc` trait,
+//! and is suitable both as a memory allocator and as a global allocator.
 
-#![feature(allocator_api)]
+#![cfg_attr(feature = "alloc_trait", feature(allocator_api))]
 #![deny(missing_docs)]
 #![no_std]
 
@@ -23,8 +23,10 @@ extern crate jemalloc_sys;
 extern crate libc;
 
 use core::mem;
-use core::ptr::{self, NonNull};
-use core::alloc::{GlobalAlloc, Alloc, Layout, Excess, CannotReallocInPlace, AllocErr};
+use core::ptr;
+use core::alloc::{GlobalAlloc, Layout};
+#[cfg(feature = "alloc_trait")] use core::alloc::{Alloc, Excess, CannotReallocInPlace, AllocErr};
+#[cfg(feature = "alloc_trait")] use core::ptr::NonNull;
 
 use libc::{c_int, c_void};
 
@@ -61,10 +63,10 @@ fn layout_to_flags(align: usize, size: usize) -> c_int {
 
 /// Handle to the jemalloc allocator
 ///
-/// This type and a reference to this type both implement the `Alloc` trait,
+/// This type implements the `GlobalAllocAlloc` trait, allowing usage a global allocator.
 ///
-/// allowing usage of this `Jemalloc` type both in collections and as a global
-/// allocator.
+/// When the `alloc_trait` feature of this crate is enabled, it also implements the `Alloc` trait,
+/// allowing usage in collections.
 pub struct Jemalloc;
 
 unsafe impl GlobalAlloc for Jemalloc {
@@ -103,6 +105,7 @@ unsafe impl GlobalAlloc for Jemalloc {
     }
 }
 
+#[cfg(feature = "alloc_trait")]
 unsafe impl Alloc for Jemalloc {
     #[inline]
     unsafe fn alloc(&mut self, layout: Layout) -> Result<NonNull<u8>, AllocErr> {

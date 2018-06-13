@@ -32,6 +32,7 @@ if [[ ${CARGO_CMD} == "cargo" ]]; then
 fi
 
 ${CARGO_CMD} build -vv --target $TARGET
+${CARGO_CMD} build -vv --target $TARGET --features alloc_trait
 ${CARGO_CMD} build -vv --target $TARGET --features profiling
 ${CARGO_CMD} build -vv --target $TARGET --features debug
 ${CARGO_CMD} build -vv --target $TARGET --features 'debug profiling'
