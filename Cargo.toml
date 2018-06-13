@@ -24,6 +24,7 @@ jemalloc-sys = { path = "jemalloc-sys", version = "0.1.6" }
 libc = "0.2.8"
 
 [features]
+alloc_trait = []
 default = ["bg_thread"]
 profiling = ["jemalloc-sys/profiling"]
 debug = ["jemalloc-sys/debug"]
