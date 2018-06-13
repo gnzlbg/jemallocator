@@ -1,5 +1,3 @@
-#![feature(global_allocator)]
-
 extern crate libc;
 extern crate jemalloc_sys as ffi;
 extern crate jemallocator;

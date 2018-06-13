@@ -1,9 +1,7 @@
-#![feature(global_allocator, allocator_api)]
-
 extern crate jemallocator;
 
 use jemallocator::Jemalloc;
-use std::heap::{Alloc, Layout};
+use std::alloc::{GlobalAlloc, Layout};
 
 #[global_allocator]
 static A: Jemalloc = Jemalloc;
@@ -22,10 +20,12 @@ fn overaligned() {
     let iterations = 100;
     unsafe {
         let pointers: Vec<_> = (0..iterations).map(|_| {
-            Jemalloc.alloc(Layout::from_size_align(size, align).unwrap()).unwrap()
+            let ptr = Jemalloc.alloc(Layout::from_size_align(size, align).unwrap());
+            assert!(!ptr.is_null());
+            ptr
         }).collect();
         for &ptr in &pointers {
-            assert_eq!((ptr.as_ptr() as usize) % align, 0,
+            assert_eq!((ptr as usize) % align, 0,
                        "Got a pointer less aligned than requested")
         }
 

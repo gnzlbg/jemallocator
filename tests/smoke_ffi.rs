@@ -1,5 +1,3 @@
-#![feature(global_allocator)]
-
 extern crate jemallocator;
 extern crate jemalloc_sys;
 
