@@ -24,8 +24,7 @@ extern crate libc;
 
 use core::mem;
 use core::ptr::{self, NonNull};
-use core::heap::{GlobalAlloc, Alloc, Layout, Opaque, Excess,
-                 CannotReallocInPlace, AllocErr};
+use core::alloc::{GlobalAlloc, Alloc, Layout, Excess, CannotReallocInPlace, AllocErr};
 
 use libc::{c_int, c_void};
 
@@ -70,61 +69,61 @@ pub struct Jemalloc;
 
 unsafe impl GlobalAlloc for Jemalloc {
     #[inline]
-    unsafe fn alloc(&self, layout: Layout) -> *mut Opaque {
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         let flags = layout_to_flags(layout.align(), layout.size());
         let ptr = ffi::mallocx(layout.size(), flags);
-        ptr as *mut Opaque
+        ptr as *mut u8
     }
 
     #[inline]
-    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut Opaque {
+    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
         let ptr = if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
             ffi::calloc(1, layout.size())
         } else {
             let flags = layout_to_flags(layout.align(), layout.size()) | ffi::MALLOCX_ZERO;
             ffi::mallocx(layout.size(), flags)
         };
-        ptr as *mut Opaque
+        ptr as *mut u8
     }
 
     #[inline]
-    unsafe fn dealloc(&self, ptr: *mut Opaque, layout: Layout) {
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
         let flags = layout_to_flags(layout.align(), layout.size());
         ffi::sdallocx(ptr as *mut c_void, layout.size(), flags)
     }
 
     #[inline]
     unsafe fn realloc(&self,
-                      ptr: *mut Opaque,
+                      ptr: *mut u8,
                       layout: Layout,
-                      new_size: usize) -> *mut Opaque {
+                      new_size: usize) -> *mut u8 {
         let flags = layout_to_flags(layout.align(), new_size);
         let ptr = ffi::rallocx(ptr as *mut c_void, new_size, flags);
-        ptr as *mut Opaque
+        ptr as *mut u8
     }
 }
 
 unsafe impl Alloc for Jemalloc {
     #[inline]
-    unsafe fn alloc(&mut self, layout: Layout) -> Result<NonNull<Opaque>, AllocErr> {
+    unsafe fn alloc(&mut self, layout: Layout) -> Result<NonNull<u8>, AllocErr> {
         NonNull::new(GlobalAlloc::alloc(self, layout)).ok_or(AllocErr)
     }
 
     #[inline]
-    unsafe fn alloc_zeroed(&mut self, layout: Layout) -> Result<NonNull<Opaque>, AllocErr> {
+    unsafe fn alloc_zeroed(&mut self, layout: Layout) -> Result<NonNull<u8>, AllocErr> {
         NonNull::new(GlobalAlloc::alloc_zeroed(self, layout)).ok_or(AllocErr)
     }
 
     #[inline]
-    unsafe fn dealloc(&mut self, ptr: NonNull<Opaque>, layout: Layout) {
+    unsafe fn dealloc(&mut self, ptr: NonNull<u8>, layout: Layout) {
         GlobalAlloc::dealloc(self, ptr.as_ptr(), layout)
     }
 
     #[inline]
     unsafe fn realloc(&mut self,
-                      ptr: NonNull<Opaque>,
+                      ptr: NonNull<u8>,
                       layout: Layout,
-                      new_size: usize) -> Result<NonNull<Opaque>, AllocErr> {
+                      new_size: usize) -> Result<NonNull<u8>, AllocErr> {
         NonNull::new(GlobalAlloc::realloc(self, ptr.as_ptr(), layout, new_size)).ok_or(AllocErr)
     }
 
@@ -132,7 +131,7 @@ unsafe impl Alloc for Jemalloc {
     unsafe fn alloc_excess(&mut self, layout: Layout) -> Result<Excess, AllocErr> {
         let flags = layout_to_flags(layout.align(), layout.size());
         let ptr = ffi::mallocx(layout.size(), flags);
-        if let Some(nonnull) = NonNull::new(ptr as *mut Opaque) {
+        if let Some(nonnull) = NonNull::new(ptr as *mut u8) {
             let excess = ffi::nallocx(layout.size(), flags);
             Ok(Excess(nonnull, excess))
         } else {
@@ -142,12 +141,12 @@ unsafe impl Alloc for Jemalloc {
 
     #[inline]
     unsafe fn realloc_excess(&mut self,
-                      ptr: NonNull<Opaque>,
+                      ptr: NonNull<u8>,
                       layout: Layout,
                       new_size: usize) -> Result<Excess, AllocErr> {
         let flags = layout_to_flags(layout.align(), new_size);
         let ptr = ffi::rallocx(ptr.cast().as_ptr(), new_size, flags);
-        if let Some(nonnull) = NonNull::new(ptr as *mut Opaque) {
+        if let Some(nonnull) = NonNull::new(ptr as *mut u8) {
             let excess = ffi::nallocx(new_size, flags);
             Ok(Excess(nonnull, excess))
         } else {
@@ -166,7 +165,7 @@ unsafe impl Alloc for Jemalloc {
 
     #[inline]
     unsafe fn grow_in_place(&mut self,
-                            ptr: NonNull<Opaque>,
+                            ptr: NonNull<u8>,
                             layout: Layout,
                             new_size: usize) -> Result<(), CannotReallocInPlace> {
         self.shrink_in_place(ptr, layout, new_size)
@@ -174,7 +173,7 @@ unsafe impl Alloc for Jemalloc {
 
     #[inline]
     unsafe fn shrink_in_place(&mut self,
-                              ptr: NonNull<Opaque>,
+                              ptr: NonNull<u8>,
                               layout: Layout,
                               new_size: usize) -> Result<(), CannotReallocInPlace> {
         let flags = layout_to_flags(layout.align(), new_size);

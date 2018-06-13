@@ -1,9 +1,7 @@
-#![feature(global_allocator, allocator_api)]
-
 extern crate libc;
 extern crate jemallocator;
 
-use std::heap::{Alloc, Layout};
+use std::alloc::{GlobalAlloc, Layout};
 use jemallocator::Jemalloc;
 
 #[global_allocator]
@@ -13,7 +11,8 @@ static A: Jemalloc = Jemalloc;
 fn smoke() {
     let layout = Layout::from_size_align(100, 8).unwrap();
     unsafe {
-        let ptr = Jemalloc.alloc(layout.clone()).unwrap();
+        let ptr = Jemalloc.alloc(layout.clone());
+        assert!(!ptr.is_null());
         Jemalloc.dealloc(ptr, layout);
     }
 }
