@@ -186,6 +186,7 @@ fn main() {
 
     if use_prefix {
         cmd.arg("--with-jemalloc-prefix=_rjem_");
+        cmd.arg("--with-private-namespace=_rjem_");
         println!("cargo:rustc-cfg=prefixed");
     }
 
