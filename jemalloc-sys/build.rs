@@ -41,7 +41,7 @@ fn main() {
     let src_dir = env::current_dir().expect("failed to get current directory");
     println!("SRC_DIR={:?}", src_dir);
 
-    let disable_bg_thread = !env::var("CARGO_FEATURE_bg_thread").is_ok();
+    let disable_bg_thread = !env::var("CARGO_FEATURE_BG_THREAD").is_ok();
 
     let unsupported_targets = [
         "rumprun",
