@@ -18,48 +18,48 @@ pub const MALLOCX_ZERO: c_int = 0x40;
 
 extern "C" {
     // Standard API
-    #[link_name = "_rjem_malloc"]
+    #[cfg_attr(prefixed, link_name = "_rjem_malloc")]
     pub fn malloc(size: size_t) -> *mut c_void;
-    #[link_name = "_rjem_calloc"]
+    #[cfg_attr(prefixed, link_name = "_rjem_calloc")]
     pub fn calloc(number: size_t, size: size_t) -> *mut c_void;
-    #[link_name = "_rjem_posix_memalign"]
+    #[cfg_attr(prefixed, link_name = "_rjem_posix_memalign")]
     pub fn posix_memalign(ptr: *mut *mut c_void, alignment: size_t, size: size_t) -> c_int;
-    #[link_name = "_rjem_aligned_alloc"]
+    #[cfg_attr(prefixed, link_name = "_rjem_aligned_alloc")]
     pub fn aligned_alloc(alignment: size_t, size: size_t) -> *mut c_void;
-    #[link_name = "_rjem_realloc"]
+    #[cfg_attr(prefixed, link_name = "_rjem_realloc")]
     pub fn realloc(ptr: *mut c_void, size: size_t) -> *mut c_void;
-    #[link_name = "_rjem_free"]
+    #[cfg_attr(prefixed, link_name = "_rjem_free")]
     pub fn free(ptr: *mut c_void);
 
     // Non-standard API
-    #[link_name = "_rjem_mallocx"]
+    #[cfg_attr(prefixed, link_name = "_rjem_mallocx")]
     pub fn mallocx(size: size_t, flags: c_int) -> *mut c_void;
-    #[link_name = "_rjem_rallocx"]
+    #[cfg_attr(prefixed, link_name = "_rjem_rallocx")]
     pub fn rallocx(ptr: *mut c_void, size: size_t, flags: c_int) -> *mut c_void;
-    #[link_name = "_rjem_xallocx"]
+    #[cfg_attr(prefixed, link_name = "_rjem_xallocx")]
     pub fn xallocx(ptr: *mut c_void, size: size_t, extra: size_t, flags: c_int) -> size_t;
-    #[link_name = "_rjem_sallocx"]
+    #[cfg_attr(prefixed, link_name = "_rjem_sallocx")]
     pub fn sallocx(ptr: *const c_void, flags: c_int) -> size_t;
-    #[link_name = "_rjem_dallocx"]
+    #[cfg_attr(prefixed, link_name = "_rjem_dallocx")]
     pub fn dallocx(ptr: *mut c_void, flags: c_int);
-    #[link_name = "_rjem_sdallocx"]
+    #[cfg_attr(prefixed, link_name = "_rjem_sdallocx")]
     pub fn sdallocx(ptr: *mut c_void, size: size_t, flags: c_int);
-    #[link_name = "_rjem_nallocx"]
+    #[cfg_attr(prefixed, link_name = "_rjem_nallocx")]
     pub fn nallocx(size: size_t, flags: c_int) -> size_t;
-    #[link_name = "_rjem_malloc_usable_size"]
+    #[cfg_attr(prefixed, link_name = "_rjem_malloc_usable_size")]
     pub fn malloc_usable_size(ptr: *const c_void) -> size_t;
 
     // mallctl
-    #[link_name = "_rjem_mallctl"]
+    #[cfg_attr(prefixed, link_name = "_rjem_mallctl")]
     pub fn mallctl(name: *const c_char,
                    oldp: *mut c_void,
                    oldpenp: *mut size_t,
                    newp: *mut c_void,
                    newlen: size_t)
                    -> c_int;
-    #[link_name = "_rjem_mallctlnametomib"]
+    #[cfg_attr(prefixed, link_name = "_rjem_mallctlnametomib")]
     pub fn mallctlnametomib(name: *const c_char, mibp: *mut size_t, miblenp: *mut size_t) -> c_int;
-    #[link_name = "_rjem_mallctlbymib"]
+    #[cfg_attr(prefixed, link_name = "_rjem_mallctlbymib")]
     pub fn mallctlbymib(mib: *const size_t,
                         miblen: size_t,
                         oldp: *mut c_void,
@@ -69,7 +69,7 @@ extern "C" {
                         -> c_int;
 
     // stats
-    #[link_name = "_rjem_malloc_stats_print"]
+    #[cfg_attr(prefixed, link_name = "_rjem_malloc_stats_print")]
     pub fn malloc_stats_print(write_cb: extern "C" fn(*mut c_void, *const c_char),
                               cbopaque: *mut c_void,
                               opts: *const c_char);
