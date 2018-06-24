@@ -173,14 +173,16 @@ fn main() {
         cmd.arg("--with-malloc-conf=background_thread:false");
     }
 
-    let mut use_prefix = !env::var_os("CARGO_FEATURE_NO_PREFIX").is_some();
+    let mut use_prefix =
+        env::var_os("CARGO_FEATURE_UNPREFIXED_MALLOC_ON_SUPPORTED_PLATFORMS").is_none();
+
     if !use_prefix &&
         (target.contains("android")
             || target.contains("dragonfly")
             || target.contains("musl")
             || target.contains("darwin"))
     {
-        println!("ignoring no_prefix feature on unsupported platform");
+        println!("Unprefixed malloc() requested on unsupported platform");
         use_prefix = true;
     }
 
