@@ -39,4 +39,4 @@ ${CARGO_CMD} build -vv --target $TARGET --features 'debug profiling'
 ${CARGO_CMD} test -vv --target $TARGET
 ${CARGO_CMD} test -vv --target $TARGET --release
 ${CARGO_CMD} test -vv --target $TARGET -p jemalloc-sys
-${CARGO_CMD} test -vv --target $TARGET -p jemalloc-sys --features no_prefix
+${CARGO_CMD} test -vv --target $TARGET -p jemalloc-sys --features unprefixed_malloc_on_supported_platforms
