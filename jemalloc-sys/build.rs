@@ -173,7 +173,21 @@ fn main() {
         cmd.arg("--with-malloc-conf=background_thread:false");
     }
 
-    cmd.arg("--with-jemalloc-prefix=_rjem_");
+    let mut use_prefix = !env::var_os("CARGO_FEATURE_NO_PREFIX").is_some();
+    if !use_prefix &&
+        (target.contains("android")
+            || target.contains("dragonfly")
+            || target.contains("musl")
+            || target.contains("darwin"))
+    {
+        println!("ignoring no_prefix feature on unsupported platform");
+        use_prefix = true;
+    }
+
+    if use_prefix {
+        cmd.arg("--with-jemalloc-prefix=_rjem_");
+        println!("cargo:rustc-cfg=prefixed");
+    }
 
     if env::var_os("CARGO_FEATURE_DEBUG").is_some() {
         println!("CARGO_FEATURE_DEBUG set");
@@ -181,7 +195,7 @@ fn main() {
     }
 
     if env::var_os("CARGO_FEATURE_PROFILING").is_some() {
-        println!("CARGO_FEATURE_PROFILING set set");
+        println!("CARGO_FEATURE_PROFILING set");
         cmd.arg("--enable-prof");
     }
     cmd.arg(format!("--host={}", gnu_target(&target)));
