@@ -4,29 +4,28 @@
 
 [Documentation](https://docs.rs/jemallocator)
 
-A nightly-only Rust allocator crate which links to jemalloc and forces all Rust
-allocations to use jemalloc as well.
+A Rust allocator crate which links to [jemalloc](http://jemalloc.net/)
+and provides a `Jemalloc` unit type for use with the `#[global_allocator]` attribute.
 
 Usage:
 
 ```toml
 # Cargo.toml
 [dependencies]
-jemallocator = "0.1"
+jemallocator = "0.1.8"
 ```
 
 Rust:
 
 ```rust
-#![feature(global_allocator)]
 extern crate jemallocator;
 
 #[global_allocator]
 static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
 ```
 
-And that's it! Once you've linked to this crate then jemalloc will be used for
-all allocations which happen in the crate itself.
+And that's it! Once you've defined this `static` then jemalloc will be used for
+all allocations requested by Rust code in the same program.
 
 
 # License
