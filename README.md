@@ -28,6 +28,28 @@ And that's it! Once you've defined this `static` then jemalloc will be used for
 all allocations requested by Rust code in the same program.
 
 
+# Feature flags
+
+This crate has some Cargo feature flags:
+
+* `profiling`: configure jemalloc with `--enable-prof`.
+
+* `debug`: configure jemalloc with `--enable-debug`.
+
+* `bg_thread`: enabled by default.
+  When disabled, configure jemalloc with `--with-malloc-conf=background_thread:false`.
+
+* `unprefixed_malloc_on_supported_platforms`:
+  when disabled, configure jemalloc with `--with-jemalloc-prefix=`.
+  Enabling this causes symbols like `malloc` to be emitted without a prefix,
+  overriding the ones defined by libc.
+  This usually causes C and C++ code linked in the same program to use jemalloc as well.
+
+  On some platforms prefixes are always used
+  because unprefixing is known to cause segfaults due to allocator mismatches.
+
+See [`jemalloc/INSTALL.md`](https://github.com/jemalloc/jemalloc/blob/dev/INSTALL.md#advanced-configuration).
+
 # License
 
 This project is licensed under either of
