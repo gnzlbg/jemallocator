@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 set -ex
 
@@ -10,13 +10,16 @@ export RUST_TEST_THREADS=1
 export RUST_TEST_NOCAPTURE=1
 export CARGO_CMD=cross
 
-# Runs jemalloc tests using "make check":
-#export JEMALLOC_SYS_RUN_TESTS=1
-
-# Use cargo on native CI platforms:
+# Native CI platforms able to natively run binaries compiled for ${TARGET}.
 if [[ ${TARGET} = *"windows"* ]] || \
-       [[ ${TARGET} = *"x86_64-unknown-linux-gnu"* ]] || [[ ${TARGET} = *"i686-unknown-linux-gnu"* ]] || [[ ${TARGET} = *"i586-unknown-linux-gnu"* ]] \
+       [[ ${TARGET} = *"x86_64-unknown-linux-gnu"* ]] \
+       || [[ ${TARGET} = *"i686-unknown-linux-gnu"* ]] \
+       || [[ ${TARGET} = *"i586-unknown-linux-gnu"* ]] \
        || [[ ${TARGET} = *"apple"* ]]; then
+    # Runs jemalloc tests using "make check":
+    export JEMALLOC_SYS_RUN_TESTS=1
+
+    # Use cargo on native CI platforms:
     export CARGO_CMD=cargo
 else
     cargo install cross || echo "cross is already installed"
@@ -31,7 +34,17 @@ if [[ ${CARGO_CMD} == "cargo" ]]; then
     rustup target add ${TARGET} || true
 fi
 
-${CARGO_CMD} build -vv --target $TARGET
+# Check that no-std builds are not linked against a libc with default features that
+# links std:
+if [[ ${TARGET} = *"x86_64-unknown-linux-gnu"* ]] \
+       || [[ ${TARGET} = *"apple"* ]]; then
+    ${CARGO_CMD} build -vv --target $TARGET --verbose 2>&1 | tee build.txt
+    cat build.txt | grep -q "default"
+    cat build.txt | grep -q "use_std"
+    # Make sure that the resulting build contains no std symbols
+    ! find target/ -name *.rlib -exec nm {} \; | grep "std"
+fi
+
 ${CARGO_CMD} build -vv --target $TARGET --features alloc_trait
 ${CARGO_CMD} build -vv --target $TARGET --features profiling
 ${CARGO_CMD} build -vv --target $TARGET --features debug
@@ -41,3 +54,6 @@ ${CARGO_CMD} test -vv --target $TARGET --features unprefixed_malloc_on_supported
 ${CARGO_CMD} test -vv --target $TARGET --release
 ${CARGO_CMD} test -vv --target $TARGET -p jemalloc-sys
 ${CARGO_CMD} test -vv --target $TARGET -p jemalloc-sys --features unprefixed_malloc_on_supported_platforms
+
+# Run the examples
+. ci/examples.sh
