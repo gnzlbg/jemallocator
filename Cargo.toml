@@ -17,17 +17,18 @@ test = false
 bench = false
 
 [workspace]
-members = ["systest"]
+members = ["systest", "examples/vec", "examples/no_std"]
 
 [dependencies]
 jemalloc-sys = { path = "jemalloc-sys", version = "0.1.7", default-features = false }
-libc = "0.2.8"
+libc = { "0.2.8", default-features = false }
 
 [features]
+default = ["bg_thread", "use_std"]
 alloc_trait = []
-default = ["bg_thread"]
 profiling = ["jemalloc-sys/profiling"]
 debug = ["jemalloc-sys/debug"]
 stats = ["jemalloc-sys/stats"]
 bg_thread = ["jemalloc-sys/bg_thread"]
 unprefixed_malloc_on_supported_platforms = ["jemalloc-sys/unprefixed_malloc_on_supported_platforms"]
+use_std = ["jemalloc-sys/use_std", "libc/use_std"]

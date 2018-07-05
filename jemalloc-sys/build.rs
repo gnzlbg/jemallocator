@@ -31,15 +31,18 @@ fn main() {
     let target = env::var("TARGET").expect("TARGET was not set");
     let host = env::var("HOST").expect("HOST was not set");
     let num_jobs = env::var("NUM_JOBS").expect("NUM_JOBS was not set");
-    let out_dir = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR was not set"));
+    let out_dir = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR was not set"))
+        .canonicalize().expect("OUT_DIR does not exist");
     println!("TARGET={}", target.clone());
     println!("HOST={}", host.clone());
     println!("NUM_JOBS={}", num_jobs.clone());
     println!("OUT_DIR={:?}", out_dir);
     let build_dir = out_dir.join("build");
     println!("BUILD_DIR={:?}", build_dir);
-    let src_dir = env::current_dir().expect("failed to get current directory");
+    let src_dir = env::current_dir().expect("failed to get current directory")
+        .canonicalize().expect("SRC_DIR does not exist");
     println!("SRC_DIR={:?}", src_dir);
+    println!("JEMALLOC_SYS_VERIFY_CONFIGURE={:?}", env::var_os("JEMALLOC_SYS_VERIFY_CONFIGURE"));
 
     let disable_bg_thread = !env::var("CARGO_FEATURE_BG_THREAD").is_ok();
 
@@ -78,6 +81,9 @@ fn main() {
     }
 
     fs::create_dir_all(&build_dir).unwrap();
+    let build_dir = build_dir.canonicalize().expect("BUILD_DIR does not exist");
+    println!("BUILD_DIR(canonicalized)={:?}", build_dir);
+
     // Disable -Wextra warnings - jemalloc doesn't compile free of warnings with
     // it enabled: https://github.com/jemalloc/jemalloc/issues/1196
     let compiler = cc::Build::new().extra_warnings(false).get_compiler();
@@ -107,9 +113,11 @@ fn main() {
         jemalloc_src_dir.clone(),
         &copy_options,
     ).expect("failed to copy jemalloc source code to OUT_DIR");
+    let jemalloc_src_dir = jemalloc_src_dir.canonicalize().expect("JEMALLOC_SRC_DIR does not exist");
+    println!("JEMALLOC_SRC_DIR(canonicalized)={:?}", jemalloc_src_dir);
 
     // Configuration files
-    let config_files = ["configure", "VERSION"];
+    let config_files = ["configure"];
 
     // Verify that the configuration files are up-to-date
     if env::var_os("JEMALLOC_SYS_VERIFY_CONFIGURE").is_some() {
@@ -122,17 +130,23 @@ fn main() {
 
         for f in &config_files {
             use std::io::Read;
-            let mut file = File::open(jemalloc_src_dir.join(f)).expect("file not found");
+
+            let p = jemalloc_src_dir.join(f);
+            let mut file = File::open(p.clone())
+                .expect(&format!("file not found: {}", p.display()));
             let mut source_contents = String::new();
             file.read_to_string(&mut source_contents)
-                .expect("failed to read file");
-            let mut file =
-                File::open(Path::new(&format!("configure/{}", f))).expect("file not found");
+                .expect(&format!("failed to read file: {}", p.display()));
+
+            let o = PathBuf::from(&format!("configure/{}", f));
+            let mut file = File::open(o.clone())
+                .expect(&format!("file not found: {}", o.display()));
             let mut reference_contents = String::new();
             file.read_to_string(&mut reference_contents)
-                .expect("failed to read file");
+                .expect(&format!("failed to read file: {}", o.display()));
             if source_contents != reference_contents {
-                panic!("the file \"{}\" differs from the jemalloc source and the reference in \"jemalloc-sys/configure/{}\"", jemalloc_src_dir.join(f).display(), f);
+                panic!("the file \"{}\" differs from the jemalloc source and the reference in \"jemalloc-sys/configure/{}\"",
+                       jemalloc_src_dir.join(f).display(), f);
             }
         }
     } else {
@@ -143,6 +157,12 @@ fn main() {
                 jemalloc_src_dir.join(f),
             ).expect("failed to copy config file to OUT_DIR");
         }
+    }
+
+    // Verify that jemalloc's source directory contains the configuration files:
+    for f in &config_files {
+        let p = jemalloc_src_dir.join(f);
+        assert!(p.exists(), "configuration file {} does not exist at path: {}", f, p.display());
     }
 
     // Run configure:
@@ -251,8 +271,11 @@ fn main() {
 
     run(&mut cmd);
 
-    let make = if host.contains("bitrig") || host.contains("dragonfly") || host.contains("freebsd")
-        || host.contains("netbsd") || host.contains("openbsd")
+    let make = if host.contains("bitrig")
+        || host.contains("dragonfly")
+        || host.contains("freebsd")
+        || host.contains("netbsd")
+        || host.contains("openbsd")
     {
         "gmake"
     } else {
@@ -315,6 +338,7 @@ fn run(cmd: &mut Command) {
         Ok(status) => status,
         Err(e) => panic!("failed to execute command: {}", e),
     };
+    println!("... {:?} status: {:?}", cmd, status);
     if !status.success() {
         panic!(
             "command did not execute successfully: {:?}\n\

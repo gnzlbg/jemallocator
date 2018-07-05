@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 set -ex
 
@@ -10,13 +10,16 @@ export RUST_TEST_THREADS=1
 export RUST_TEST_NOCAPTURE=1
 export CARGO_CMD=cross
 
-# Runs jemalloc tests using "make check":
-#export JEMALLOC_SYS_RUN_TESTS=1
-
-# Use cargo on native CI platforms:
+# Native CI platforms able to natively run binaries compiled for ${TARGET}.
 if [[ ${TARGET} = *"windows"* ]] || \
-       [[ ${TARGET} = *"x86_64-unknown-linux-gnu"* ]] || [[ ${TARGET} = *"i686-unknown-linux-gnu"* ]] || [[ ${TARGET} = *"i586-unknown-linux-gnu"* ]] \
+       [[ ${TARGET} = *"x86_64-unknown-linux-gnu"* ]] \
+       || [[ ${TARGET} = *"i686-unknown-linux-gnu"* ]] \
+       || [[ ${TARGET} = *"i586-unknown-linux-gnu"* ]] \
        || [[ ${TARGET} = *"apple"* ]]; then
+    # Runs jemalloc tests using "make check":
+    export JEMALLOC_SYS_RUN_TESTS=1
+
+    # Use cargo on native CI platforms:
     export CARGO_CMD=cargo
 else
     cargo install cross || echo "cross is already installed"
@@ -29,6 +32,19 @@ fi
 # Make sure TARGET is installed when using cargo:
 if [[ ${CARGO_CMD} == "cargo" ]]; then
     rustup target add ${TARGET} || true
+fi
+
+# Check that no-std builds are not linked against a libc with default features that
+# links std:
+if [[ ${TARGET} = *"x86_64-unknown-linux-gnu"* ]] \
+       || [[ ${TARGET} = *"apple"* ]]; then
+    set +x
+    ${CARGO_CMD} build -vv --target $TARGET --verbose --no-default-features 2>&1 | tee build.txt
+    cat build.txt | grep -q "default"
+    cat build.txt | grep -q "use_std"
+    # Make sure that the resulting build contains no std symbols
+    ! find target/ -name *.rlib -exec nm {} \; | grep "std"
+    set -x
 fi
 
 ${CARGO_CMD} test -vv --target $TARGET
@@ -50,3 +66,6 @@ if [[ ${TRAVIS_RUST_VERSION} == "nightly"  ]]; then
     # The Alloc trait is unstable:
     ${CARGO_CMD} test -vv --target $TARGET --features alloc_trait
 fi
+
+# Run the examples
+. ci/examples.sh
