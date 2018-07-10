@@ -1,0 +1,17 @@
+[package]
+name = "jemallocator_vec_example"
+version = "0.1.0"
+authors = ["Gonzalo Brito Gadeschi <gonzalobg88@gmail.com>"]
+license = "MIT/Apache-2.0"
+
+[dependencies]
+jemallocator = { path = "../.." }
+
+[[bin]]
+name = "vec"
+path = "main.rs"
+
+[features]
+default = ["alloc_trait", "bg_thread"]
+alloc_trait = ["jemallocator/alloc_trait"]
+bg_thread = ["jemallocator/bg_thread"]
