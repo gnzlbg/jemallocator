@@ -180,12 +180,9 @@ unsafe impl Alloc for Jemalloc {
                               layout: Layout,
                               new_size: usize) -> Result<(), CannotReallocInPlace> {
         let flags = layout_to_flags(layout.align(), new_size);
-        let size = ffi::xallocx(ptr.cast().as_ptr(), new_size, 0, flags);
-        if size >= new_size {
-            Err(CannotReallocInPlace)
-        } else {
-            Ok(())
-        }
+        let shrunk_size = ffi::xallocx(ptr.cast().as_ptr(), new_size, 0, flags);
+        debug_assert!(shrunk_size >= new_size);
+        Ok(())
     }
 }
 
