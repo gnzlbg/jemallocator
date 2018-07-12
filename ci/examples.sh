@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -ex
+set -e
 
 : ${TARGET?"The TARGET environment variable must be set."}
 : ${CARGO_CMD?"The CARGO_CMD  environment variable must be set."}
