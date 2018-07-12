@@ -4,12 +4,12 @@
 extern crate jemalloc_sys;
 extern crate libc;
 
-use std::heap::System;
+use std::alloc::System;
 
 #[global_allocator]
 static A: System = System;
 
-use libc::c_int;
+use libc::{c_int};
 use jemalloc_sys::*;
 
 include!(concat!(env!("OUT_DIR"), "/all.rs"));
