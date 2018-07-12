@@ -34,6 +34,7 @@ fi
 ${CARGO_CMD} test -vv --target $TARGET
 ${CARGO_CMD} test -vv --target $TARGET --features profiling
 ${CARGO_CMD} test -vv --target $TARGET --features debug
+${CARGO_CMD} test -vv --target $TARGET --features stats
 ${CARGO_CMD} test -vv --target $TARGET --features 'debug profiling'
 ${CARGO_CMD} test -vv --target $TARGET --features unprefixed_malloc_on_supported_platforms
 ${CARGO_CMD} test -vv --target $TARGET --release
@@ -44,5 +45,8 @@ ${CARGO_CMD} test -vv --target $TARGET --release
 #${CARGO_CMD} test -vv --target $TARGET -p jemalloc-sys --features unprefixed_malloc_on_supported_platforms
 
 if [[ ${TRAVIS_RUST_VERSION} == "nightly"  ]]; then
+    # feature(global_allocator) is unstable:
+    ${CARGO_CMD} test -vv --target $TARGET -p systest
+    # The Alloc trait is unstable:
     ${CARGO_CMD} test -vv --target $TARGET --features alloc_trait
 fi

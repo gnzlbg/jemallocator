@@ -32,18 +32,20 @@ all allocations requested by Rust code in the same program.
 
 This crate has some Cargo feature flags:
 
-* `profiling`: configure jemalloc with `--enable-prof`.
+* `profiling`: configure `jemalloc` with `--enable-prof`.
 
-* `debug`: configure jemalloc with `--enable-debug`.
+* `stats`: configure `jemalloc` with `--enable-stats`.
 
-* `bg_thread`: enabled by default.
-  When disabled, configure jemalloc with `--with-malloc-conf=background_thread:false`.
+* `debug`: configure `jemalloc` with `--enable-debug`.
+
+* `bg_thread` (enabled by default): when disabled, configure `jemalloc` with
+  `--with-malloc-conf=background_thread:false`.
 
 * `unprefixed_malloc_on_supported_platforms`:
-  when disabled, configure jemalloc with `--with-jemalloc-prefix=`.
+  when disabled, configure `jemalloc` with `--with-jemalloc-prefix=_rjem_`.
   Enabling this causes symbols like `malloc` to be emitted without a prefix,
   overriding the ones defined by libc.
-  This usually causes C and C++ code linked in the same program to use jemalloc as well.
+  This usually causes C and C++ code linked in the same program to use `jemalloc` as well.
 
   On some platforms prefixes are always used
   because unprefixing is known to cause segfaults due to allocator mismatches.
@@ -64,5 +66,5 @@ at your option.
 ### Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in jemallocator by you, as defined in the Apache-2.0 license, shall be
+for inclusion in `jemallocator` by you, as defined in the Apache-2.0 license, shall be
 dual licensed as above, without any additional terms or conditions.

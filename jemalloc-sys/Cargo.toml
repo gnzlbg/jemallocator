@@ -5,9 +5,11 @@ authors = ["Alex Crichton <alex@alexcrichton.com>"]
 build = "build.rs"
 links = "jemalloc"
 license = "MIT/Apache-2.0"
+readme = "README.md"
 repository = "https://github.com/alexcrichton/jemallocator"
 homepage = "https://github.com/alexcrichton/jemallocator"
 documentation = "https://docs.rs/jemallocator-sys"
+keywords = ["allocator"]
 description = """
 Rust FFI bindings to jemalloc
 """
@@ -28,4 +30,5 @@ default = ["bg_thread"]
 profiling = []
 debug = []
 bg_thread = []
+stats = []
 unprefixed_malloc_on_supported_platforms = []
