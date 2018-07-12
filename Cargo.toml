@@ -17,7 +17,8 @@ test = false
 bench = false
 
 [workspace]
-members = ["systest", "examples/vec", "examples/no_std"]
+members = ["systest"]
+exclude = ["examples/vec", "examples/no_std"]
 
 [dependencies]
 jemalloc-sys = { path = "jemalloc-sys", version = "0.1.7", default-features = false }

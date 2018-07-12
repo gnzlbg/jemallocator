@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -ex
 
 : ${TARGET?"The TARGET environment variable must be set."}
 
@@ -38,11 +38,13 @@ fi
 # links std:
 if [[ ${TARGET} = *"x86_64-unknown-linux-gnu"* ]] \
        || [[ ${TARGET} = *"apple"* ]]; then
+    set +x
     ${CARGO_CMD} build -vv --target $TARGET --verbose --no-default-features 2>&1 | tee build.txt
     cat build.txt | grep -q "default"
     cat build.txt | grep -q "use_std"
     # Make sure that the resulting build contains no std symbols
     ! find target/ -name *.rlib -exec nm {} \; | grep "std"
+    set -x
 fi
 
 ${CARGO_CMD} test -vv --target $TARGET
