@@ -57,8 +57,8 @@ ${CARGO_CMD} test -vv --target $TARGET --release
 # FIXME: something broke in the toolchain leading to these
 # two commands producing a stack overflow inside of cargo:
 # https://github.com/alexcrichton/jemallocator/issues/61
-#${CARGO_CMD} test -vv --target $TARGET -p jemalloc-sys
-#${CARGO_CMD} test -vv --target $TARGET -p jemalloc-sys --features unprefixed_malloc_on_supported_platforms
+#${CARGO_CMD} test  --target $TARGET -p jemalloc-sys
+#${CARGO_CMD} test  --target $TARGET -p jemalloc-sys --features unprefixed_malloc_on_supported_platforms
 
 if [[ ${TRAVIS_RUST_VERSION} == "nightly"  ]]; then
     # feature(global_allocator) is unstable:
