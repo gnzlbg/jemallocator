@@ -587,13 +587,13 @@ pub struct extent_hooks_s {
 ///
 /// * the `size` parameter is not a multiple of the page size
 /// * the `alignment` parameter is not a power of two at least as large as the page size
-pub type extent_alloc_t = fn (extent_hooks: *mut extent_hooks_t,
- 	                            new_addr: *mut c_void,
- 	                            size: size_t,
- 	                            alignment: size_t,
- 	                            zero: *mut c_bool,
- 	                            commit: *mut c_bool,
- 	                            arena_ind: c_uint) -> *mut c_void;
+pub type extent_alloc_t = extern fn (extent_hooks: *mut extent_hooks_t,
+ 	                                   new_addr: *mut c_void,
+ 	                                   size: size_t,
+ 	                                   alignment: size_t,
+ 	                                   zero: *mut c_bool,
+ 	                                   commit: *mut c_bool,
+ 	                                   arena_ind: c_uint) -> *mut c_void;
 
 /// Extent deallocation function.
 ///
@@ -605,11 +605,11 @@ pub type extent_alloc_t = fn (extent_hooks: *mut extent_hooks_t,
 /// the virtual memory mapping associated with the extent remains mapped, in the
 /// same commit state, and available for future use, in which case it will be
 /// automatically retained for later reuse.
-pub type extent_dalloc_t = fn (extent_hooks: *mut extent_hooks_t,
-                               addr: *mut c_void,
-                               size: size_t,
-                               committed: c_bool,
-                               arena_ind: c_uint) -> c_bool;
+pub type extent_dalloc_t = extern fn (extent_hooks: *mut extent_hooks_t,
+                                      addr: *mut c_void,
+                                      size: size_t,
+                                      committed: c_bool,
+                                      arena_ind: c_uint) -> c_bool;
 
 /// Extent destruction function.
 ///
@@ -618,11 +618,11 @@ pub type extent_dalloc_t = fn (extent_hooks: *mut extent_hooks_t,
 ///
 /// This function may be called to destroy retained extents during arena
 /// destruction (see `arena.<i>.destroy`).
-pub type extent_destroy_t = fn (extent_hooks: *mut extent_hooks_t,
-                                addr: *mut c_void,
-                                size: size_t,
-                                committed: c_bool,
-                                arena_ind: c_uint);
+pub type extent_destroy_t = extern fn (extent_hooks: *mut extent_hooks_t,
+                                       addr: *mut c_void,
+                                       size: size_t,
+                                       committed: c_bool,
+                                       arena_ind: c_uint);
 
 /// Extent commit function.
 ///
@@ -635,12 +635,12 @@ pub type extent_destroy_t = fn (extent_hooks: *mut extent_hooks_t,
 /// satisfies physical memory needs on demand via soft page faults. If the
 /// function returns `true`, this indicates insufficient physical memory to
 /// satisfy the request.
-pub type extent_commit_t = fn (extent_hooks: *mut extent_hooks_t,
-                               addr: *mut c_void,
-                               size: size_t,
-                               offset: size_t,
-                               length: size_t,
-                               arena_ind: c_uint) -> c_bool;
+pub type extent_commit_t = extern fn (extent_hooks: *mut extent_hooks_t,
+                                      addr: *mut c_void,
+                                      size: size_t,
+                                      offset: size_t,
+                                      length: size_t,
+                                      arena_ind: c_uint) -> c_bool;
 
 /// Extent decommit function.
 ///
@@ -652,12 +652,12 @@ pub type extent_commit_t = fn (extent_hooks: *mut extent_hooks_t,
 /// If the function returns `true`, this indicates opt-out from decommit; the
 /// memory remains committed and available for future use, in which case it will
 /// be automatically retained for later reuse.
-pub type extent_decommit_t = fn (extent_hooks: *mut extent_hooks_t,
-                                 addr: *mut c_void,
-                                 size: size_t,
-                                 offset: size_t,
-                                 length: size_t,
-                                 arena_ind: c_uint) -> c_bool;
+pub type extent_decommit_t = extern fn (extent_hooks: *mut extent_hooks_t,
+                                        addr: *mut c_void,
+                                        size: size_t,
+                                        offset: size_t,
+                                        length: size_t,
+                                        arena_ind: c_uint) -> c_bool;
 
 /// Extent purge function.
 ///
@@ -671,12 +671,12 @@ pub type extent_decommit_t = fn (extent_hooks: *mut extent_hooks_t,
 /// function immediately purges, and the pages within the virtual memory range
 /// will be zero-filled the next time they are accessed. If the function returns
 /// `true`, this indicates failure to purge.
-pub type extent_purge_t = fn (extent_hooks: *mut extent_hooks_t,
-                              addr: *mut c_void,
-                              size: size_t,
-                              offset: size_t,
-                              length: size_t,
-                              arena_ind: c_uint) -> c_bool;
+pub type extent_purge_t = extern fn (extent_hooks: *mut extent_hooks_t,
+                                     addr: *mut c_void,
+                                     size: size_t,
+                                     offset: size_t,
+                                     length: size_t,
+                                     arena_ind: c_uint) -> c_bool;
 
 /// Extent split function.
 ///
@@ -687,13 +687,13 @@ pub type extent_purge_t = fn (extent_hooks: *mut extent_hooks_t,
 ///
 /// If the function returns `true`, this indicates that the extent remains
 /// unsplit and therefore should continue to be operated on as a whole.
-pub type extent_split_t = fn (extent_hooks: *mut extent_hooks_t,
-                              addr: *mut c_void,
-                              size: size_t,
-                              size_a: size_t,
-                              size_b: size_t,
-                              committed: c_bool,
-                              arena_ind: c_uint) -> c_bool;
+pub type extent_split_t = extern fn (extent_hooks: *mut extent_hooks_t,
+                                     addr: *mut c_void,
+                                     size: size_t,
+                                     size_a: size_t,
+                                     size_b: size_t,
+                                     committed: c_bool,
+                                     arena_ind: c_uint) -> c_bool;
 
 /// Extent merge function.
 ///
@@ -705,13 +705,13 @@ pub type extent_split_t = fn (extent_hooks: *mut extent_hooks_t,
 /// If the function returns `true`, this indicates that the extents remain
 /// distinct mappings and therefore should continue to be operated on
 /// independently.
-pub type extent_merge_t = fn (extent_hooks: *mut extent_hooks_t,
-                              addr_a: *mut c_void,
-                              size_a: size_t,
-                              addr_b: *mut c_void,
-                              size_b: size_t,
-                              committed: c_bool,
-                              arena_ind: c_uint) -> c_bool;
+pub type extent_merge_t = extern fn (extent_hooks: *mut extent_hooks_t,
+                                     addr_a: *mut c_void,
+                                     size_a: size_t,
+                                     addr_b: *mut c_void,
+                                     size_b: size_t,
+                                     committed: c_bool,
+                                     arena_ind: c_uint) -> c_bool;
 
 // These symbols are used by jemalloc on android but the really old android
 // we're building on doesn't have them defined, so just make sure the symbols
