@@ -162,9 +162,6 @@ fn main() {
         .arg("--disable-cxx");
 
     if target == "sparc64-unknown-linux-gnu" {
-        // jemalloc's configure doesn't detect this value
-        // automatically for this target:
-        cmd.arg("--with-lg-quantum=4");
         // See: https://github.com/jemalloc/jemalloc/issues/999
         cmd.arg("--disable-thp");
     }
