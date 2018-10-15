@@ -166,6 +166,12 @@ fn main() {
         cmd.arg("--disable-thp");
     }
 
+    if target.contains("ios") {
+        // newer iOS deviced have 16kb page sizes:
+        // closed: https://github.com/alexcrichton/jemallocator/issues/68
+        cmd.arg("--with-lg-page=14");
+    }
+
     if disable_bg_thread {
         cmd.arg("--with-malloc-conf=background_thread:false");
     }
