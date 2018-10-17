@@ -172,12 +172,43 @@ fn main() {
         cmd.arg("--with-lg-page=14");
     }
 
+    // collect malloc_conf string:
+    let mut malloc_conf = String::new();
+
     if disable_bg_thread {
-        cmd.arg("--with-malloc-conf=background_thread:false");
+        malloc_conf += "background_thread:false";
     }
 
-    let mut use_prefix =
-        env::var_os("CARGO_FEATURE_UNPREFIXED_MALLOC_ON_SUPPORTED_PLATFORMS").is_none();
+    if let Ok(malloc_conf_opts) = env::var("JEMALLOC_SYS_WITH_MALLOC_CONF") {
+        if malloc_conf.is_empty() {
+            malloc_conf += &malloc_conf_opts;
+        } else {
+            malloc_conf += &format!(",{}", malloc_conf_opts);
+        }
+    }
+
+    if !malloc_conf.is_empty() {
+        cmd.arg(format!("--with-malloc-conf={}", malloc_conf));
+    }
+
+    if let Ok(lg_page) = env::var("JEMALLOC_SYS_WITH_LG_PAGE") {
+        cmd.arg(format!("--with-lg-page={}", lg_page));
+    }
+
+    if let Ok(lg_hugepage) = env::var("JEMALLOC_SYS_WITH_LG_HUGEPAGE") {
+        cmd.arg(format!("--with-lg-hugepage={}", lg_hugepage));
+    }
+
+    if let Ok(lg_quantum) = env::var("JEMALLOC_SYS_WITH_LG_QUANTUM") {
+        cmd.arg(format!("--with-lg-quantum={}", lg_quantum));
+    }
+
+    if let Ok(lg_vaddr) = env::var("JEMALLOC_SYS_WITH_LG_VADDR") {
+        cmd.arg(format!("--with-lg-vaddr={}", lg_vaddr));
+    }
+
+    let mut use_prefix
+       = env::var_os("CARGO_FEATURE_UNPREFIXED_MALLOC_ON_SUPPORTED_PLATFORMS").is_none();
 
     // “it was found that the `realpath` function in libc would allocate with libc malloc
     //  (not jemalloc malloc), and then the standard library would free with jemalloc free,
@@ -280,6 +311,7 @@ fn main() {
     } else if !target.contains("windows") {
         println!("cargo:rustc-link-lib=pthread");
     }
+    println!("cargo:rerun-if-changed=jemalloc");
 }
 
 fn run(cmd: &mut Command) {
