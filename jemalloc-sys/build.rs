@@ -161,11 +161,6 @@ fn main() {
         .env("CPPFLAGS", cflags.clone())
         .arg("--disable-cxx");
 
-    if target == "sparc64-unknown-linux-gnu" {
-        // See: https://github.com/jemalloc/jemalloc/issues/999
-        cmd.arg("--disable-thp");
-    }
-
     if target.contains("ios") {
         // newer iOS deviced have 16kb page sizes:
         // closed: https://github.com/alexcrichton/jemallocator/issues/68
