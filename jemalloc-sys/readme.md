@@ -14,6 +14,9 @@
 
 **Current jemalloc version**: 5.1.
 
+[jemalloc_docs]: http://jemalloc.net/jemalloc.3.html
+[jemalloc_wiki]: https://github.com/jemalloc/jemalloc/wiki
+
 # Features
 
 Most features correspond to `jemalloc` features - the reference is
