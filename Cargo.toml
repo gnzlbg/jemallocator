@@ -20,7 +20,7 @@ bench = false
 members = ["systest"]
 
 [dependencies]
-jemalloc-sys = { path = "jemalloc-sys", version = "0.1.6", default-features = false }
+jemalloc-sys = { path = "jemalloc-sys", version = "0.1.7", default-features = false }
 libc = "0.2.8"
 
 [features]
