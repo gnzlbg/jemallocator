@@ -525,7 +525,7 @@ extern "C" {
     /// completely up to date, since extra locking would be required to merge
     /// counters that track thread cache operations.
     #[cfg_attr(prefixed, link_name = "_rjem_malloc_stats_print")]
-    pub fn malloc_stats_print(write_cb: extern "C" fn(*mut c_void, *const c_char),
+    pub fn malloc_stats_print(write_cb: unsafe extern "C" fn(*mut c_void, *const c_char),
                               cbopaque: *mut c_void,
                               opts: *const c_char);
 
@@ -539,9 +539,9 @@ extern "C" {
     ///
     /// Please note that doing anything which tries to allocate memory in this
     /// function is likely to result in a crash or deadlock.
-    #[no_mangle]
-    pub static mut malloc_message: unsafe extern fn (cbopaque: *mut c_void,
-                                                     s: *const c_char);
+    #[cfg_attr(prefixed, link_name = "_rjem_malloc_message")]
+    pub static mut malloc_message: unsafe extern "C" fn (cbopaque: *mut c_void,
+                                                         s: *const c_char);
 }
 
 /// Extent lifetime management functions.

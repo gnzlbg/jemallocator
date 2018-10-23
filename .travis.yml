@@ -6,69 +6,97 @@ services: docker
 matrix:
   include:
     # Linux
-    - env: TARGET=aarch64-unknown-linux-gnu
-    - env: TARGET=arm-unknown-linux-gnueabi
-    - env: TARGET=arm-unknown-linux-musleabi
-    - env: TARGET=armv7-unknown-linux-gnueabihf
-    - env: TARGET=armv7-unknown-linux-musleabihf
-    - env: TARGET=i586-unknown-linux-gnu
+    - name: "aarch64-unknown-linux-gnu"
+      env: TARGET=aarch64-unknown-linux-gnu
+    - name: "arm-unknown-linux-gnueabi"
+      env: TARGET=arm-unknown-linux-gnueabi
+    - name: "arm-unknown-linux-musleabi"
+      env: TARGET=arm-unknown-linux-musleabi
+    - name: "armv7-unknown-linux-gnueabihf"
+      env: TARGET=armv7-unknown-linux-gnueabihf
+    - name: "armv7-unknown-linux-musleabihf"
+      env: TARGET=armv7-unknown-linux-musleabihf
+    - name: "i586-unknown-linux-gnu"
+      env: TARGET=i586-unknown-linux-gnu
       addons: &gcc_multilib
         apt:
           packages:
             - gcc-multilib
-    - env: TARGET=i686-unknown-linux-gnu
+    - name: "i686-unknown-linux-gnu"
+      env: TARGET=i686-unknown-linux-gnu
       addons: *gcc_multilib
-    - env: TARGET=i686-unknown-linux-gnu
+    - name: "i686-unknown-linux-gnu"
+      env: TARGET=i686-unknown-linux-gnu
       addons: *gcc_multilib
       rust: beta  
-    - env: TARGET=i686-unknown-linux-musl
-    - env: TARGET=mips-unknown-linux-gnu
-    - env: TARGET=mips64-unknown-linux-gnuabi64
-    - env: TARGET=mips64el-unknown-linux-gnuabi64
-    - env: TARGET=mipsel-unknown-linux-gnu
-    - env: TARGET=powerpc-unknown-linux-gnu
-    - env: TARGET=powerpc64-unknown-linux-gnu
-    - env: TARGET=powerpc64le-unknown-linux-gnu
-    - env: TARGET=sparc64-unknown-linux-gnu
-    - env: TARGET=x86_64-unknown-linux-gnu
-    - env: TARGET=x86_64-unknown-linux-gnu
+    - name: "i686-unknown-linux-musl"
+      env: TARGET=i686-unknown-linux-musl
+    - name: "mips-unknown-linux-gnu"
+      env: TARGET=mips-unknown-linux-gnu
+    - name: "mips64-unknown-linux-gnuabi64"
+      env: TARGET=mips64-unknown-linux-gnuabi64
+    - name: "mips64el-unknown-linux-gnuabi64"
+      env: TARGET=mips64el-unknown-linux-gnuabi64
+    - name: "mipsel-unknown-linux-gnu"
+      env: TARGET=mipsel-unknown-linux-gnu
+    - name: "powerpc-unknown-linux-gnu"
+      env: TARGET=powerpc-unknown-linux-gnu
+    - name: "powerpc64-unknown-linux-gnu"
+      env: TARGET=powerpc64-unknown-linux-gnu
+    - name: "powerpc64le-unknown-linux-gnu"
+      env: TARGET=powerpc64le-unknown-linux-gnu
+    - name: "sparc64-unknown-linux-gnu"
+      env: TARGET=sparc64-unknown-linux-gnu JEMALLOC_SYS_WITH_LG_PAGE=14
+    - name: "x86_64-unknown-linux-gnu"
+      env: TARGET=x86_64-unknown-linux-gnu
+    - name: "x86_64-unknown-linux-gnu"
+      env: TARGET=x86_64-unknown-linux-gnu
       rust: beta
-    - env: TARGET=x86_64-unknown-linux-musl
+    - name: "x86_64-unknown-linux-musl"
+      env: TARGET=x86_64-unknown-linux-musl
 
     # Android
-    - env: TARGET=aarch64-linux-android
-    - env: TARGET=arm-linux-androideabi
-    - env: TARGET=armv7-linux-androideabi
-    - env: TARGET=x86_64-linux-android
+    - name: "aarch64-linux-android"
+      env: TARGET=aarch64-linux-android
+    - name: "arm-linux-androideabi"
+      env: TARGET=arm-linux-androideabi
+    - name: "armv7-linux-androideabi"
+      env: TARGET=armv7-linux-androideabi
+    - name: "x86_64-linux-android"
+      env: TARGET=x86_64-linux-android
 
     # OSX
-    - env: TARGET=i686-apple-darwin
+    - name: "i686-apple-darwin"
+      env: TARGET=i686-apple-darwin
       os: osx
       osx_image: xcode9.2
-    - env: TARGET=x86_64-apple-darwin
+    - name: "x86_64-apple-darwin"
+      env: TARGET=x86_64-apple-darwin
       os: osx
       osx_image: xcode9.2
-    - env: TARGET=i686-apple-darwin
+    - name: "i686-apple-darwin"
+      env: TARGET=i686-apple-darwin
       os: osx
       osx_image: xcode9.2
       rust: beta
-    - env: TARGET=x86_64-apple-darwin
+    - name: "x86_64-apple-darwin"
+      env: TARGET=x86_64-apple-darwin
       os: osx
       osx_image: xcode9.2
       rust: beta
 
-    - env: DOCUMENTATION
+    - name: "Documentation"
       install: pip install 'travis-cargo<0.2' --user && export PATH=$HOME/.local/bin:$PATH
       script: cargo doc
       after_success:
         - travis-cargo --only nightly doc-upload
 
   allow_failures:
-    - env: TARGET=arm-linux-androideabi
-    - env: TARGET=armv7-linux-androideabi
-    - env: TARGET=arm-unknown-linux-musleabi
-    - env: TARGET=armv7-unknown-linux-musleabihf
-    - env: TARGET=sparc64-unknown-linux-gnu
+    - name: "arm-linux-androideabi"
+    - name: "armv7-linux-androideabi"
+    - name: "arm-unknown-linux-musleabi"
+    - name: "armv7-unknown-linux-musleabihf"
+    - name: "sparc64-unknown-linux-gnu"
 
 script: ci/run.sh
 env:
