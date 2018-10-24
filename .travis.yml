@@ -18,13 +18,17 @@ matrix:
         apt:
           packages:
             - gcc-multilib
-    - name: "i686-unknown-linux-gnu"
+    - name: "i686-unknown-linux-gnu (nightly)"
       env: TARGET=i686-unknown-linux-gnu
       addons: *gcc_multilib
-    - name: "i686-unknown-linux-gnu"
+    - name: "i686-unknown-linux-gnu (beta)"
       env: TARGET=i686-unknown-linux-gnu
       addons: *gcc_multilib
-      rust: beta  
+      rust: beta
+    - name: "i686-unknown-linux-gnu (stable)"
+      env: TARGET=i686-unknown-linux-gnu
+      addons: *gcc_multilib
+      rust: stable  
     - name: "i686-unknown-linux-musl"
       env: TARGET=i686-unknown-linux-musl
     - name: "mips-unknown-linux-gnu"
@@ -41,12 +45,16 @@ matrix:
       env: TARGET=powerpc64-unknown-linux-gnu
     - name: "powerpc64le-unknown-linux-gnu"
       env: TARGET=powerpc64le-unknown-linux-gnu
-    - name: "x86_64-unknown-linux-gnu"
-      env: TARGET=x86_64-unknown-linux-gnu
-      install: true
-    - name: "x86_64-unknown-linux-gnu"
+    - name: "x86_64-unknown-linux-gnu (nightly)"
       env: TARGET=x86_64-unknown-linux-gnu JEMALLOC_SYS_VERIFY_CONFIGURE=1
+      install: true
+    - name: "x86_64-unknown-linux-gnu (beta)"
+      env: TARGET=x86_64-unknown-linux-gnu
       rust: beta
+      install: true
+    - name: "x86_64-unknown-linux-gnu (stable)"
+      env: TARGET=x86_64-unknown-linux-gnu
+      rust: stable
       install: true
     - name: "x86_64-unknown-linux-musl"
       env: TARGET=x86_64-unknown-linux-musl
@@ -58,25 +66,36 @@ matrix:
       env: TARGET=x86_64-linux-android
 
     # OSX
-    - name: "i686-apple-darwin"
+    - name: "i686-apple-darwin (nightly)"
       env: TARGET=i686-apple-darwin
       os: osx
       osx_image: xcode9.2
-    - name: "x86_64-apple-darwin"
+    - name: "i686-apple-darwin (beta)"
+      env: TARGET=i686-apple-darwin
+      os: osx
+      osx_image: xcode9.2
+      rust: beta
+    - name: "i686-apple-darwin (stable)"
+      env: TARGET=i686-apple-darwin
+      os: osx
+      osx_image: xcode9.2
+      rust: stable
+    - name: "x86_64-apple-darwin (nightly)"
       env: TARGET=x86_64-apple-darwin
       os: osx
       osx_image: xcode9.2
       install: true
-    - name: "i686-apple-darwin"
-      env: TARGET=i686-apple-darwin
-      os: osx
-      osx_image: xcode9.2
-      rust: beta
-    - name: "x86_64-apple-darwin"
+    - name: "x86_64-apple-darwin (beta)"
       env: TARGET=x86_64-apple-darwin
       os: osx
       osx_image: xcode9.2
       rust: beta
+      install: true
+    - name: "x86_64-apple-darwin (stable)"
+      env: TARGET=x86_64-apple-darwin
+      os: osx
+      osx_image: xcode9.2
+      rust: stable
       install: true
 
     - name: "Documentation"
