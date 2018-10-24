@@ -46,7 +46,7 @@ matrix:
     - name: "powerpc64le-unknown-linux-gnu"
       env: TARGET=powerpc64le-unknown-linux-gnu
     - name: "x86_64-unknown-linux-gnu (nightly)"
-      env: TARGET=x86_64-unknown-linux-gnu JEMALLOC_SYS_VERIFY_CONFIGURE=1
+      env: TARGET=x86_64-unknown-linux-gnu #JEMALLOC_SYS_VERIFY_CONFIGURE=1
       install: true
     - name: "x86_64-unknown-linux-gnu (beta)"
       env: TARGET=x86_64-unknown-linux-gnu
