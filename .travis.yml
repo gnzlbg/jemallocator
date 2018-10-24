@@ -69,32 +69,32 @@ matrix:
     - name: "i686-apple-darwin (nightly)"
       env: TARGET=i686-apple-darwin
       os: osx
-      osx_image: xcode9.2
+      osx_image: xcode10
     - name: "i686-apple-darwin (beta)"
       env: TARGET=i686-apple-darwin
       os: osx
-      osx_image: xcode9.2
+      osx_image: xcode10
       rust: beta
     - name: "i686-apple-darwin (stable)"
       env: TARGET=i686-apple-darwin
       os: osx
-      osx_image: xcode9.2
+      osx_image: xcode10
       rust: stable
     - name: "x86_64-apple-darwin (nightly)"
       env: TARGET=x86_64-apple-darwin
       os: osx
-      osx_image: xcode9.2
+      osx_image: xcode10
       install: true
     - name: "x86_64-apple-darwin (beta)"
       env: TARGET=x86_64-apple-darwin
       os: osx
-      osx_image: xcode9.2
+      osx_image: xcode10
       rust: beta
       install: true
     - name: "x86_64-apple-darwin (stable)"
       env: TARGET=x86_64-apple-darwin
       os: osx
-      osx_image: xcode9.2
+      osx_image: xcode10
       rust: stable
       install: true
 
