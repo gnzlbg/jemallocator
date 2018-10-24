@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/alexcrichton/jemallocator.svg?branch=master)](https://travis-ci.org/alexcrichton/jemallocator) [![Build Status](https://ci.appveyor.com/api/projects/status/github/alexcrichton/jemallocator?branch=master&svg=true)](https://ci.appveyor.com/project/alexcrichton/jemallocator/branch/master)
 
 [Documentation](https://docs.rs/jemallocator)
+[`maser` branch documentation](http://alexcrichton.github.io/jemallocator/jemallocator/index.html)
 
 A Rust allocator crate which links to [jemalloc](http://jemalloc.net/)
 and provides a `Jemalloc` unit type for use with the `#[global_allocator]` attribute.
