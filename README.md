@@ -1,14 +1,16 @@
 # jemallocator
 
-[![Build Status](https://travis-ci.org/alexcrichton/jemallocator.svg?branch=master)](https://travis-ci.org/alexcrichton/jemallocator) [![Build Status](https://ci.appveyor.com/api/projects/status/github/alexcrichton/jemallocator?branch=master&svg=true)](https://ci.appveyor.com/project/alexcrichton/jemallocator/branch/master)
+[![Travis-CI Status]][travis] [![Appveyor Status]][appveyor] [![Latest Version]][crates.io] [![docs]][docs.rs]
 
-[Documentation](https://docs.rs/jemallocator)
-[`maser` branch documentation](http://alexcrichton.github.io/jemallocator/jemallocator/index.html)
+> Links against `jemalloc` and provides a `Jemalloc` unit type that implements
+> the allocator APIs and can be set as the `#[global_allocator]`
 
-A Rust allocator crate which links to [jemalloc](http://jemalloc.net/)
-and provides a `Jemalloc` unit type for use with the `#[global_allocator]` attribute.
+## Documentation
 
-Usage:
+* [Latest release (docs.rs)][docs.rs]
+* [Master branch][master_docs]
+
+To use `jemallocator` add it as a dependency:
 
 ```toml
 # Cargo.toml
@@ -16,7 +18,7 @@ Usage:
 jemallocator = "0.1.8"
 ```
 
-Rust:
+To set `jemallocator::Jemalloc` as the global allocator add this to your project:
 
 ```rust
 extern crate jemallocator;
@@ -86,3 +88,14 @@ at your option.
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in `jemallocator` by you, as defined in the Apache-2.0 license, shall be
 dual licensed as above, without any additional terms or conditions.
+
+[travis]: https://travis-ci.org/alexcrichton/jemallocator
+[Travis-CI Status]: https://travis-ci.org/alexcrichton/jemallocator.svg?branch=master
+[appveyor]: https://ci.appveyor.com/project/alexcrichton/jemallocator/branch/master
+[Appveyor Status]: https://ci.appveyor.com/api/projects/status/github/alexcrichton/jemallocator?branch=master&svg=true
+[Latest Version]: https://img.shields.io/crates/v/jemallocator.svg
+[crates.io]: https://crates.io/crates/jemallocator
+[docs]: https://docs.rs/jemallocator/badge.svg
+[docs.rs]: https://docs.rs/jemallocator/
+[master_docs]: https://alexcrichton.github.io/jemallocator/jemallocator
+
