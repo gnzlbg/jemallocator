@@ -10,12 +10,8 @@ matrix:
       env: TARGET=aarch64-unknown-linux-gnu
     - name: "arm-unknown-linux-gnueabi"
       env: TARGET=arm-unknown-linux-gnueabi
-    - name: "arm-unknown-linux-musleabi"
-      env: TARGET=arm-unknown-linux-musleabi
     - name: "armv7-unknown-linux-gnueabihf"
       env: TARGET=armv7-unknown-linux-gnueabihf
-    - name: "armv7-unknown-linux-musleabihf"
-      env: TARGET=armv7-unknown-linux-musleabihf
     - name: "i586-unknown-linux-gnu"
       env: TARGET=i586-unknown-linux-gnu
       addons: &gcc_multilib
@@ -45,8 +41,6 @@ matrix:
       env: TARGET=powerpc64-unknown-linux-gnu
     - name: "powerpc64le-unknown-linux-gnu"
       env: TARGET=powerpc64le-unknown-linux-gnu
-    - name: "sparc64-unknown-linux-gnu"
-      env: TARGET=sparc64-unknown-linux-gnu JEMALLOC_SYS_WITH_LG_PAGE=14
     - name: "x86_64-unknown-linux-gnu"
       env: TARGET=x86_64-unknown-linux-gnu
     - name: "x86_64-unknown-linux-gnu"
@@ -58,10 +52,6 @@ matrix:
     # Android
     - name: "aarch64-linux-android"
       env: TARGET=aarch64-linux-android
-    - name: "arm-linux-androideabi"
-      env: TARGET=arm-linux-androideabi
-    - name: "armv7-linux-androideabi"
-      env: TARGET=armv7-linux-androideabi
     - name: "x86_64-linux-android"
       env: TARGET=x86_64-linux-android
 
@@ -90,13 +80,6 @@ matrix:
       script: cargo doc
       after_success:
         - travis-cargo --only nightly doc-upload
-
-  allow_failures:
-    - name: "arm-linux-androideabi"
-    - name: "armv7-linux-androideabi"
-    - name: "arm-unknown-linux-musleabi"
-    - name: "armv7-unknown-linux-musleabihf"
-    - name: "sparc64-unknown-linux-gnu"
 
 script: ci/run.sh
 env:
