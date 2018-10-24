@@ -542,6 +542,35 @@ extern "C" {
     #[cfg_attr(prefixed, link_name = "_rjem_malloc_message")]
     pub static mut malloc_message: unsafe extern "C" fn (cbopaque: *mut c_void,
                                                          s: *const c_char);
+
+    /// Compile-time string of configuration options.
+    ///
+    /// Once, when the first call is made to one of the memory allocation
+    /// routines, the allocator initializes its internals based in part on
+    /// various options that can be specified at compile- or run-time.
+    ///
+    /// The string specified via `--with-malloc-conf`, the string pointed to by
+    /// the global variable `malloc_conf`, the “name” of the file referenced by
+    /// the symbolic link named `/etc/malloc.conf`, and the value of the
+    /// environment variable `MALLOC_CONF`, will be interpreted, in that order,
+    /// from left to right as options. Note that `malloc_conf` may be read
+    /// before `main()` is entered, so the declaration of `malloc_conf` should
+    /// specify an initializer that contains the final value to be read by
+    /// `jemalloc`.
+    ///
+    /// `--with-malloc-conf` and `malloc_conf` are compile-time mechanisms, whereas
+    /// `/etc/malloc.conf` and `MALLOC_CONF` can be safely set any time prior to
+    /// program invocation.
+    ///
+    /// An options string is a comma-separated list of `option:value` pairs.
+    /// There is one key corresponding to each `opt.* mallctl` (see the `MALLCTL
+    /// NAMESPACE` section for options documentation). For example,
+    /// `abort:true,narenas:1` sets the `opt.abort` and `opt.narenas` options.
+    /// Some options have boolean values (`true`/`false`), others have integer
+    /// values (base `8`, `10`, or `16`, depending on prefix), and yet others
+    /// have raw string values.
+    #[cfg_attr(prefixed, link_name = "_rjem_malloc_conf")]
+    pub static malloc_conf: Option<&'static libc::c_char>;
 }
 
 /// Extent lifetime management functions.
