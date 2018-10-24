@@ -217,7 +217,7 @@ pub unsafe fn usable_size<T>(ptr: *const T) -> usize {
 ///
 /// Please note that if you want to fetch a string, use char* instead of &str or
 /// cstring.
-pub unsafe fn mallctl_fetch<T>(name: &[u8], t: &mut T) -> Result<(), i32> {
+pub unsafe fn mallctl_fetch<T>(name: &[u8], t: &mut T) -> Result<(), libc::c_int> {
     // make sure name is a valid c string.
     if name.is_empty() || *name.last().unwrap() != 0 {
         return Err(libc::EINVAL);
@@ -231,6 +231,7 @@ pub unsafe fn mallctl_fetch<T>(name: &[u8], t: &mut T) -> Result<(), i32> {
         ptr::null_mut(),
         0,
     );
+
     if code != 0 {
         return Err(code);
     }
@@ -241,7 +242,7 @@ pub unsafe fn mallctl_fetch<T>(name: &[u8], t: &mut T) -> Result<(), i32> {
 ///
 /// Please note that if you want to set a string, use char* instead of &str or
 /// cstring.
-pub unsafe fn mallctl_set<T>(name: &[u8], mut t: T) -> Result<(), i32> {
+pub unsafe fn mallctl_set<T>(name: &[u8], mut t: T) -> Result<(), libc::c_int> {
     // make sure name is a valid c string.
     if name.is_empty() || *name.last().unwrap() != 0 {
         return Err(libc::EINVAL);
