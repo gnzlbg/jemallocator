@@ -15,8 +15,6 @@ export CARGO_CMD=cross
 
 # Use cargo on native CI platforms:
 case "${TARGET}" in
-    "i586-unknown-linux-gnu") export CARGO_CMD=cargo ;;
-    "i686-unknown-linux-gnu") export CARGO_CMD=cargo ;;
     "x86_64-unknown-linux-gnu") export CARGO_CMD=cargo ;;
     *"windows"*) export CARGO_CMD=cargo ;;
     *"apple"*) export CARGO_CMD=cargo ;;
