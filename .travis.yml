@@ -43,9 +43,11 @@ matrix:
       env: TARGET=powerpc64le-unknown-linux-gnu
     - name: "x86_64-unknown-linux-gnu"
       env: TARGET=x86_64-unknown-linux-gnu
+      install: true
     - name: "x86_64-unknown-linux-gnu"
-      env: TARGET=x86_64-unknown-linux-gnu
+      env: TARGET=x86_64-unknown-linux-gnu JEMALLOC_SYS_VERIFY_CONFIGURE=1
       rust: beta
+      install: true
     - name: "x86_64-unknown-linux-musl"
       env: TARGET=x86_64-unknown-linux-musl
 
@@ -64,6 +66,7 @@ matrix:
       env: TARGET=x86_64-apple-darwin
       os: osx
       osx_image: xcode9.2
+      install: true
     - name: "i686-apple-darwin"
       env: TARGET=i686-apple-darwin
       os: osx
@@ -74,13 +77,14 @@ matrix:
       os: osx
       osx_image: xcode9.2
       rust: beta
+      install: true
 
     - name: "Documentation"
       install: pip install 'travis-cargo<0.2' --user && export PATH=$HOME/.local/bin:$PATH
       script: cargo doc
-      after_success:
-        - travis-cargo --only nightly doc-upload
+      after_success: travis-cargo --only nightly doc-upload
 
+install: rustup target add ${TARGET}
 script: ci/run.sh
 env:
   global:
