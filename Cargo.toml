@@ -25,9 +25,10 @@ libc = "0.2.8"
 
 [features]
 alloc_trait = []
-default = ["bg_thread"]
+default = ["background_threads_runtime_support"]
 profiling = ["jemalloc-sys/profiling"]
 debug = ["jemalloc-sys/debug"]
 stats = ["jemalloc-sys/stats"]
-bg_thread = ["jemalloc-sys/bg_thread"]
+background_threads_runtime_support = ["jemalloc-sys/background_threads_runtime_support"]
+background_threads = ["jemalloc-sys/background_threads"]
 unprefixed_malloc_on_supported_platforms = ["jemalloc-sys/unprefixed_malloc_on_supported_platforms"]

@@ -41,7 +41,16 @@ fn main() {
     let src_dir = env::current_dir().expect("failed to get current directory");
     println!("SRC_DIR={:?}", src_dir);
 
-    let disable_bg_thread = !env::var("CARGO_FEATURE_BG_THREAD").is_ok();
+    let enable_background_threads = env::var("CARGO_FEATURE_BACKGROUND_THREADS").is_ok();
+    let enable_background_threads_runtime_support =
+        env::var("CARGO_FEATURE_BACKGROUND_THREADS_RUNTIME_SUPPORT").is_ok();
+
+    if enable_background_threads {
+        assert!(
+            enable_background_threads_runtime_support,
+            "enabling `background_threads` requires `background_threads_runtime_support`"
+        );
+    }
 
     let unsupported_targets = [
         "rumprun",
@@ -173,7 +182,26 @@ fn main() {
     // collect malloc_conf string:
     let mut malloc_conf = String::new();
 
-    if disable_bg_thread {
+    if enable_background_threads_runtime_support {
+        // jemalloc is compiled with background thread run-time support on
+        // available platforms by default
+
+        if enable_background_threads {
+            // Background thread support does not enable background threads at
+            // run-time, just support for enabling them via run-time configuration
+            // options (they are disabled by default)
+
+            // The `enable_background_threads` cargo feature forces background
+            // threads to be enabled at run-time by default:
+            malloc_conf += "background_thread:true";
+        }
+    } else {
+        assert!(
+            !enable_background_threads,
+            "`background_threads` enabled but run-time support is disabled"
+        );
+        // Background thread run-time support is disabled by
+        // disabling background threads at compile-time:
         malloc_conf += "background_thread:false";
     }
 

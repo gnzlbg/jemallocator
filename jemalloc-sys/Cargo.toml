@@ -26,9 +26,10 @@ cc = "^1.0.13"
 fs_extra = "^1.1"
 
 [features]
-default = ["bg_thread"]
+default = ["background_threads_runtime_support"]
 profiling = []
 debug = []
-bg_thread = []
+background_threads_runtime_support = []
+background_threads = [ "background_threads_runtime_support" ]
 stats = []
 unprefixed_malloc_on_supported_platforms = []

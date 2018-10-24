@@ -37,16 +37,20 @@ This crate provides following cargo feature flags:
   * `gcc intrinsics` (unless --disable-prof-gcc)
 
 * `stats` (configure `jemalloc` with `--enable-stats`): Enable statistics
-  gathering functionality. See the `jemalloc`'s "opt.stats_print" option documentation for
-  usage details.
+  gathering functionality. See the `jemalloc`'s "`opt.stats_print`" option
+  documentation for usage details.
   
 * `debug` (configure `jemalloc` with `--enable-debug`): Enable assertions and
   validation code. This incurs a substantial performance hit, but is very useful
   during application development.
   
-* `bg_thread` (enabled by default - configure `jemalloc` with
-  `--with-malloc-conf=background_thread:false`): When disabled, disable internal
-  background worker threads. When set to true, background threads are created on
+* `background_threads_runtime_support` (enabled by default): enables
+  background-threads run-time support when building `jemalloc-sys` on some POSIX
+  targets supported by `jemalloc`. Background threads are disabled at run-time
+  by default. This option allows dynamically enabling them at run-time.
+
+* `background_threads` (disabled by default): enables background threads by
+  default at run-time. When set to true, background threads are created on
   demand (the number of background threads will be no more than the number of
   CPUs or active arenas). Threads run periodically, and handle purging
   asynchronously. When switching off, background threads are terminated

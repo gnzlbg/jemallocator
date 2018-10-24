@@ -31,6 +31,17 @@ ${CARGO_CMD} test -vv --target "${TARGET}" --features debug
 ${CARGO_CMD} test -vv --target "${TARGET}" --features stats
 ${CARGO_CMD} test -vv --target "${TARGET}" --features 'debug profiling'
 ${CARGO_CMD} test -vv --target "${TARGET}" --features unprefixed_malloc_on_supported_platforms
+${CARGO_CMD} test -vv --target $TARGET --no-default-features
+${CARGO_CMD} test -vv --target $TARGET --no-default-features \
+             --features background_threads_runtime_support
+
+if [ "${NOBGT}" = "1" ]
+then
+    echo "enabling background threads by default at run-time is not tested"
+else
+    ${CARGO_CMD} test -vv --target $TARGET --features background_threads
+fi
+
 ${CARGO_CMD} test -vv --target "${TARGET}" --release
 ${CARGO_CMD} test -vv --target "${TARGET}" -p jemalloc-sys
 ${CARGO_CMD} test -vv --target "${TARGET}" -p jemalloc-sys --features unprefixed_malloc_on_supported_platforms
