@@ -570,7 +570,7 @@ extern "C" {
     /// values (base `8`, `10`, or `16`, depending on prefix), and yet others
     /// have raw string values.
     #[cfg_attr(prefixed, link_name = "_rjem_malloc_conf")]
-    pub static malloc_conf: Option<&'static libc::c_char>;
+    pub static malloc_conf: Option<&'static c_char>;
 }
 
 /// Extent lifetime management functions.
