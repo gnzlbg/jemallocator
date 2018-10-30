@@ -82,7 +82,11 @@ fn test_stats() {
 
     let mut ctx = PrintCtx { called_times: 0 };
     unsafe {
-        ffi::malloc_stats_print(write_cb, &mut ctx as *mut _ as *mut c_void, ptr::null());
+        ffi::malloc_stats_print(
+            Some(write_cb),
+            &mut ctx as *mut _ as *mut c_void,
+            ptr::null(),
+        );
     }
     assert_ne!(
         ctx.called_times, 0,
