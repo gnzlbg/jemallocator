@@ -8,10 +8,10 @@ fn main() {
 
     let mut cfg = ctest::TestGenerator::new();
     cfg.header("jemalloc/jemalloc.h")
-       .include(root.join("include"))
-       .cfg("prefixed", None)
-       .fn_cname(|rust, link_name| link_name.unwrap_or(rust).to_string())
-       .skip_signededness(|c| c.ends_with("_t"));
+        .include(root.join("include"))
+        .cfg("prefixed", None)
+        .fn_cname(|rust, link_name| link_name.unwrap_or(rust).to_string())
+        .skip_signededness(|c| c.ends_with("_t"));
 
     if cfg!(target_os = "linux") {
         cfg.skip_fn(|f| f == "malloc_usable_size");

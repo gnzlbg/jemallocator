@@ -8,7 +8,7 @@ use std::alloc::System;
 #[global_allocator]
 static A: System = System;
 
-use libc::{c_int, c_void, c_char};
 use jemalloc_sys::*;
+use libc::{c_char, c_int, c_void};
 
 include!(concat!(env!("OUT_DIR"), "/all.rs"));
