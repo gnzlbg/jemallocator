@@ -249,7 +249,7 @@ fn main() {
             || target.contains("musl")
             || target.contains("darwin"))
     {
-        println!("Unprefixed malloc() requested on unsupported platform");
+        println!("cargo:warning=\"Unprefixed malloc() requested on unsupported platform\"");
         use_prefix = true;
     }
 
