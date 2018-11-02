@@ -30,7 +30,7 @@ matrix:
       addons: *gcc_multilib
       rust: stable  
     - name: "i686-unknown-linux-musl"
-      env: TARGET=i686-unknown-linux-musl
+      env: TARGET=i686-unknown-linux-musl NOBGT=1
     - name: "mips-unknown-linux-gnu"
       env: TARGET=mips-unknown-linux-gnu
     - name: "mips64-unknown-linux-gnuabi64"
@@ -57,7 +57,7 @@ matrix:
       rust: stable
       install: true
     - name: "x86_64-unknown-linux-musl"
-      env: TARGET=x86_64-unknown-linux-musl
+      env: TARGET=x86_64-unknown-linux-musl NOBGT=1
 
     # Android
     - name: "aarch64-linux-android"
