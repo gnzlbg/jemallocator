@@ -41,17 +41,6 @@ fn main() {
     let src_dir = env::current_dir().expect("failed to get current directory");
     println!("SRC_DIR={:?}", src_dir);
 
-    let enable_background_threads = env::var("CARGO_FEATURE_BACKGROUND_THREADS").is_ok();
-    let enable_background_threads_runtime_support =
-        env::var("CARGO_FEATURE_BACKGROUND_THREADS_RUNTIME_SUPPORT").is_ok();
-
-    if enable_background_threads {
-        assert!(
-            enable_background_threads_runtime_support,
-            "enabling `background_threads` requires `background_threads_runtime_support`"
-        );
-    }
-
     let unsupported_targets = [
         "rumprun",
         "bitrig",
@@ -66,6 +55,26 @@ fn main() {
         if target.contains(i) {
             panic!("jemalloc does not support target: {}", target);
         }
+    }
+
+    let mut enable_background_threads = env::var("CARGO_FEATURE_BACKGROUND_THREADS").is_ok();
+    let mut enable_background_threads_runtime_support =
+        env::var("CARGO_FEATURE_BACKGROUND_THREADS_RUNTIME_SUPPORT").is_ok();
+
+    if enable_background_threads_runtime_support && target.contains("musl") {
+        println!(
+            "cargo:warning=\"`background_threads_runtime_support` not supported for `{}`\"",
+            target
+        );
+        enable_background_threads_runtime_support = false;
+        enable_background_threads = false;
+    }
+
+    if enable_background_threads {
+        assert!(
+            enable_background_threads_runtime_support,
+            "enabling `background_threads` requires `background_threads_runtime_support`"
+        );
     }
 
     if let Some(jemalloc) = env::var_os("JEMALLOC_OVERRIDE") {
