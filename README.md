@@ -35,38 +35,39 @@ all allocations requested by Rust code in the same program.
 The following table describes the supported platforms: 
 
 * `build`: does the library compile for the target?
-* `run`: do the tests pass on the target?
+* `run`: do `jemallocator` and `jemalloc-sys` tests pass on the target?
+* `jemalloc`: do `jemalloc`'s tests pass on the target?
 * `valgrind`: do the tests pass under valgrind?
 
 Tier 1 targets are tested on all Rust channels (stable, beta, and nightly). All
 other targets are only tested on Rust nightly.
 
-| Linux targets:                      | build     | run     | valgrind     |
-|-------------------------------------|-----------|---------|--------------|
-| `aarch64-unknown-linux-gnu`         | ✓         | ✓       | ✗            |
-| `arm-unknown-linux-gnueabi`         | ✓         | ✓       | ✗            |
-| `armv7-unknown-linux-gnueabi`       | ✓         | ✓       | ✗            |
-| `i586-unknown-linux-gnu`            | ✓         | ✓       | ✗            |
-| `i686-unknown-linux-gnu` (tier 1)   | ✓         | ✓       | ✗            |
-| `mips-unknown-linux-gnu`            | ✓         | ✓       | ✗            |
-| `mipsel-unknown-linux-musl`         | ✓         | ✓       | ✗            |
-| `mips64-unknown-linux-gnuabi64`     | ✓         | ✓       | ✗            |
-| `mips64el-unknown-linux-gnuabi64`   | ✓         | ✓       | ✗            |
-| `powerpc-unknown-linux-gnu`         | ✓         | ✓       | ✗            |
-| `powerpc64-unknown-linux-gnu`       | ✓         | ✓       | ✗            |
-| `powerpc64le-unknown-linux-gnu`     | ✓         | ✓       | ✗            |
-| `x86_64-unknown-linux-gnu` (tier 1) | ✓         | ✓       | ✓            |
-| **MacOSX targets:**                 | **build** | **run** | **valgrind** |
-| `x86_64-apple-darwin` (tier 1)      | ✓         | ✓       | ✗            |
-| `i686-apple-darwin` (tier 1)        | ✓         | ✓       | ✗            |
-| **Windows targets:**                | **build** | **run** | **valgrind** |
-| `x86_64-pc-windows-msvc` (tier 1)   | ✗         | ✗       | ✗            |
-| `i686-pc-windows-msvc` (tier 1)     | ✗         | ✗       | ✗            |
-| `x86_64-pc-windows-gnu` (tier 1)    | ✓         | ✓       | ✗            |
-| `i686-pc-windows-gnu` (tier 1)      | ✓         | ✓       | ✗            |
-| **Android targets:**                | **build** | **run** | **valgrind** |
-| `aarch64-linux-android`             | ✓         | ✓       | ✗            |
-| `x86_64-linux-android`              | ✓         | ✓       | ✗            |
+| Linux targets:                      | build     | run     | jemalloc     | valgrind     |
+|-------------------------------------|-----------|---------|--------------|--------------|
+| `aarch64-unknown-linux-gnu`         | ✓         | ✓       | ✗            | ✗            |
+| `arm-unknown-linux-gnueabi`         | ✓         | ✓       | ✗            | ✗            |
+| `armv7-unknown-linux-gnueabi`       | ✓         | ✓       | ✗            | ✗            |
+| `i586-unknown-linux-gnu`            | ✓         | ✓       | ✓            | ✗            |
+| `i686-unknown-linux-gnu` (tier 1)   | ✓         | ✓       | ✓            | ✗            |
+| `mips-unknown-linux-gnu`            | ✓         | ✓       | ✗            | ✗            |
+| `mipsel-unknown-linux-musl`         | ✓         | ✓       | ✗            | ✗            |
+| `mips64-unknown-linux-gnuabi64`     | ✓         | ✓       | ✗            | ✗            |
+| `mips64el-unknown-linux-gnuabi64`   | ✓         | ✓       | ✗            | ✗            |
+| `powerpc-unknown-linux-gnu`         | ✓         | ✓       | ✗            | ✗            |
+| `powerpc64-unknown-linux-gnu`       | ✓         | ✓       | ✗            | ✗            |
+| `powerpc64le-unknown-linux-gnu`     | ✓         | ✓       | ✗            | ✗            |
+| `x86_64-unknown-linux-gnu` (tier 1) | ✓         | ✓       | ✓            | ✓            |
+| **MacOSX targets:**                 | **build** | **run** | **jemalloc** | **valgrind** |
+| `x86_64-apple-darwin` (tier 1)      | ✓         | ✓       | ✗            | ✗            |
+| `i686-apple-darwin` (tier 1)        | ✓         | ✓       | ✗            | ✗            |
+| **Windows targets:**                | **build** | **run** | **jemalloc** | **valgrind** |
+| `x86_64-pc-windows-msvc` (tier 1)   | ✗         | ✗       | ✗            | ✗            |
+| `i686-pc-windows-msvc` (tier 1)     | ✗         | ✗       | ✗            | ✗            |
+| `x86_64-pc-windows-gnu` (tier 1)    | ✓         | ✓       | ✗            | ✗            |
+| `i686-pc-windows-gnu` (tier 1)      | ✓         | ✓       | ✗            | ✗            |
+| **Android targets:**                | **build** | **run** | **jemalloc** | **valgrind** |
+| `aarch64-linux-android`             | ✓         | ✓       | ✗            | ✗            |
+| `x86_64-linux-android`              | ✓         | ✓       | ✓            | ✗            |
 
 ## Features
 
