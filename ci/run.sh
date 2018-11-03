@@ -25,6 +25,22 @@ then
     cargo install cross || echo "cross is already installed"
 fi
 
+if [ "${VALGRIND}" = "1" ]
+then
+    case "${TARGET}" in
+        "x86_64-unknown-linux-gnu")
+            export CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER=valgrind
+            ;;
+        "x86_64-apple-darwin")
+            export CARGO_TARGET_X86_64_APPLE_DARWIN_RUNNER=valgrind
+            ;;
+        *)
+            echo "Specify how to run valgrind for TARGET=${TARGET}"
+            exit 1
+            ;;
+    esac
+fi
+
 ${CARGO_CMD} test -vv --target "${TARGET}"
 ${CARGO_CMD} test -vv --target "${TARGET}" --features profiling
 ${CARGO_CMD} test -vv --target "${TARGET}" --features debug
