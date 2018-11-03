@@ -46,16 +46,23 @@ matrix:
     - name: "powerpc64le-unknown-linux-gnu"
       env: TARGET=powerpc64le-unknown-linux-gnu
     - name: "x86_64-unknown-linux-gnu (nightly)"
-      env: TARGET=x86_64-unknown-linux-gnu #JEMALLOC_SYS_VERIFY_CONFIGURE=1
+      env: TARGET=x86_64-unknown-linux-gnu VALGRIND=1 #JEMALLOC_SYS_VERIFY_CONFIGURE=1
       install: true
+      addons: &valgrind
+        apt:
+          packages:
+            - valgrind
+            - autoconf
     - name: "x86_64-unknown-linux-gnu (beta)"
-      env: TARGET=x86_64-unknown-linux-gnu
+      env: TARGET=x86_64-unknown-linux-gnu VALGRIND=1
       rust: beta
       install: true
+      addons: *valgrind
     - name: "x86_64-unknown-linux-gnu (stable)"
-      env: TARGET=x86_64-unknown-linux-gnu
+      env: TARGET=x86_64-unknown-linux-gnu VALGRIND=1
       rust: stable
       install: true
+      addons: *valgrind
     - name: "x86_64-unknown-linux-musl"
       env: TARGET=x86_64-unknown-linux-musl NOBGT=1
 
@@ -80,6 +87,8 @@ matrix:
       os: osx
       osx_image: xcode10
       rust: stable
+    # FIXME: valgrind fails on OSX
+    # https://github.com/alexcrichton/jemallocator/issues/86
     - name: "x86_64-apple-darwin (nightly)"
       env: TARGET=x86_64-apple-darwin
       os: osx
