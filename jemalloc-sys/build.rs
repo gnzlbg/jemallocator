@@ -308,8 +308,8 @@ fn main() {
         .arg("-j")
         .arg(num_jobs.clone()));
 
-    if env::var_os("JEMALLOC_SYS_RUN_TESTS").is_some() {
-        println!("JEMALLOC_SYS_RUN_TESTS set: building and running jemalloc tests...");
+    if env::var_os("JEMALLOC_SYS_RUN_JEMALLOC_TESTS").is_some() {
+        println!("JEMALLOC_SYS_RUN_JEMALLOC_TESTS set: building and running jemalloc tests...");
         // Make tests:
         run(Command::new(make)
             .current_dir(&build_dir)

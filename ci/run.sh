@@ -10,8 +10,13 @@ export RUST_TEST_THREADS=1
 export RUST_TEST_NOCAPTURE=1
 export CARGO_CMD=cross
 
-# Runs jemalloc tests using "make check":
-#export JEMALLOC_SYS_RUN_TESTS=1
+# Runs jemalloc tests when building jemalloc-sys (runs "make check"):
+if [ "${NO_JEMALLOC_TESTS}" = "1" ]
+then
+    echo "jemalloc's tests are not run"
+else
+    export JEMALLOC_SYS_RUN_JEMALLOC_TESTS=1
+fi
 
 # Use cargo on native CI platforms:
 case "${TARGET}" in

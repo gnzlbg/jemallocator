@@ -7,11 +7,11 @@ matrix:
   include:
     # Linux
     - name: "aarch64-unknown-linux-gnu"
-      env: TARGET=aarch64-unknown-linux-gnu
+      env: TARGET=aarch64-unknown-linux-gnu NO_JEMALLOC_TESTS=1
     - name: "arm-unknown-linux-gnueabi"
-      env: TARGET=arm-unknown-linux-gnueabi
+      env: TARGET=arm-unknown-linux-gnueabi NO_JEMALLOC_TESTS=1
     - name: "armv7-unknown-linux-gnueabihf"
-      env: TARGET=armv7-unknown-linux-gnueabihf
+      env: TARGET=armv7-unknown-linux-gnueabihf NO_JEMALLOC_TESTS=1
     - name: "i586-unknown-linux-gnu"
       env: TARGET=i586-unknown-linux-gnu
       addons: &gcc_multilib
@@ -30,21 +30,21 @@ matrix:
       addons: *gcc_multilib
       rust: stable  
     - name: "i686-unknown-linux-musl"
-      env: TARGET=i686-unknown-linux-musl NOBGT=1
+      env: TARGET=i686-unknown-linux-musl NOBGT=1 NO_JEMALLOC_TESTS=1
     - name: "mips-unknown-linux-gnu"
-      env: TARGET=mips-unknown-linux-gnu
+      env: TARGET=mips-unknown-linux-gnu NO_JEMALLOC_TESTS=1
     - name: "mips64-unknown-linux-gnuabi64"
-      env: TARGET=mips64-unknown-linux-gnuabi64
+      env: TARGET=mips64-unknown-linux-gnuabi64 NO_JEMALLOC_TESTS=1
     - name: "mips64el-unknown-linux-gnuabi64"
-      env: TARGET=mips64el-unknown-linux-gnuabi64
+      env: TARGET=mips64el-unknown-linux-gnuabi64 NO_JEMALLOC_TESTS=1
     - name: "mipsel-unknown-linux-gnu"
-      env: TARGET=mipsel-unknown-linux-gnu
+      env: TARGET=mipsel-unknown-linux-gnu NO_JEMALLOC_TESTS=1
     - name: "powerpc-unknown-linux-gnu"
-      env: TARGET=powerpc-unknown-linux-gnu
+      env: TARGET=powerpc-unknown-linux-gnu NO_JEMALLOC_TESTS=1
     - name: "powerpc64-unknown-linux-gnu"
-      env: TARGET=powerpc64-unknown-linux-gnu
+      env: TARGET=powerpc64-unknown-linux-gnu NO_JEMALLOC_TESTS=1
     - name: "powerpc64le-unknown-linux-gnu"
-      env: TARGET=powerpc64le-unknown-linux-gnu
+      env: TARGET=powerpc64le-unknown-linux-gnu NO_JEMALLOC_TESTS=1
     - name: "x86_64-unknown-linux-gnu (nightly)"
       env: TARGET=x86_64-unknown-linux-gnu VALGRIND=1 #JEMALLOC_SYS_VERIFY_CONFIGURE=1
       install: true
@@ -64,44 +64,47 @@ matrix:
       install: true
       addons: *valgrind
     - name: "x86_64-unknown-linux-musl"
-      env: TARGET=x86_64-unknown-linux-musl NOBGT=1
+      env: TARGET=x86_64-unknown-linux-musl NOBGT=1 NO_JEMALLOC_TESTS=1
 
     # Android
     - name: "aarch64-linux-android"
-      env: TARGET=aarch64-linux-android
+      env: TARGET=aarch64-linux-android NO_JEMALLOC_TESTS=1
     - name: "x86_64-linux-android"
       env: TARGET=x86_64-linux-android
 
     # OSX
+    # FIXME: cannot jemalloc tests fail due to:
+    # https://github.com/jemalloc/jemalloc/issues/1320
+    # https://github.com/alexcrichton/jemallocator/issues/85
     - name: "i686-apple-darwin (nightly)"
-      env: TARGET=i686-apple-darwin
+      env: TARGET=i686-apple-darwin NO_JEMALLOC_TESTS=1
       os: osx
       osx_image: xcode10
     - name: "i686-apple-darwin (beta)"
-      env: TARGET=i686-apple-darwin
+      env: TARGET=i686-apple-darwin NO_JEMALLOC_TESTS=1
       os: osx
       osx_image: xcode10
       rust: beta
     - name: "i686-apple-darwin (stable)"
-      env: TARGET=i686-apple-darwin
+      env: TARGET=i686-apple-darwin NO_JEMALLOC_TESTS=1
       os: osx
       osx_image: xcode10
       rust: stable
     # FIXME: valgrind fails on OSX
     # https://github.com/alexcrichton/jemallocator/issues/86
     - name: "x86_64-apple-darwin (nightly)"
-      env: TARGET=x86_64-apple-darwin
+      env: TARGET=x86_64-apple-darwin NO_JEMALLOC_TESTS=1
       os: osx
       osx_image: xcode10
       install: true
     - name: "x86_64-apple-darwin (beta)"
-      env: TARGET=x86_64-apple-darwin
+      env: TARGET=x86_64-apple-darwin NO_JEMALLOC_TESTS=1
       os: osx
       osx_image: xcode10
       rust: beta
       install: true
     - name: "x86_64-apple-darwin (stable)"
-      env: TARGET=x86_64-apple-darwin
+      env: TARGET=x86_64-apple-darwin NO_JEMALLOC_TESTS=1
       os: osx
       osx_image: xcode10
       rust: stable
