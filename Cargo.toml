@@ -11,13 +11,14 @@ documentation = "https://docs.rs/jemallocator"
 description = """
 A Rust allocator backed by jemalloc
 """
+edition = "2015"
 
 [lib]
 test = false
 bench = false
 
 [workspace]
-members = ["systest"]
+members = ["systest", "jemallocator-global" ]
 
 [dependencies]
 jemalloc-sys = { path = "jemalloc-sys", version = "0.2.0", default-features = false }
@@ -27,8 +28,8 @@ libc = { version = "^0.2.8", default-features = false }
 paste = "0.1"
 
 [features]
-alloc_trait = []
 default = ["background_threads_runtime_support"]
+alloc_trait = []
 profiling = ["jemalloc-sys/profiling"]
 debug = ["jemalloc-sys/debug"]
 stats = ["jemalloc-sys/stats"]

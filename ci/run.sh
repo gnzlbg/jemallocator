@@ -76,7 +76,8 @@ ${CARGO_CMD} test -vv --target "${TARGET}" --features profiling
 ${CARGO_CMD} test -vv --target "${TARGET}" --features debug
 ${CARGO_CMD} test -vv --target "${TARGET}" --features stats
 ${CARGO_CMD} test -vv --target "${TARGET}" --features 'debug profiling'
-${CARGO_CMD} test -vv --target "${TARGET}" --features unprefixed_malloc_on_supported_platforms
+${CARGO_CMD} test -vv --target "${TARGET}" \
+             --features unprefixed_malloc_on_supported_platforms
 ${CARGO_CMD} test -vv --target "${TARGET}" --no-default-features
 ${CARGO_CMD} test -vv --target "${TARGET}" --no-default-features \
              --features background_threads_runtime_support
@@ -89,9 +90,16 @@ else
 fi
 
 ${CARGO_CMD} test -vv --target "${TARGET}" --release
-${CARGO_CMD} test -vv --target "${TARGET}" -p jemalloc-sys
-${CARGO_CMD} test -vv --target "${TARGET}" -p jemalloc-sys --features unprefixed_malloc_on_supported_platforms
+${CARGO_CMD} test -vv --target "${TARGET}" --manifest-path jemalloc-sys/Cargo.toml
+${CARGO_CMD} test -vv --target "${TARGET}" \
+             --manifest-path jemalloc-sys/Cargo.toml \
+             --features unprefixed_malloc_on_supported_platforms
 ${CARGO_CMD} test -vv --target "${TARGET}" -p systest
+${CARGO_CMD} test -vv --target "${TARGET}" \
+             --manifest-path jemallocator-global/Cargo.toml
+${CARGO_CMD} test -vv --target "${TARGET}" \
+             --manifest-path jemallocator-global/Cargo.toml \
+             --features force_global_jemalloc
 
 if [ "${TRAVIS_RUST_VERSION}" = "nightly"  ]
 then
