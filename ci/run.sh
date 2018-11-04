@@ -10,6 +10,13 @@ export RUST_TEST_THREADS=1
 export RUST_TEST_NOCAPTURE=1
 export CARGO_CMD=cross
 
+# FIXME: workaround cargo breaking Travis-CI again:
+# https://github.com/rust-lang/cargo/issues/5721
+if [ "$TRAVIS" = "true" ]
+then
+    export TERM=dumb
+fi
+
 # Runs jemalloc tests when building jemalloc-sys (runs "make check"):
 if [ "${NO_JEMALLOC_TESTS}" = "1" ]
 then
