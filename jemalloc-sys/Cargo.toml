@@ -13,6 +13,7 @@ keywords = ["allocator"]
 description = """
 Rust FFI bindings to jemalloc
 """
+edition = "2015"
 
 [lib]
 test = false

@@ -1,0 +1,51 @@
+[package]
+name = "jemallocator-global"
+version = "0.3.0"
+authors = ["Gonzalo Brito Gadeschi <gonzalobg88@gmail.com>"]
+edition = "2015"
+license = "MIT/Apache-2.0"
+readme = "README.md"
+keywords = ["allocator", "jemalloc"]
+categories = ["memory-management", "api-bindings"]
+repository = "https://github.com/alexcrichton/jemallocator"
+homepage = "https://github.com/alexcrichton/jemallocator"
+documentation = "https://docs.rs/jemallocator-global"
+description = """
+Sets `jemalloc` as the `#[global_allocator]`
+"""
+
+ [badges]
+appveyor = { repository = "alexcrichton/jemallocator" }
+travis-ci = { repository = "alexcrichton/jemallocator" }
+codecov = { repository = "alexcrichton/jemallocator" }
+is-it-maintained-issue-resolution = { repository = "alexcrichton/jemallocator" }
+is-it-maintained-open-issues = { repository = "alexcrichton/jemallocator" }
+maintenance = { status = "actively-developed" }
+
+[dependencies]
+jemallocator = { optional = true, path = "..", version = "0.2.0" }
+cfg-if = "0.1"
+
+[features]
+default = []
+# Unconditionally sets jemalloc as the global allocator:
+force_global_jemalloc = [ "jemallocator" ]
+
+# To enable `jemalloc` as the `#[global_allocator]` by default
+# for a particular target, white-list the target explicitly here:
+
+[target.'cfg(any(target_os = "linux", target_os = "android", target_os = "macos", target_os = "ios", target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))'.dependencies]
+jemallocator = { optional = false, path = ".." }
+
+# FIXME: https://github.com/alexcrichton/jemallocator/issues/91
+# [target.'cfg(target_os = "windows")'.dependencies]
+# jemallocator = { path = ".." }
+
+# `jemalloc` is known not to work on - see `jemalloc-sys/build.rs`.
+# - rumprun
+# - bitrig
+# - redox
+# - fuchsia
+# - emscripten
+# - wasm32
+
