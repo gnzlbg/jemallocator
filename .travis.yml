@@ -123,10 +123,11 @@ matrix:
     - name: "clippy"
       install: true
       rust: nightly
-      before_script: rustup component add clippy-preview
-      script:
-        - cargo clippy -p jemalloc-sys -- -D clippy::pedantic
-        - cargo clippy -p jemallocator -- -D clippy::pedantic
+      script: |
+        if rustup component add clippy-preview; then
+            cargo clippy -p jemalloc-sys -- -D clippy::pedantic
+            cargo clippy -p jemallocator -- -D clippy::pedantic
+        fi
     - name: "Shellcheck"
       install: true
       script: shellcheck ci/*.sh
