@@ -584,18 +584,103 @@ extern "C" {
 /// Extent lifetime management functions.
 pub type extent_hooks_t = extent_hooks_s;
 
-/// Extent lifetime management functions.
+// note: there are two structs here, one is used when compiling the crate normally,
+// and the other one is behind the `--cfg jemallocator_docs` flag and used only
+// when generating docs.
+//
+// For the docs we want to use type aliases here, but `ctest` does see through
+// them when generating the code to verify the FFI bindings, and it needs to
+// be able to tell that these are `fn` types so that `Option<fn>` gets lowered
+// to C function pointers.
+
 #[repr(C)]
+#[cfg(not(jemallocator_docs))]
+#[derive(Copy, Clone, Default)]
 pub struct extent_hooks_s {
-    pub alloc: *mut extent_alloc_t,
-    pub dalloc: *mut extent_dalloc_t,
-    pub destroy: *mut extent_destroy_t,
-    pub commit: *mut extent_commit_t,
-    pub decommit: *mut extent_decommit_t,
-    pub purge_lazy: *mut extent_purge_t,
-    pub purge_forced: *mut extent_purge_t,
-    pub split: *mut extent_split_t,
-    pub merge: *mut extent_merge_t,
+    pub alloc: Option<
+        unsafe extern "C" fn(
+            *mut extent_hooks_t,
+            *mut c_void,
+            size_t,
+            size_t,
+            *mut c_bool,
+            *mut c_bool,
+            c_uint,
+        ) -> *mut c_void,
+    >,
+    pub dalloc: Option<
+        unsafe extern "C" fn(*mut extent_hooks_t, *mut c_void, size_t, c_bool, c_uint) -> c_bool,
+    >,
+    pub destroy:
+        Option<unsafe extern "C" fn(*mut extent_hooks_t, *mut c_void, size_t, c_bool, c_uint)>,
+    pub commit: Option<
+        unsafe extern "C" fn(*mut extent_hooks_t, *mut c_void, size_t, size_t, size_t, c_uint)
+            -> c_bool,
+    >,
+    pub decommit: Option<
+        unsafe extern "C" fn(*mut extent_hooks_t, *mut c_void, size_t, size_t, size_t, c_uint)
+            -> c_bool,
+    >,
+    pub purge_lazy: Option<
+        unsafe extern "C" fn(*mut extent_hooks_t, *mut c_void, size_t, size_t, size_t, c_uint)
+            -> c_bool,
+    >,
+    pub purge_forced: Option<
+        unsafe extern "C" fn(*mut extent_hooks_t, *mut c_void, size_t, size_t, size_t, c_uint)
+            -> c_bool,
+    >,
+    pub split: Option<
+        unsafe extern "C" fn(
+            *mut extent_hooks_t,
+            *mut c_void,
+            size_t,
+            size_t,
+            size_t,
+            c_bool,
+            c_uint,
+        ) -> c_bool,
+    >,
+    pub merge: Option<
+        unsafe extern "C" fn(
+            *mut extent_hooks_t,
+            *mut c_void,
+            size_t,
+            *mut c_void,
+            size_t,
+            c_bool,
+            c_uint,
+        ) -> c_bool,
+    >,
+}
+
+/// Extent lifetime management functions.
+///
+/// The extent_hooks_t structure comprises function pointers which are described
+/// individually below. `jemalloc` uses these functions to manage extent lifetime,
+/// which starts off with allocation of mapped committed memory, in the simplest
+/// case followed by deallocation. However, there are performance and platform
+/// reasons to retain extents for later reuse. Cleanup attempts cascade from
+/// deallocation to decommit to forced purging to lazy purging, which gives the
+/// extent management functions opportunities to reject the most permanent
+/// cleanup operations in favor of less permanent (and often less costly)
+/// operations. All operations except allocation can be universally opted out of
+/// by setting the hook pointers to `NULL`, or selectively opted out of by
+/// returning failure. Note that once the extent hook is set, the structure is
+/// accessed directly by the associated arenas, so it must remain valid for the
+/// entire lifetime of the arenas.
+#[repr(C)]
+#[cfg(jemallocator_docs)]
+#[derive(Copy, Clone, Default)]
+pub struct extent_hooks_s {
+    pub alloc: Option<extent_alloc_t>,
+    pub dalloc: Option<extent_dalloc_t>,
+    pub destroy: Option<extent_destroy_t>,
+    pub commit: Option<extent_commit_t>,
+    pub decommit: Option<extent_decommit_t>,
+    pub purge_lazy: Option<extent_purge_t>,
+    pub purge_forced: Option<extent_purge_t>,
+    pub split: Option<extent_split_t>,
+    pub merge: Option<extent_merge_t>,
 }
 
 /// Extent allocation function.

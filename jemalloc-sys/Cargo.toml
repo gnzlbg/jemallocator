@@ -33,3 +33,6 @@ background_threads_runtime_support = []
 background_threads = [ "background_threads_runtime_support" ]
 stats = []
 unprefixed_malloc_on_supported_platforms = []
+
+[package.metadata.docs.rs]
+rustdoc-args = [ "--cfg jemallocator_docs" ]
