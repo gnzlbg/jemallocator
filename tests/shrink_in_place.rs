@@ -27,7 +27,6 @@ fn shrink_in_place() {
             let new_l = Layout::from_size_align(new_sz, 1).unwrap();
             Jemalloc.dealloc(ptr, new_l);
         } else {
-            assert!(false);
             // if shrink in place failed - deallocate with the old layout
             Jemalloc.dealloc(ptr, orig_l);
         }
