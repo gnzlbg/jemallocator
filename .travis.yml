@@ -46,7 +46,7 @@ matrix:
     - name: "powerpc64le-unknown-linux-gnu"
       env: TARGET=powerpc64le-unknown-linux-gnu NO_JEMALLOC_TESTS=1
     - name: "x86_64-unknown-linux-gnu (nightly)"
-      env: TARGET=x86_64-unknown-linux-gnu VALGRIND=1 #JEMALLOC_SYS_VERIFY_CONFIGURE=1
+      env: TARGET=x86_64-unknown-linux-gnu VALGRIND=1 JEMALLOC_SYS_VERIFY_CONFIGURE=1
       install: true
       addons: &valgrind
         apt:
@@ -93,7 +93,7 @@ matrix:
     # FIXME: valgrind fails on OSX
     # https://github.com/alexcrichton/jemallocator/issues/86
     - name: "x86_64-apple-darwin (nightly)"
-      env: TARGET=x86_64-apple-darwin NO_JEMALLOC_TESTS=1
+      env: TARGET=x86_64-apple-darwin NO_JEMALLOC_TESTS=1 JEMALLOC_SYS_VERIFY_CONFIGURE=1
       os: osx
       osx_image: xcode10
       install: true
