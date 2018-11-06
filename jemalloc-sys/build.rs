@@ -134,7 +134,7 @@ fn main() {
     assert!(jemalloc_src_dir.exists());
 
     // Configuration files
-    let config_files = ["configure", /*"VERSION"*/];
+    let config_files = ["configure" /*"VERSION"*/];
 
     // Verify that the configuration files are up-to-date
     if env::var("JEMALLOC_SYS_VERIFY_CONFIGURE").is_ok() {
@@ -142,8 +142,10 @@ fn main() {
 
         // The configuration file from the configure/directory should be used.
         // The jemalloc git submodule shouldn't contain any configuration files.
-        assert!(!jemalloc_src_dir.join("configure").exists(),
-                "the jemalloc submodule contains configuration files");
+        assert!(
+            !jemalloc_src_dir.join("configure").exists(),
+            "the jemalloc submodule contains configuration files"
+        );
 
         // Run autoconf:
         let mut cmd = Command::new("autoconf");
@@ -167,17 +169,17 @@ fn main() {
 
             let current = read_content(&jemalloc_src_dir.join(f));
             let reference = read_content(&Path::new("configure").join(f));
-            assert_eq!(current, reference,
-                       "the current and reference configuration files \"{}\" differ", f);
+            assert_eq!(
+                current, reference,
+                "the current and reference configuration files \"{}\" differ",
+                f
+            );
         }
     } else {
         // Copy the configuration files to jemalloc's source directory
         for f in &config_files {
-            fs::copy(
-                Path::new("configure").join(f),
-                jemalloc_src_dir.join(f),
-            )
-            .expect("failed to copy config file to OUT_DIR");
+            fs::copy(Path::new("configure").join(f), jemalloc_src_dir.join(f))
+                .expect("failed to copy config file to OUT_DIR");
         }
     }
 
