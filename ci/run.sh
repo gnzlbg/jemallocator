@@ -53,6 +53,24 @@ then
     esac
 fi
 
+if [ "${TARGET}" = "x86_64-unknown-linux-gnu" ] || [ "${TARGET}" = "x86_64-apple-darwin" ]
+then
+    ${CARGO_CMD} build -vv --target "${TARGET}" 2>&1 | tee build_no_std.txt
+
+    # Check that the no-std builds are not linked against a libc with default
+    # features or the `use_std` feature enabled:
+    ! grep -q "default" build_no_std.txt
+    ! grep -q "use_std" build_no_std.txt
+
+    RUST_SYS_ROOT=$(rustc --target="${TARGET}" --print sysroot)
+    RUST_LLVM_NM="${RUST_SYS_ROOT}/lib/rustlib/${TARGET}/bin/llvm-nm"
+
+    find target/ -iname '*jemalloc*.rlib' | while read -r rlib; do
+        echo "${RUST_LLVM_NM} ${rlib}"
+        ! $RUST_LLVM_NM "${rlib}" | grep "std"
+    done
+fi
+
 ${CARGO_CMD} test -vv --target "${TARGET}"
 ${CARGO_CMD} test -vv --target "${TARGET}" --features profiling
 ${CARGO_CMD} test -vv --target "${TARGET}" --features debug
