@@ -47,7 +47,7 @@ matrix:
       env: TARGET=powerpc64le-unknown-linux-gnu NO_JEMALLOC_TESTS=1
     - name: "x86_64-unknown-linux-gnu (nightly)"
       env: TARGET=x86_64-unknown-linux-gnu VALGRIND=1 JEMALLOC_SYS_VERIFY_CONFIGURE=1
-      install: true
+      install: rustup component add llvm-tools-preview
       addons: &valgrind
         apt:
           packages:
@@ -56,12 +56,12 @@ matrix:
     - name: "x86_64-unknown-linux-gnu (beta)"
       env: TARGET=x86_64-unknown-linux-gnu VALGRIND=1
       rust: beta
-      install: true
+      install: rustup component add llvm-tools-preview
       addons: *valgrind
     - name: "x86_64-unknown-linux-gnu (stable)"
       env: TARGET=x86_64-unknown-linux-gnu VALGRIND=1
       rust: stable
-      install: true
+      install: rustup component add llvm-tools-preview
       addons: *valgrind
     - name: "x86_64-unknown-linux-musl"
       env: TARGET=x86_64-unknown-linux-musl NOBGT=1 NO_JEMALLOC_TESTS=1
@@ -96,19 +96,19 @@ matrix:
       env: TARGET=x86_64-apple-darwin NO_JEMALLOC_TESTS=1 JEMALLOC_SYS_VERIFY_CONFIGURE=1
       os: osx
       osx_image: xcode10
-      install: true
+      install: rustup component add llvm-tools-preview
     - name: "x86_64-apple-darwin (beta)"
       env: TARGET=x86_64-apple-darwin NO_JEMALLOC_TESTS=1
       os: osx
       osx_image: xcode10
       rust: beta
-      install: true
+      install: rustup component add llvm-tools-preview
     - name: "x86_64-apple-darwin (stable)"
       env: TARGET=x86_64-apple-darwin NO_JEMALLOC_TESTS=1
       os: osx
       osx_image: xcode10
       rust: stable
-      install: true
+      install: rustup component add llvm-tools-preview
 
     # TOOLING  
     - name: "Documentation"
@@ -132,8 +132,9 @@ matrix:
       install: true
       script: shellcheck ci/*.sh
 
-install: rustup target add ${TARGET}
-script: ci/run.sh
+install:
+  - rustup target add ${TARGET}
+script: sh ci/run.sh
 env:
   global:
     - secure: "2Z1z4ir++XEQb9eegYTMolsNfTo1aATric2k4KfvRgnG1nAvvccf1Jg0828PVeqqD6w5f+X52AVT4bTDXbSL5L+/cTiBuVmY3943nyNOgHxFBTbVlnLtGnh18bb7AQAhyH1L9KjiLptMtFUfIg3TQ9r0QS+cBEJMFiE8BuuQMq/uPZYF3QMuV8W+9AwnqZPgdZV4q7LRnx2gHyVKifRfa4v0TxJA+fY5euON8CKemw12yVTZyNS5WUq6GLvQa5KsSYOSAIYizxz8Mze8plQytc6VhF3OuFyJ72u5LAx+szyxIu8zNAkyNeUqI1/V1gnlhWbZfov6KV56qoV9U8+xKp1J/nCXdabHEO/saOgWk4XgSSc7JNsT1PMPKT18r7JwNha0DS2onWBbegYMV0YXyH/WVAM+oXvhZAj7WPz5bHRbgkatGmBZD2jOjRQxzSugJsZzsmrKbWm8lIoyJGdNxTn5CisYElZvP1CV1OFaQBkaLfmnlpbJ0NQXpQdnpgXuLvI7sXptyn0Bjt41JQclB2BU98SrEiR0hPlkh8m4fH/QpQ8WdXEtvKXTX8UtG5RPW0UvTZVZtrU4Weyu2Hctj2D/hkXywtBXp7mUhB21fBGiaEc+vh6Q2OrZPrwoAj3YWfLlNBjFmfKmUwXXLno4FLLUujFmmypgs4Qit5HtzwQ="
