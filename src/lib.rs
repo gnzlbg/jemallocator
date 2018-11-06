@@ -190,28 +190,36 @@ unsafe impl Alloc for Jemalloc {
         layout: Layout,
         new_size: usize,
     ) -> Result<(), CannotReallocInPlace> {
-        if new_size == layout.size() { return Ok(()); }
+        if new_size == layout.size() {
+            return Ok(());
+        }
         let flags = layout_to_flags(layout.align(), new_size);
         let usable_size = ffi::xallocx(ptr.cast().as_ptr(), new_size, 0, flags);
+
         if usable_size < layout.size() {
-            // `shrink_in_place` succeeds if the usable size of the shrunk
-            // allocation is smaller than that of the current allocation (and
-            // therefore, than the originally requested size). This means that:
-            //
-            // * the size-class of the allocation was changed to the size-class
-            // of `new_size`, therefore the allocation can be deallocated with
-            // `new_size`
-            //
-            // * if `new_size` lies in the same size class as `layout.size()`,
-            // and `new_size != layout.size()` then `shrink_in_place` will error
-            // even though technically the allocation can be deallocated
-            // properly with `new_size` - the problem is that `xallocx` will
-            // return `layout.size()` if shrinking failed, and we cannot detect
-            // whether that means that shrinking failed or that `new_size` is
-            // part of the same size-class efficiently.
-            //
+            // If `usable_size` is smaller than the original size, the
+            // size-class of the allocation was shrunk to the size-class of
+            // `new_size`, and it is safe to deallocate the allocation with
+            // `new_size`:
+            Ok(())
+        } else if usable_size == ffi::nallocx(new_size, flags) {
+            // If the allocation was not shrunk and the size class of `new_size`
+            // is the same as the size-class of `layout.size()`, then the
+            // allocation can be properly deallocated using `new_size` (and also
+            // using `layout.size()` because the allocation did not change)
+
+            // note: when the allocation is not shrunk, `xallocx` returns the
+            // usable size of the original allocation, which in this case matches
+            // that of the requested allocation:
+            debug_assert_eq!(
+                ffi::nallocx(new_size, flags),
+                ffi::nallocx(layout.size(), flags)
+            );
             Ok(())
         } else {
+            // If the allocation was not shrunk, but the size-class of
+            // `new_size` is not the same as that of the original allocation,
+            // then shrinking the allocation failed:
             Err(CannotReallocInPlace)
         }
     }
