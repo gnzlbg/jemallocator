@@ -134,7 +134,7 @@ fn main() {
     assert!(jemalloc_src_dir.exists());
 
     // Configuration files
-    let config_files = ["configure", "VERSION"];
+    let config_files = ["configure", /*"VERSION"*/];
 
     // Verify that the configuration files are up-to-date
     if env::var("JEMALLOC_SYS_VERIFY_CONFIGURE").is_ok() {
