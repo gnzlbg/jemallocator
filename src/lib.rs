@@ -25,8 +25,6 @@ extern crate libc;
 #[cfg(feature = "alloc_trait")]
 use core::alloc::{Alloc, AllocErr, CannotReallocInPlace, Excess};
 use core::alloc::{GlobalAlloc, Layout};
-use core::mem;
-use core::ptr;
 #[cfg(feature = "alloc_trait")]
 use core::ptr::NonNull;
 
@@ -252,55 +250,7 @@ pub unsafe fn usable_size<T>(ptr: *const T) -> usize {
     ffi::malloc_usable_size(ptr as *const c_void)
 }
 
-/// Fetch the value of options `name`.
-///
-/// Please note that if you want to fetch a string, use char* instead of &str or
-/// cstring.
-pub unsafe fn mallctl_fetch<T>(name: &[u8], t: &mut T) -> Result<(), libc::c_int> {
-    // make sure name is a valid c string.
-    if name.is_empty() || *name.last().unwrap() != 0 {
-        return Err(libc::EINVAL);
-    }
-    let mut t_size = mem::size_of::<T>();
-    let t_ptr = t as *mut T as *mut _;
-    let code = ffi::mallctl(
-        name.as_ptr() as *const _,
-        t_ptr,
-        &mut t_size,
-        ptr::null_mut(),
-        0,
-    );
-
-    if code != 0 {
-        return Err(code);
-    }
-    Ok(())
-}
-
-/// Set a value to option `name`.
-///
-/// Please note that if you want to set a string, use char* instead of &str or
-/// cstring.
-pub unsafe fn mallctl_set<T>(name: &[u8], mut t: T) -> Result<(), libc::c_int> {
-    // make sure name is a valid c string.
-    if name.is_empty() || *name.last().unwrap() != 0 {
-        return Err(libc::EINVAL);
-    }
-    let size = mem::size_of::<T>();
-    let code = ffi::mallctl(
-        name.as_ptr() as *const _,
-        ptr::null_mut(),
-        ptr::null_mut(),
-        &mut t as *mut T as *mut _,
-        size,
-    );
-    if code != 0 {
-        return Err(code);
-    }
-    Ok(())
-}
-
 /// Raw bindings to jemalloc
-pub mod ffi {
+mod ffi {
     pub use jemalloc_sys::*;
 }

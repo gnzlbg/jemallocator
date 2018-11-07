@@ -1,0 +1,37 @@
+[package]
+name = "jemalloc-ctl"
+version = "0.3.0"
+authors = ["Steven Fackler <sfackler@gmail.com>"]
+
+license = "MIT/Apache-2.0"
+readme = "README.md"
+categories = ["memory-management", "api-bindings", "development-tools" ]
+keywords = ["allocator", "jemalloc"]
+repository = "https://github.com/alexcrichton/jemallocator"
+homepage = "https://github.com/alexcrichton/jemallocator"
+documentation = "https://docs.rs/jemalloc-ctl"
+description = """
+A safe wrapper over jemalloc's control and introspection APIs
+"""
+
+[badges]
+appveyor = { repository = "alexcrichton/jemallocator" }
+travis-ci = { repository = "alexcrichton/jemallocator" }
+codecov = { repository = "alexcrichton/jemallocator" }
+is-it-maintained-issue-resolution = { repository = "alexcrichton/jemallocator" }
+is-it-maintained-open-issues = { repository = "alexcrichton/jemallocator" }
+maintenance = { status = "actively-developed" }
+
+[dependencies]
+jemalloc-sys = { path = "../jemalloc-sys", version = "0.3.0" }
+libc = { version = "0.2", default-features = false }
+
+[dev-dependencies]
+jemallocator = { path = "..", version = "0.3.0" }
+
+[features]
+default = []
+use_std = [ "libc/use_std" ]
+
+[package.metadata.docs.rs]
+rustdoc-args = [ "--cfg jemallocator_docs" ]
