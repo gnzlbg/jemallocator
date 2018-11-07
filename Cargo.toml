@@ -1,10 +1,16 @@
 [package]
 name = "jemallocator"
-version = "0.2.0"
-authors = ["Alex Crichton <alex@alexcrichton.com>"]
+version = "0.3.0"
+authors = [
+    "Alex Crichton <alex@alexcrichton.com>",
+    "Gonzalo Brito Gadeschi <gonzalobg88@gmail.com>",
+    "Simon Sapin <simon.sapin@exyr.org>",
+    "Steven Fackler <sfackler@gmail.com>"
+]
 license = "MIT/Apache-2.0"
 readme = "README.md"
-keywords = ["allocator"]
+keywords = ["allocator", "jemalloc"]
+categories = ["memory-management", "api-bindings"]
 repository = "https://github.com/alexcrichton/jemallocator"
 homepage = "https://github.com/alexcrichton/jemallocator"
 documentation = "https://docs.rs/jemallocator"
@@ -12,6 +18,14 @@ description = """
 A Rust allocator backed by jemalloc
 """
 edition = "2015"
+
+[badges]
+appveyor = { repository = "alexcrichton/jemallocator" }
+travis-ci = { repository = "alexcrichton/jemallocator" }
+codecov = { repository = "alexcrichton/jemallocator" }
+is-it-maintained-issue-resolution = { repository = "alexcrichton/jemallocator" }
+is-it-maintained-open-issues = { repository = "alexcrichton/jemallocator" }
+maintenance = { status = "actively-developed" }
 
 [lib]
 test = false
@@ -21,11 +35,12 @@ bench = false
 members = ["systest", "jemallocator-global" ]
 
 [dependencies]
-jemalloc-sys = { path = "jemalloc-sys", version = "0.2.0", default-features = false }
+jemalloc-sys = { path = "jemalloc-sys", version = "0.3.0", default-features = false }
 libc = { version = "^0.2.8", default-features = false }
 
 [dev-dependencies]
 paste = "0.1"
+jemalloc-ctl = { path = "jemalloc-ctl", version = "0.3.0" }
 
 [features]
 default = ["background_threads_runtime_support"]

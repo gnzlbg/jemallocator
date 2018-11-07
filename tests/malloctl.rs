@@ -1,3 +1,4 @@
+extern crate jemalloc_ctl;
 extern crate jemallocator;
 extern crate libc;
 
@@ -18,24 +19,21 @@ fn smoke() {
 }
 
 #[test]
-fn test_mallctl() {
-    let mut epoch: u64 = 0;
+fn test_jemalloc_ctl_get_set() {
+    use jemalloc_ctl::{
+        raw::{get, set},
+        Error,
+    };
     unsafe {
-        assert_eq!(
-            jemallocator::mallctl_fetch(b"", &mut epoch),
-            Err(libc::EINVAL)
-        );
-        assert_eq!(
-            jemallocator::mallctl_fetch(b"epoch", &mut epoch),
-            Err(libc::EINVAL)
-        );
-        jemallocator::mallctl_fetch(b"epoch\0", &mut epoch).unwrap();
-        assert!(epoch > 0);
-        assert_eq!(jemallocator::mallctl_set(b"", epoch), Err(libc::EINVAL));
-        assert_eq!(
-            jemallocator::mallctl_set(b"epoch", epoch),
-            Err(libc::EINVAL)
-        );
-        jemallocator::mallctl_set(b"epoch\0", epoch).unwrap();
+        {
+            // get}
+            assert_eq!(get::<u64>(b""), Err(Error::EINVAL));
+            assert_eq!(get::<u64>(b"epoch"), Err(Error::EINVAL));
+            let epoch = get::<u64>(b"epoch\0").unwrap();
+            assert!(epoch > 0);
+            assert_eq!(set(b"", epoch), Err(Error::EINVAL));
+            assert_eq!(set(b"epoch", epoch), Err(Error::EINVAL));
+            set(b"epoch\0", epoch).unwrap();
+        }
     }
 }

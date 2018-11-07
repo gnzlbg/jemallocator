@@ -4,6 +4,7 @@
 #![cfg(not(feature = "unprefixed_malloc_on_supported_platforms"))]
 #![cfg(not(target_env = "musl"))]
 
+extern crate jemalloc_ctl;
 extern crate jemallocator;
 extern crate libc;
 
@@ -28,17 +29,8 @@ pub static malloc_conf: Option<&'static libc::c_char> = Some(unsafe {
     .y
 });
 
-// Returns true if background threads are enabled.
-fn background_threads() -> bool {
-    unsafe {
-        let mut v: bool = false;
-        jemallocator::mallctl_fetch(b"opt.background_thread\0", &mut v).unwrap();
-        v
-    }
-}
-
 #[test]
 fn background_threads_enabled() {
     // Background threads are unconditionally enabled at run-time by default.
-    assert_eq!(background_threads(), true);
+    assert_eq!(jemalloc_ctl::opt::background_thread().unwrap(), true);
 }

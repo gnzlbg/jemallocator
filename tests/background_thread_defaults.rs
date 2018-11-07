@@ -1,4 +1,6 @@
 //! Test background threads run-time default settings.
+
+extern crate jemalloc_ctl;
 extern crate jemallocator;
 extern crate libc;
 
@@ -9,11 +11,7 @@ static A: Jemalloc = Jemalloc;
 
 // Returns true if background threads are enabled.
 fn background_threads() -> bool {
-    unsafe {
-        let mut v: bool = false;
-        jemallocator::mallctl_fetch(b"opt.background_thread\0", &mut v).unwrap();
-        v
-    }
+    jemalloc_ctl::opt::background_thread().unwrap()
 }
 
 #[test]

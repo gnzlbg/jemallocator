@@ -1,9 +1,17 @@
 # jemalloc-sys - Rust bindings to the `jemalloc` C library
 
+[![Travis-CI Status]][travis] [![Appveyor Status]][appveyor] [![Latest Version]][crates.io] [![docs]][docs.rs]
+
 > Note: the Rust allocator API is implemented for `jemalloc` in the
 > [`jemallocator`](https://crates.io/crates/jemallocator) crate.
 
+## Documentation
+
+* [Latest release (docs.rs)][docs.rs]
+* [master branch`][master_docs]
+
 `jemalloc` is a general purpose memory allocator, its documentation
+
  can be found here:
 
 * [API documentation][jemalloc_docs]
@@ -14,15 +22,17 @@
 
 **Current jemalloc version**: 5.1.
 
-[jemalloc_docs]: http://jemalloc.net/jemalloc.3.html
-[jemalloc_wiki]: https://github.com/jemalloc/jemalloc/wiki
+## Platform support
 
-# Features
+See the platform support of the
+[`jemallocator`](https://crates.io/crates/jemallocator) crate.
+
+## Features
 
 Most features correspond to `jemalloc` features - the reference is
 [`jemalloc/INSTALL.md`][jemalloc_install].
 
-## Cargo features
+### Cargo features
 
 This crate provides following cargo feature flags:
 
@@ -67,7 +77,7 @@ This crate provides following cargo feature flags:
   `jemalloc` as well. On some platforms prefixes are always used because
   unprefixing is known to cause segfaults due to allocator mismatches.
 
-## Environment variables
+### Environment variables
 
 `jemalloc` options taking values are passed via environment variables using the
 schema `JEMALLOC_SYS_{KEY}=VALUE` where the `KEY` names correspond to the
@@ -127,7 +137,7 @@ hyphens `-` are replaced with underscores `_`(see
 
 [jemalloc_install]: https://github.com/jemalloc/jemalloc/blob/dev/INSTALL.md#advanced-configuration
 
-# License
+## License
 
 This project is licensed under either of
 
@@ -138,8 +148,18 @@ This project is licensed under either of
 
 at your option.
 
-### Contribution
+## Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in `jemalloc-sys` by you, as defined in the Apache-2.0 license,
 shall be dual licensed as above, without any additional terms or conditions.
+
+[travis]: https://travis-ci.org/alexcrichton/jemallocator
+[Travis-CI Status]: https://travis-ci.org/alexcrichton/jemallocator.svg?branch=master
+[appveyor]: https://ci.appveyor.com/project/alexcrichton/jemallocator/branch/master
+[Appveyor Status]: https://ci.appveyor.com/api/projects/status/github/alexcrichton/jemallocator?branch=master&svg=true
+[Latest Version]: https://img.shields.io/crates/v/jemalloc-sys.svg
+[crates.io]: https://crates.io/crates/jemalloc-ctl
+[docs]: https://docs.rs/jemalloc-sys/badge.svg
+[docs.rs]: https://docs.rs/jemalloc-sys/
+[master_docs]: https://alexcrichton.github.io/jemallocator/jemalloc-sys
