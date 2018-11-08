@@ -2,6 +2,7 @@ extern crate jemalloc_ctl;
 extern crate jemallocator;
 extern crate libc;
 
+use jemalloc_ctl::raw::{get, set};
 use jemallocator::Jemalloc;
 use std::alloc::{GlobalAlloc, Layout};
 
@@ -19,21 +20,34 @@ fn smoke() {
 }
 
 #[test]
-fn test_jemalloc_ctl_get_set() {
-    use jemalloc_ctl::{
-        raw::{get, set},
-        Error,
-    };
-    unsafe {
-        {
-            // get}
-            assert_eq!(get::<u64>(b""), Err(Error::EINVAL));
-            assert_eq!(get::<u64>(b"epoch"), Err(Error::EINVAL));
-            let epoch = get::<u64>(b"epoch\0").unwrap();
-            assert!(epoch > 0);
-            assert_eq!(set(b"", epoch), Err(Error::EINVAL));
-            assert_eq!(set(b"epoch", epoch), Err(Error::EINVAL));
-            set(b"epoch\0", epoch).unwrap();
-        }
-    }
+fn ctl_get_set() {
+    let epoch = get::<u64>(b"epoch\0").unwrap();
+    assert!(epoch > 0);
+    set(b"epoch\0", epoch).unwrap();
+}
+
+#[test]
+#[should_panic]
+fn ctl_panic_empty_get() {
+    let _ = get::<u64>(b"").unwrap();
+}
+
+#[test]
+#[should_panic]
+fn ctl_panic_empty_set() {
+    let epoch = get::<u64>(b"epoch\0").unwrap();
+    set(b"", epoch).unwrap();
+}
+
+#[test]
+#[should_panic]
+fn ctl_panic_non_null_terminated_get() {
+    let _ = get::<u64>(b"epoch").unwrap();
+}
+
+#[test]
+#[should_panic]
+fn ctl_panic_non_null_terminated_set() {
+    let epoch = get::<u64>(b"epoch\0").unwrap();
+    set(b"epoch", epoch).unwrap();
 }

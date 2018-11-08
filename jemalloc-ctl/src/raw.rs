@@ -43,7 +43,7 @@ use {mem, ptr, slice};
 /// ```
 pub fn name_to_mib(name: &[u8], mib: &mut [usize]) -> Result<()> {
     unsafe {
-        validate_name(name)?;
+        validate_name(name);
 
         let mut len = mib.len();
         cvt(jemalloc_sys::mallctlnametomib(
@@ -81,7 +81,7 @@ pub fn get_mib<T: Copy>(mib: &[usize]) -> Result<T> {
 /// reads its value.
 pub fn get<T: Copy>(name: &[u8]) -> Result<T> {
     unsafe {
-        validate_name(name)?;
+        validate_name(name);
 
         let mut value = MaybeUninit { init: () };
         let mut len = mem::size_of::<T>();
@@ -118,7 +118,7 @@ pub fn set_mib<T>(mib: &[usize], mut value: T) -> Result<()> {
 /// and sets it `value`
 pub fn set<T>(name: &[u8], mut value: T) -> Result<()> {
     unsafe {
-        validate_name(name)?;
+        validate_name(name);
 
         cvt(jemalloc_sys::mallctl(
             name as *const _ as *const c_char,
@@ -155,7 +155,7 @@ pub fn get_set_mib<T>(mib: &[usize], mut value: T) -> Result<T> {
 /// sets its `value` returning its previous value.
 pub fn get_set<T>(name: &[u8], mut value: T) -> Result<T> {
     unsafe {
-        validate_name(name)?;
+        validate_name(name);
 
         let mut len = mem::size_of::<T>();
         cvt(jemalloc_sys::mallctl(
@@ -186,7 +186,7 @@ pub fn get_str_mib(mib: &[usize]) -> Result<&'static str> {
 /// reads its value of type `&str`.
 pub fn get_str(name: &[u8]) -> Result<&'static str> {
     unsafe {
-        validate_name(name)?;
+        validate_name(name);
 
         let ptr: *const c_char = get(name)?;
         ptr2str(ptr)
@@ -199,12 +199,13 @@ unsafe fn ptr2str(ptr: *const c_char) -> Result<&'static str> {
     core::str::from_utf8(byte_slice).map_err(|_| Error::EINVAL)
 }
 
-fn validate_name(name: &[u8]) -> Result<()> {
-    if name.is_empty() || *name.last().unwrap() != b'\0' {
-        Err(Error::EINVAL)
-    } else {
-        Ok(())
-    }
+fn validate_name(name: &[u8]) {
+    assert!(!name.is_empty(), "empty byte string");
+    assert_eq!(
+        *name.last().unwrap(),
+        b'\0',
+        "non-null terminated byte string"
+    );
 }
 
 union MaybeUninit<T: Copy> {
