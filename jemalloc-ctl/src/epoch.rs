@@ -1,7 +1,7 @@
 //! Epoch access.
 
 use error::Result;
-use raw::{get_set, get_set_mib, name_to_mib};
+use keys::{Access, IntoName, Mib};
 
 const EPOCH: &[u8] = b"epoch\0";
 
@@ -28,7 +28,7 @@ const EPOCH: &[u8] = b"epoch\0";
 /// }
 /// ```
 pub fn epoch() -> Result<u64> {
-    get_set(EPOCH, 1)
+    EPOCH.name().read_write(1)
 }
 
 /// A type providing access to the jemalloc epoch.
@@ -57,13 +57,12 @@ pub fn epoch() -> Result<u64> {
 ///     assert_eq!(a + 1, b);
 /// }
 #[derive(Copy, Clone)]
-pub struct Epoch([usize; 1]);
+pub struct Epoch(Mib<[usize; 1]>);
 
 impl Epoch {
     /// Returns a new `Epoch`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 1];
-        name_to_mib(EPOCH, &mut mib)?;
+        let mib = EPOCH.name().mib()?;
         Ok(Epoch(mib))
     }
 
@@ -72,6 +71,6 @@ impl Epoch {
     /// The epoch advances by 1 every time it is advanced, so the value can be
     /// used to determine if another thread triggered a referesh.
     pub fn advance(self) -> Result<u64> {
-        get_set_mib(&self.0, 1)
+        self.0.read_write(1)
     }
 }

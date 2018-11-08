@@ -71,6 +71,7 @@
 #![deny(missing_docs)]
 #![cfg_attr(not(feature = "use_std"), no_std)]
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::stutter))]
+#![feature(coerce_unsized)]
 
 extern crate jemalloc_sys;
 extern crate libc;
@@ -84,13 +85,14 @@ static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
 #[cfg(not(feature = "use_std"))]
 use core as std;
-use std::{fmt, mem, ptr, result, slice};
+use std::{fmt, mem, ops, ptr, result, slice, str};
 
 pub mod arenas;
 mod background_threads;
 pub mod config;
 mod epoch;
 mod error;
+mod keys;
 pub mod opt;
 pub mod raw;
 pub mod stats;
@@ -102,4 +104,5 @@ mod version;
 pub use background_threads::*;
 pub use epoch::*;
 pub use error::{Error, Result};
+pub use keys::{Access, IntoName, Mib, MibStr, Name};
 pub use version::*;

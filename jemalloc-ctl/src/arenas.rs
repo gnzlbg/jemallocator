@@ -1,8 +1,8 @@
 //! Arena operations.
 
 use error::Result;
+use keys::{Access, IntoName, Mib};
 use libc::c_uint;
-use raw::{get, get_mib, name_to_mib};
 
 const NARENAS: &[u8] = b"arenas.narenas\0";
 
@@ -25,7 +25,7 @@ const NARENAS: &[u8] = b"arenas.narenas\0";
 /// }
 /// ```
 pub fn narenas() -> Result<c_uint> {
-    get(NARENAS)
+    NARENAS.name().read()
 }
 
 /// A type providing access to the current limit on the number of arenas.
@@ -48,18 +48,17 @@ pub fn narenas() -> Result<c_uint> {
 /// }
 /// ```
 #[derive(Copy, Clone)]
-pub struct NArenas([usize; 2]);
+pub struct NArenas(Mib<[usize; 2]>);
 
 impl NArenas {
     /// Returns a new `NArenas`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(NARENAS, &mut mib)?;
+        let mib = NARENAS.name().mib()?;
         Ok(NArenas(mib))
     }
 
     /// Returns the maximum number of arenas.
     pub fn get(self) -> Result<c_uint> {
-        get_mib(&self.0)
+        self.0.read()
     }
 }

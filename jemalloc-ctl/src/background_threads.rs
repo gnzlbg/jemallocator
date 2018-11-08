@@ -1,7 +1,7 @@
 //! Background thread operations.
 
 use error::Result;
-use raw::{get, get_mib, name_to_mib, set, set_mib};
+use keys::{Access, IntoName, Mib};
 
 const BACKGROUND_THREAD: &[u8] = b"background_thread\0";
 
@@ -27,7 +27,7 @@ const BACKGROUND_THREAD: &[u8] = b"background_thread\0";
 /// }
 /// ```
 pub fn background_thread() -> Result<bool> {
-    get(BACKGROUND_THREAD)
+    BACKGROUND_THREAD.name().read()
 }
 
 /// Enables or disables internal background worker threads.
@@ -51,7 +51,7 @@ pub fn background_thread() -> Result<bool> {
 /// }
 /// ```
 pub fn set_background_thread(background_thread: bool) -> Result<()> {
-    set(BACKGROUND_THREAD, background_thread)
+    BACKGROUND_THREAD.name().write(background_thread)
 }
 
 /// A type providing access to the state of internal background worker threads.
@@ -77,24 +77,23 @@ pub fn set_background_thread(background_thread: bool) -> Result<()> {
 /// }
 /// ```
 #[derive(Copy, Clone)]
-pub struct BackgroundThread([usize; 1]);
+pub struct BackgroundThread(Mib<[usize; 1]>);
 
 impl BackgroundThread {
     /// Returns a new `BackgroundThread`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 1];
-        name_to_mib(BACKGROUND_THREAD, &mut mib)?;
+        let mib = BACKGROUND_THREAD.name().mib()?;
         Ok(BackgroundThread(mib))
     }
 
     /// Returns the current background thread state.
     pub fn get(self) -> Result<bool> {
-        get_mib(&self.0)
+        self.0.read()
     }
 
     /// Sets the background thread state.
     pub fn set(self, background_thread: bool) -> Result<()> {
-        set_mib(&self.0, background_thread)
+        self.0.write(background_thread)
     }
 }
 
@@ -118,7 +117,7 @@ const MAX_BACKGROUND_THREADS: &[u8] = b"max_background_threads\0";
 /// }
 /// ```
 pub fn max_background_threads() -> Result<usize> {
-    get(MAX_BACKGROUND_THREADS)
+    MAX_BACKGROUND_THREADS.name().read()
 }
 
 /// Sets the maximum number of background threads that will be created.
@@ -138,7 +137,7 @@ pub fn max_background_threads() -> Result<usize> {
 /// }
 /// ```
 pub fn set_max_background_threads(max_background_threads: usize) -> Result<()> {
-    set(MAX_BACKGROUND_THREADS, max_background_threads)
+    MAX_BACKGROUND_THREADS.name().write(max_background_threads)
 }
 
 /// A type providing access to the maximum number of background threads that
@@ -161,23 +160,22 @@ pub fn set_max_background_threads(max_background_threads: usize) -> Result<()> {
 /// }
 /// ```
 #[derive(Copy, Clone)]
-pub struct MaxBackgroundThreads([usize; 1]);
+pub struct MaxBackgroundThreads(Mib<[usize; 1]>);
 
 impl MaxBackgroundThreads {
     /// Returns a new `MaxBackgroundThreads`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 1];
-        name_to_mib(MAX_BACKGROUND_THREADS, &mut mib)?;
+        let mib = MAX_BACKGROUND_THREADS.name().mib()?;
         Ok(MaxBackgroundThreads(mib))
     }
 
     /// Returns the current background thread limit.
     pub fn get(self) -> Result<usize> {
-        get_mib(&self.0)
+        self.0.read()
     }
 
     /// Sets the background thread limit.
     pub fn set(self, max_background_threads: usize) -> Result<()> {
-        set_mib(&self.0, max_background_threads)
+        self.0.write(max_background_threads)
     }
 }

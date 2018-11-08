@@ -6,7 +6,7 @@
 //! [`Epoch`]: ../struct.Epoch.html
 
 use error::Result;
-use raw::{get, get_mib, name_to_mib};
+use keys::{Access, IntoName, Mib};
 
 const ALLOCATED: &[u8] = b"stats.allocated\0";
 
@@ -37,7 +37,7 @@ const ALLOCATED: &[u8] = b"stats.allocated\0";
 ///
 /// [`epoch`]: ../fn.epoch().html
 pub fn allocated() -> Result<usize> {
-    get(ALLOCATED)
+    ALLOCATED.name().read()
 }
 
 /// A type providing access to the total number of bytes allocated by the application.
@@ -73,19 +73,18 @@ pub fn allocated() -> Result<usize> {
 ///
 /// [`Epoch`]: ../struct.Epoch.html
 #[derive(Copy, Clone)]
-pub struct Allocated([usize; 2]);
+pub struct Allocated(Mib<[usize; 2]>);
 
 impl Allocated {
     /// Returns a new `Allocated`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(ALLOCATED, &mut mib)?;
+        let mib = ALLOCATED.name().mib()?;
         Ok(Allocated(mib))
     }
 
     /// Returns the total number of bytes allocated by the application.
     pub fn get(self) -> Result<usize> {
-        get_mib(&self.0)
+        self.0.read()
     }
 }
 
@@ -122,7 +121,7 @@ const ACTIVE: &[u8] = b"stats.active\0";
 /// [`epoch`]: ../fn.epoch().html
 /// [`allocated`]: fn.allocated.hml
 pub fn active() -> Result<usize> {
-    get(ACTIVE)
+    ACTIVE.name().read()
 }
 
 /// A type providing access to the total number of bytes in active pages allocated by the
@@ -163,19 +162,18 @@ pub fn active() -> Result<usize> {
 /// [`Epoch`]: ../struct.Epoch.html
 /// [`Allocated`]: struct.Allocated.html
 #[derive(Copy, Clone)]
-pub struct Active([usize; 2]);
+pub struct Active(Mib<[usize; 2]>);
 
 impl Active {
     /// Returns a new `Allocated`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(ACTIVE, &mut mib)?;
+        let mib = ACTIVE.name().mib()?;
         Ok(Active(mib))
     }
 
     /// Returns the total number of bytes in active pages allocated by the application.
     pub fn get(self) -> Result<usize> {
-        get_mib(&self.0)
+        self.0.read()
     }
 }
 
@@ -205,7 +203,7 @@ const METADATA: &[u8] = b"stats.metadata\0";
 ///
 /// [`epoch`]: ../fn.epoch.html
 pub fn metadata() -> Result<usize> {
-    get(METADATA)
+    METADATA.name().read()
 }
 
 /// A type providing access to the total number of bytes dedicated to jemalloc metadata.
@@ -239,19 +237,18 @@ pub fn metadata() -> Result<usize> {
 ///
 /// [`Epoch`]: ../struct.Epoch.html
 #[derive(Copy, Clone)]
-pub struct Metadata([usize; 2]);
+pub struct Metadata(Mib<[usize; 2]>);
 
 impl Metadata {
     /// Returns a new `Metadata`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(METADATA, &mut mib)?;
+        let mib = METADATA.name().mib()?;
         Ok(Metadata(mib))
     }
 
     /// Returns the total number of bytes dedicated to jemalloc metadata.
     pub fn get(self) -> Result<usize> {
-        get_mib(&self.0)
+        self.0.read()
     }
 }
 
@@ -288,7 +285,7 @@ const RESIDENT: &[u8] = b"stats.resident\0";
 /// [`epoch`]: ../fn.epoch.html
 /// [`active`]: fn.active.html
 pub fn resident() -> Result<usize> {
-    get(RESIDENT)
+    RESIDENT.name().read()
 }
 
 /// A type providing access to the total number of bytes in physically resident data pages mapped
@@ -330,19 +327,18 @@ pub fn resident() -> Result<usize> {
 /// [`Epoch`]: ../struct.Epoch.html
 /// [`Active`]: struct.Active.html
 #[derive(Copy, Clone)]
-pub struct Resident([usize; 2]);
+pub struct Resident(Mib<[usize; 2]>);
 
 impl Resident {
     /// Returns a new `Resident`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(RESIDENT, &mut mib)?;
+        let mib = RESIDENT.name().mib()?;
         Ok(Resident(mib))
     }
 
     /// Returns the total number of bytes in physically resident data pages mapped by the allocator.
     pub fn get(self) -> Result<usize> {
-        get_mib(&self.0)
+        self.0.read()
     }
 }
 
@@ -378,7 +374,7 @@ const MAPPED: &[u8] = b"stats.mapped\0";
 /// [`resident`]: fn.resident.html
 /// [`active`]: fn.active.html
 pub fn mapped() -> Result<usize> {
-    get(MAPPED)
+    MAPPED.name().read()
 }
 
 /// A type providing access to the total number of bytes in active extents mapped by the allocator.
@@ -418,19 +414,18 @@ pub fn mapped() -> Result<usize> {
 /// [`Resident`]: struct.Resident.html
 /// [`Active`]: struct.Active.html
 #[derive(Copy, Clone)]
-pub struct Mapped([usize; 2]);
+pub struct Mapped(Mib<[usize; 2]>);
 
 impl Mapped {
     /// Returns a new `Mapped`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(MAPPED, &mut mib)?;
+        let mib = MAPPED.name().mib()?;
         Ok(Mapped(mib))
     }
 
     /// Returns the total number of bytes in active extents mapped by the allocator.
     pub fn get(self) -> Result<usize> {
-        get_mib(&self.0)
+        self.0.read()
     }
 }
 
@@ -465,7 +460,7 @@ const RETAINED: &[u8] = b"stats.retained\0";
 /// [`epoch`]: ../fn.epoch.html
 /// [`mapped`]: fn.mapped.html
 pub fn retained() -> Result<usize> {
-    get(RETAINED)
+    RETAINED.name().read()
 }
 
 /// A type providing access to the total number of bytes in virtual memory mappings that were retained rather than being
@@ -504,18 +499,17 @@ pub fn retained() -> Result<usize> {
 /// [`Epoch`]: ../struct.Epoch.html
 /// [`Mapped`]: struct.Mapped.html
 #[derive(Copy, Clone)]
-pub struct Retained([usize; 2]);
+pub struct Retained(Mib<[usize; 2]>);
 
 impl Retained {
     /// Returns a new `Retained`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(RETAINED, &mut mib)?;
+        let mib = RETAINED.name().mib()?;
         Ok(Retained(mib))
     }
 
     /// Returns the total number of bytes in virtual memory mappings that were retained.
     pub fn get(self) -> Result<usize> {
-        get_mib(&self.0)
+        self.0.read()
     }
 }

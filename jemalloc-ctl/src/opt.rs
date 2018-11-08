@@ -2,8 +2,8 @@
 //!
 //! These settings are controlled by the `MALLOC_CONF` environment variable.
 use error::Result;
+use keys::{Access, IntoName, Mib, MibStr};
 use libc::c_uint;
-use raw::{get, get_mib, get_str, get_str_mib, name_to_mib};
 
 const ABORT: &[u8] = b"opt.abort\0";
 
@@ -25,7 +25,7 @@ const ABORT: &[u8] = b"opt.abort\0";
 /// }
 /// ```
 pub fn abort() -> Result<bool> {
-    get(ABORT)
+    ABORT.name().read()
 }
 
 /// A type determining if `jemalloc` will call `abort(3)` on most warnings.
@@ -50,19 +50,18 @@ pub fn abort() -> Result<bool> {
 /// }
 /// ```
 #[derive(Copy, Clone)]
-pub struct Abort([usize; 2]);
+pub struct Abort(Mib<[usize; 2]>);
 
 impl Abort {
     /// Returns a new `Abort`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(ABORT, &mut mib)?;
+        let mib = ABORT.name().mib()?;
         Ok(Abort(mib))
     }
 
     /// Returns the abort-on-warning behavior.
     pub fn get(self) -> Result<bool> {
-        get_mib(&self.0)
+        self.0.read()
     }
 }
 
@@ -88,7 +87,7 @@ const DSS: &[u8] = b"opt.dss\0";
 /// }
 /// ```
 pub fn dss() -> Result<&'static str> {
-    get_str(DSS)
+    DSS.name().read()
 }
 
 /// A type providing access to the dss (`sbrk(2)`) allocation precedence as related to `mmap(2)`
@@ -116,19 +115,18 @@ pub fn dss() -> Result<&'static str> {
 /// }
 /// ```
 #[derive(Copy, Clone)]
-pub struct Dss([usize; 2]);
+pub struct Dss(MibStr<[usize; 2]>);
 
 impl Dss {
     /// Returns a new `Dss`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(DSS, &mut mib)?;
+        let mib = DSS.name().mib_str()?;
         Ok(Dss(mib))
     }
 
     /// Returns the dss allocation precedence.
     pub fn get(self) -> Result<&'static str> {
-        get_str_mib(&self.0)
+        self.0.read()
     }
 }
 
@@ -152,7 +150,7 @@ const NARENAS: &[u8] = b"opt.narenas\0";
 /// }
 /// ```
 pub fn narenas() -> Result<c_uint> {
-    get(NARENAS)
+    NARENAS.name().read()
 }
 
 /// A type providing access to the maximum number of arenas to use for automatic multiplexing of
@@ -178,19 +176,18 @@ pub fn narenas() -> Result<c_uint> {
 /// }
 /// ```
 #[derive(Copy, Clone)]
-pub struct NArenas([usize; 2]);
+pub struct NArenas(Mib<[usize; 2]>);
 
 impl NArenas {
     /// Returns a new `NArenas`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(NARENAS, &mut mib)?;
+        let mib = NARENAS.name().mib()?;
         Ok(NArenas(mib))
     }
 
     /// Returns the maximum number of arenas.
     pub fn get(self) -> Result<c_uint> {
-        get_mib(&self.0)
+        self.0.read()
     }
 }
 
@@ -222,7 +219,7 @@ const JUNK: &[u8] = b"opt.junk\0";
 /// }
 /// ```
 pub fn junk() -> Result<&'static str> {
-    get_str(JUNK)
+    JUNK.name().read()
 }
 
 /// A type providing access to `jemalloc`'s junk filling mode.
@@ -255,19 +252,18 @@ pub fn junk() -> Result<&'static str> {
 /// }
 /// ```
 #[derive(Copy, Clone)]
-pub struct Junk([usize; 2]);
+pub struct Junk(MibStr<[usize; 2]>);
 
 impl Junk {
     /// Returns a new `Junk`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(JUNK, &mut mib)?;
+        let mib = JUNK.name().mib_str()?;
         Ok(Junk(mib))
     }
 
     /// Returns jemalloc's junk filling mode.
     pub fn get(self) -> Result<&'static str> {
-        get_str_mib(&self.0)
+        self.0.read()
     }
 }
 
@@ -294,7 +290,7 @@ const ZERO: &[u8] = b"opt.zero\0";
 /// }
 /// ```
 pub fn zero() -> Result<bool> {
-    get(ZERO)
+    ZERO.name().read()
 }
 
 /// A type providing access to jemalloc's zeroing behavior.
@@ -322,19 +318,18 @@ pub fn zero() -> Result<bool> {
 /// }
 /// ```
 #[derive(Copy, Clone)]
-pub struct Zero([usize; 2]);
+pub struct Zero(Mib<[usize; 2]>);
 
 impl Zero {
     /// Returns a new `Zero`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(ZERO, &mut mib)?;
+        let mib = ZERO.name().mib()?;
         Ok(Zero(mib))
     }
 
     /// Returns the `jemalloc` zeroing behavior.
     pub fn get(self) -> Result<bool> {
-        get_mib(&self.0)
+        self.0.read()
     }
 }
 
@@ -359,7 +354,7 @@ const TCACHE: &[u8] = b"opt.tcache\0";
 /// }
 /// ```
 pub fn tcache() -> Result<bool> {
-    get(TCACHE)
+    TCACHE.name().read()
 }
 
 /// A type providing access to thread-local allocation caching behavior.
@@ -385,19 +380,18 @@ pub fn tcache() -> Result<bool> {
 /// }
 /// ```
 #[derive(Copy, Clone)]
-pub struct Tcache([usize; 2]);
+pub struct Tcache(Mib<[usize; 2]>);
 
 impl Tcache {
     /// Returns a new `Tcache`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(TCACHE, &mut mib)?;
+        let mib = TCACHE.name().mib()?;
         Ok(Tcache(mib))
     }
 
     /// Returns the thread-local caching behavior.
     pub fn get(self) -> Result<bool> {
-        get_mib(&self.0)
+        self.0.read()
     }
 }
 
@@ -422,7 +416,7 @@ const LG_TCACHE_MAX: &[u8] = b"opt.lg_tcache_max\0";
 /// }
 /// ```
 pub fn lg_tcache_max() -> Result<usize> {
-    get(LG_TCACHE_MAX)
+    LG_TCACHE_MAX.name().read()
 }
 
 /// A type providing access to the maximum size class (log base 2) to cache in the thread-specific
@@ -449,19 +443,18 @@ pub fn lg_tcache_max() -> Result<usize> {
 /// }
 /// ```
 #[derive(Copy, Clone)]
-pub struct LgTcacheMax([usize; 2]);
+pub struct LgTcacheMax(Mib<[usize; 2]>);
 
 impl LgTcacheMax {
     /// Returns a new `LgTcacheMax`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(LG_TCACHE_MAX, &mut mib)?;
+        let mib = LG_TCACHE_MAX.name().mib()?;
         Ok(LgTcacheMax(mib))
     }
 
     /// Returns the maximum cached size class.
     pub fn get(self) -> Result<usize> {
-        get_mib(&self.0)
+        self.0.read()
     }
 }
 
@@ -487,7 +480,7 @@ const BACKGROUND_THREAD: &[u8] = b"opt.background_thread\0";
 /// }
 /// ```
 pub fn background_thread() -> Result<bool> {
-    get(BACKGROUND_THREAD)
+    BACKGROUND_THREAD.name().read()
 }
 
 /// A type determining if `jemalloc` will be initialized with background worker
@@ -514,18 +507,17 @@ pub fn background_thread() -> Result<bool> {
 /// }
 /// ```
 #[derive(Copy, Clone)]
-pub struct BackgroundThread([usize; 2]);
+pub struct BackgroundThread(Mib<[usize; 2]>);
 
 impl BackgroundThread {
     /// Returns a new `BackgroundThread`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(BACKGROUND_THREAD, &mut mib)?;
+        let mib = BACKGROUND_THREAD.name().mib()?;
         Ok(BackgroundThread(mib))
     }
 
     /// Returns the background thread initialization behavior.
     pub fn get(self) -> Result<bool> {
-        get_mib(&self.0)
+        self.0.read()
     }
 }
