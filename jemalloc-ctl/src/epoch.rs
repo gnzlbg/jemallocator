@@ -1,7 +1,7 @@
 //! Epoch access.
 
 use error::Result;
-use keys::{Access, IntoName, Mib};
+use keys::{Access, AsName, Mib};
 
 const EPOCH: &[u8] = b"epoch\0";
 

@@ -1,7 +1,7 @@
 //! Arena operations.
 
 use error::Result;
-use keys::{Access, IntoName, Mib};
+use keys::{Access, AsName, Mib};
 use libc::c_uint;
 
 const NARENAS: &[u8] = b"arenas.narenas\0";

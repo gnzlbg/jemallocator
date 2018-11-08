@@ -2,7 +2,7 @@
 //!
 //! These settings are controlled by the `MALLOC_CONF` environment variable.
 use error::Result;
-use keys::{Access, IntoName, Mib, MibStr};
+use keys::{Access, AsName, Mib, MibStr};
 use libc::c_uint;
 
 const ABORT: &[u8] = b"opt.abort\0";

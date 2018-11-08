@@ -1,7 +1,7 @@
 //! Version operations.
 
 use error::Result;
-use keys::{Access, IntoName, MibStr};
+use keys::{Access, AsName, MibStr};
 
 const VERSION: &[u8] = b"version\0";
 
