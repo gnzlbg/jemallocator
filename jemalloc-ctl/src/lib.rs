@@ -85,7 +85,7 @@ static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
 #[cfg(not(feature = "use_std"))]
 use core as std;
-use std::{fmt, mem, ops, ptr, result, slice, str};
+use std::{fmt, mem, num, ops, ptr, result, slice, str};
 
 pub mod arenas;
 mod background_threads;
