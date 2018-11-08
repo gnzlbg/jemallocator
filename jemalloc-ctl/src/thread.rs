@@ -41,7 +41,7 @@ const ALLOCATEDP: &[u8] = b"thread.allocatedp\0";
 /// }
 /// ```
 pub fn allocatedp() -> Result<ThreadLocal<u64>> {
-    get(ALLOCATEDP).map(ThreadLocal)
+    unsafe { get(ALLOCATEDP).map(ThreadLocal) }
 }
 
 /// A type providing access to the total number of bytes allocated by the current thread.
@@ -95,7 +95,7 @@ impl AllocatedP {
 
     /// Returns a thread-local pointer to the total number of bytes allocated by this thread.
     pub fn get(&self) -> Result<ThreadLocal<u64>> {
-        get_mib(&self.0).map(ThreadLocal)
+        unsafe { get_mib(&self.0).map(ThreadLocal) }
     }
 }
 
@@ -133,7 +133,7 @@ const DEALLOCATEDP: &[u8] = b"thread.deallocatedp\0";
 /// }
 /// ```
 pub fn deallocatedp() -> Result<ThreadLocal<u64>> {
-    get(DEALLOCATEDP).map(ThreadLocal)
+    unsafe { get(DEALLOCATEDP).map(ThreadLocal) }
 }
 
 /// A type providing access to the total number of bytes deallocated by the current thread.
@@ -181,7 +181,7 @@ impl DeallocatedP {
 
     /// Returns a thread-local pointer to the total number of bytes deallocated by this thread.
     pub fn get(&self) -> Result<ThreadLocal<u64>> {
-        let ptr = get_mib::<*mut u64>(&self.0)?;
+        let ptr = unsafe { get_mib::<*mut u64>(&self.0)? };
         Ok(ThreadLocal(ptr))
     }
 }

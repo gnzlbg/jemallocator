@@ -1,7 +1,7 @@
 //! Version operations.
 
 use error::Result;
-use raw::{get_str, get_str_mib, name_to_mib};
+use keys::{Access, IntoName, MibStr};
 
 const VERSION: &[u8] = b"version\0";
 
@@ -25,7 +25,7 @@ const VERSION: &[u8] = b"version\0";
 /// }
 /// ```
 pub fn version() -> Result<&'static str> {
-    get_str(VERSION)
+    VERSION.name().read()
 }
 
 /// A type providing access to the jemalloc version string.
@@ -47,18 +47,17 @@ pub fn version() -> Result<&'static str> {
 ///     println!("jemalloc version {}", version.get().unwrap());
 /// }
 #[derive(Copy, Clone)]
-pub struct Version([usize; 1]);
+pub struct Version(MibStr<[usize; 1]>);
 
 impl Version {
     /// Returns a new `Version`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 1];
-        name_to_mib(VERSION, &mut mib)?;
+        let mib = VERSION.name().mib_str()?;
         Ok(Version(mib))
     }
 
     /// Returns the jemalloc version string.
     pub fn get(self) -> Result<&'static str> {
-        get_str_mib(&self.0)
+        self.0.read()
     }
 }

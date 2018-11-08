@@ -1,6 +1,6 @@
 //! Information about the jemalloc compile-time configuration
 use error::Result;
-use raw::{get_str, get_str_mib, name_to_mib};
+use keys::{Access, IntoName, MibStr};
 
 const MALLOC_CONF: &[u8] = b"config.malloc_conf\0";
 
@@ -26,7 +26,7 @@ const MALLOC_CONF: &[u8] = b"config.malloc_conf\0";
 /// }
 /// ```
 pub fn malloc_conf() -> Result<&'static str> {
-    get_str(MALLOC_CONF)
+    MALLOC_CONF.name().read()
 }
 
 /// A type providing access to the embedded configure-time-specified run-time
@@ -53,18 +53,17 @@ pub fn malloc_conf() -> Result<&'static str> {
 /// }
 /// ```
 #[derive(Copy, Clone)]
-pub struct MallocConf([usize; 2]);
+pub struct MallocConf(MibStr<[usize; 2]>);
 
 impl MallocConf {
     /// Returns a new `MallocConf`.
     pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(MALLOC_CONF, &mut mib)?;
+        let mib = MALLOC_CONF.name().mib_str()?;
         Ok(MallocConf(mib))
     }
 
     /// Returns the embedded configure-time-specified run-time options config.
     pub fn get(self) -> Result<&'static str> {
-        get_str_mib(&self.0)
+        self.0.read()
     }
 }

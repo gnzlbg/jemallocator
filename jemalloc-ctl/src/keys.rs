@@ -1,0 +1,417 @@
+//! Key types to index the _MALLCTL NAMESPACE_.
+//!
+//! The [`Name`] and [`Mib`] types are provided as safe indices into the
+//! _MALLCTL NAMESPACE_. These are constructed from slices via the [`IntoName`]
+//! and [`IntoMib`] traits. The [`Access`] trait provides provides safe access
+//! into the `_MALLCTL NAMESPACE_`.
+//!
+//! # Example
+//!
+//! ```
+//! extern crate libc;
+//! extern crate jemallocator;
+//! extern crate jemalloc_ctl;
+//!
+//! #[global_allocator]
+//! static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
+//!
+//! fn main() {
+//!     use jemalloc_ctl::{Access, IntoName, Name, Mib};
+//!     use libc::{c_uint, c_char};
+//!     let name = b"arenas.nbins\0".name();
+//!     let nbins: c_uint = name.read().unwrap();
+//!     let mut mib: Mib<[usize; 4]> = b"arenas.bin.0.size\0".name().mib().unwrap();
+//!     for i in 0..4 {
+//!         mib[2] = i;
+//!         let bin_size: usize = mib.read().unwrap();
+//!         println!("arena bin {} has size {}", i, bin_size);
+//!     }
+//! }
+//! ```
+
+use error::Result;
+use std::str;
+use {fmt, ops, raw};
+
+/// A `Name` in the _MALLCTL NAMESPACE_.
+#[repr(transparent)]
+#[derive(PartialEq)]
+pub struct Name([u8]);
+
+/// Converts a null-terminated byte-string into a [`Name`].
+pub trait IntoName {
+    /// Converts a null-terminated byte-string into a [`Name`].
+    fn name(&self) -> &Name;
+}
+
+impl IntoName for [u8] {
+    fn name(&self) -> &Name {
+        use str;
+        assert!(
+            !self.is_empty(),
+            "cannot create Name from empty byte-string"
+        );
+        assert_eq!(
+            *self.last().unwrap(),
+            b'\0',
+            "cannot create Name from non-null-terminated byte-string \"{}\"",
+            str::from_utf8(self).unwrap()
+        );
+        unsafe { &*(self as *const [u8] as *const Name) }
+    }
+}
+
+impl Name {
+    /// Returns the [`Mib`] of `self`.
+    pub fn mib<T: MibArg>(&self) -> Result<Mib<T>> {
+        let mut mib: Mib<T> = Mib::default();
+        raw::name_to_mib(&self.0, mib.0.as_mut())?;
+        Ok(mib)
+    }
+
+    /// Returns the [`MibStr`] of `self` which is a key whose value is a string.
+    pub fn mib_str<T: MibArg>(&self) -> Result<MibStr<T>> {
+        assert!(
+            self.value_type_str(),
+            "key \"{}\" does not refer to a string",
+            self
+        );
+        let mut mib: MibStr<T> = MibStr::default();
+        raw::name_to_mib(&self.0, mib.0.as_mut())?;
+        Ok(mib)
+    }
+
+    /// Returns `true` if `self` is a key in the _MALLCTL NAMESPCE_ referring to
+    /// a null-terminated string.
+    pub fn value_type_str(&self) -> bool {
+        // remove the null-terminator:
+        let name = self.0.split_at(self.0.len() - 1).0;
+        if name.is_empty() {
+            return false;
+        }
+        debug_assert_ne!(*name.last().unwrap(), b'\0');
+
+        match name {
+            b"version"
+            | b"config.malloc_conf"
+            | b"opt.metadata_thp"
+            | b"opt.dss"
+            | b"opt.percpu_arena"
+            | b"opt.stats_print_opts"
+            | b"opt.junk"
+            | b"opt.thp"
+            | b"opt.prof_prefix"
+            | b"thread.prof.name"
+            | b"prof.dump" => true,
+            v if v.starts_with(b"arena.") && v.ends_with(b".dss") => true,
+            v if v.starts_with(b"stats.arenas.") && v.ends_with(b".dss") => true,
+            _ => false,
+        }
+    }
+}
+
+impl fmt::Debug for Name {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use str;
+        write!(f, "{}", str::from_utf8(&self.0).unwrap())
+    }
+}
+
+impl fmt::Display for Name {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use str;
+        write!(f, "{}", str::from_utf8(&self.0).unwrap())
+    }
+}
+
+/// Management Information Base.
+#[repr(transparent)]
+#[derive(Copy, Clone, PartialEq, Debug, Default)]
+pub struct Mib<T: MibArg>(T);
+
+/// Management Information Base refering to a string value.
+#[repr(transparent)]
+#[derive(Copy, Clone, PartialEq, Debug, Default)]
+pub struct MibStr<T: MibArg>(T);
+
+impl<T: MibArg> ops::Index<usize> for Mib<T> {
+    type Output = usize;
+    fn index(&self, idx: usize) -> &Self::Output {
+        &self.0.as_ref()[idx]
+    }
+}
+
+impl<T: MibArg> ops::IndexMut<usize> for Mib<T> {
+    fn index_mut(&mut self, idx: usize) -> &mut Self::Output {
+        &mut self.0.as_mut()[idx]
+    }
+}
+
+impl<T: MibArg> ops::Index<usize> for MibStr<T> {
+    type Output = usize;
+    fn index(&self, idx: usize) -> &Self::Output {
+        &self.0.as_ref()[idx]
+    }
+}
+
+impl<T: MibArg> ops::IndexMut<usize> for MibStr<T> {
+    fn index_mut(&mut self, idx: usize) -> &mut Self::Output {
+        &mut self.0.as_mut()[idx]
+    }
+}
+
+/// Safe read access to the _MALLCTL NAMESPACE_.
+pub trait Access<T> {
+    /// Read the key at `self`.
+    fn read(&self) -> Result<T>;
+    /// Write `value` at the key `self`.
+    fn write(&self, value: T) -> Result<()>;
+    /// Write `value` at the key `self` returning its previous value.
+    fn read_write(&self, value: T) -> Result<T>;
+}
+
+macro_rules! impl_access {
+    ($id:ty) => {
+        impl<T: MibArg> Access<$id> for Mib<T> {
+            fn read(&self) -> Result<$id> {
+                unsafe { raw::get_mib(self.0.as_ref()) }
+            }
+            fn write(&self, value: $id) -> Result<()> {
+                unsafe { raw::set_mib(self.0.as_ref(), value) }
+            }
+            fn read_write(&self, value: $id) -> Result<$id> {
+                unsafe { raw::get_set_mib(self.0.as_ref(), value) }
+            }
+        }
+        impl Access<$id> for Name {
+            fn read(&self) -> Result<$id> {
+                unsafe { raw::get(&self.0) }
+            }
+            fn write(&self, value: $id) -> Result<()> {
+                unsafe { raw::set(&self.0, value) }
+            }
+            fn read_write(&self, value: $id) -> Result<$id> {
+                unsafe { raw::get_set(&self.0, value) }
+            }
+        }
+    };
+}
+
+impl_access!(u32);
+impl_access!(u64);
+impl_access!(isize);
+impl_access!(usize);
+
+impl<T: MibArg> Access<bool> for Mib<T> {
+    fn read(&self) -> Result<bool> {
+        unsafe {
+            let v: u8 = raw::get_mib(self.0.as_ref())?;
+            assert!(v == 0 || v == 1);
+            Ok(v == 1)
+        }
+    }
+    fn write(&self, value: bool) -> Result<()> {
+        unsafe { raw::set_mib(self.0.as_ref(), value) }
+    }
+    fn read_write(&self, value: bool) -> Result<bool> {
+        unsafe {
+            let v: u8 = raw::get_set_mib(self.0.as_ref(), value as u8)?;
+            Ok(v == 1)
+        }
+    }
+}
+
+impl Access<bool> for Name {
+    fn read(&self) -> Result<bool> {
+        unsafe {
+            let v: u8 = raw::get(&self.0)?;
+            assert!(v == 0 || v == 1);
+            Ok(v == 1)
+        }
+    }
+    fn write(&self, value: bool) -> Result<()> {
+        unsafe { raw::set(&self.0, value) }
+    }
+    fn read_write(&self, value: bool) -> Result<bool> {
+        unsafe {
+            let v: u8 = raw::get_set(&self.0, value as u8)?;
+            Ok(v == 1)
+        }
+    }
+}
+
+impl<T: MibArg> Access<&'static [u8]> for MibStr<T> {
+    fn read(&self) -> Result<&'static [u8]> {
+        // this is safe because the only safe way to construct a `MibStr` is by
+        // validating that the key refers to a byte-string value
+        unsafe { raw::get_str_mib(self.0.as_ref()) }
+    }
+    fn write(&self, value: &'static [u8]) -> Result<()> {
+        raw::set_str_mib(self.0.as_ref(), value)
+    }
+    fn read_write(&self, value: &'static [u8]) -> Result<&'static [u8]> {
+        // this is safe because the only safe way to construct a `MibStr` is by
+        // validating that the key refers to a byte-string value
+        unsafe { raw::get_set_str_mib(self.0.as_ref(), value) }
+    }
+}
+
+impl Access<&'static [u8]> for Name {
+    fn read(&self) -> Result<&'static [u8]> {
+        assert!(
+            self.value_type_str(),
+            "the name \"{:?}\" does not refer to a byte string",
+            self
+        );
+        // this is safe because the key refers to a byte string:
+        unsafe { raw::get_str(&self.0) }
+    }
+    fn write(&self, value: &'static [u8]) -> Result<()> {
+        assert!(
+            self.value_type_str(),
+            "the name \"{:?}\" does not refer to a byte string",
+            self
+        );
+        raw::set_str(&self.0, value)
+    }
+    fn read_write(&self, value: &'static [u8]) -> Result<&'static [u8]> {
+        assert!(
+            self.value_type_str(),
+            "the name \"{:?}\" does not refer to a byte string",
+            self
+        );
+        // this is safe because the key refers to a byte string:
+        unsafe { raw::get_set_str(&self.0, value) }
+    }
+}
+
+impl<T: MibArg> Access<&'static str> for MibStr<T> {
+    fn read(&self) -> Result<&'static str> {
+        // this is safe because the only safe way to construct a `MibStr` is by
+        // validating that the key refers to a byte-string value
+        let s = unsafe { raw::get_str_mib(self.0.as_ref())? };
+        Ok(str::from_utf8(s).unwrap())
+    }
+    fn write(&self, value: &'static str) -> Result<()> {
+        raw::set_str_mib(self.0.as_ref(), value.as_bytes())
+    }
+    fn read_write(&self, value: &'static str) -> Result<&'static str> {
+        // this is safe because the only safe way to construct a `MibStr` is by
+        // validating that the key refers to a byte-string value
+        let s = unsafe { raw::get_set_str_mib(self.0.as_ref(), value.as_bytes())? };
+        Ok(str::from_utf8(s).unwrap())
+    }
+}
+
+impl Access<&'static str> for Name {
+    fn read(&self) -> Result<&'static str> {
+        assert!(
+            self.value_type_str(),
+            "the name \"{:?}\" does not refer to a byte string",
+            self
+        );
+        // this is safe because the key refers to a byte string:
+        let s = unsafe { raw::get_str(&self.0)? };
+        Ok(str::from_utf8(s).unwrap())
+    }
+    fn write(&self, value: &'static str) -> Result<()> {
+        assert!(
+            self.value_type_str(),
+            "the name \"{:?}\" does not refer to a byte string",
+            self
+        );
+        raw::set_str(&self.0, value.as_bytes())
+    }
+    fn read_write(&self, value: &'static str) -> Result<&'static str> {
+        assert!(
+            self.value_type_str(),
+            "the name \"{:?}\" does not refer to a byte string",
+            self
+        );
+        // this is safe because the key refers to a byte string:
+        let s = unsafe { raw::get_set_str(&self.0, value.as_bytes())? };
+        Ok(str::from_utf8(s).unwrap())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Access, IntoName, Mib, MibStr};
+    #[test]
+    fn bool_rw() {
+        let name = b"thread.tcache.enabled\0".name();
+        let tcache: bool = name.read().unwrap();
+
+        let new_tcache = !tcache;
+
+        name.write(new_tcache).unwrap();
+
+        let mib: Mib<[usize; 3]> = name.mib().unwrap();
+        let r: bool = mib.read().unwrap();
+        assert_eq!(r, new_tcache);
+    }
+
+    #[test]
+    fn u32_r() {
+        let name = b"arenas.bin.0.nregs\0".name();
+        let v: u32 = name.read().unwrap();
+
+        let mib: Mib<[usize; 4]> = name.mib().unwrap();
+        let r: u32 = mib.read().unwrap();
+        assert_eq!(r, v);
+    }
+
+    #[test]
+    fn size_t_r() {
+        let name = b"arenas.lextent.0.size\0".name();
+        let v: libc::size_t = name.read().unwrap();
+
+        let mib: Mib<[usize; 4]> = name.mib().unwrap();
+        let r: libc::size_t = mib.read().unwrap();
+        assert_eq!(r, v);
+    }
+
+    #[test]
+    fn ssize_t_rw() {
+        let name = b"arenas.dirty_decay_ms\0".name();
+        let v: libc::ssize_t = name.read().unwrap();
+        name.write(v).unwrap();
+
+        let mib: Mib<[usize; 2]> = name.mib().unwrap();
+        let r: libc::ssize_t = mib.read().unwrap();
+        assert_eq!(r, v);
+    }
+
+    #[test]
+    fn u64_rw() {
+        let name = b"epoch\0".name();
+        let epoch: u64 = name.read().unwrap();
+        name.write(epoch).unwrap();
+
+        let mib: Mib<[usize; 1]> = name.mib().unwrap();
+        let epoch: u64 = mib.read().unwrap();
+        mib.write(epoch).unwrap();
+    }
+
+    #[test]
+    fn str_rw() {
+        let name = b"arena.0.dss\0".name();
+        let dss: &'static [u8] = name.read().unwrap();
+        name.write(dss).unwrap();
+
+        let mib: MibStr<[usize; 3]> = name.mib_str().unwrap();
+        let dss2: &'static [u8] = mib.read().unwrap();
+        mib.write(dss2).unwrap();
+
+        assert_eq!(dss, dss2);
+    }
+}
+
+pub trait MibArg:
+    Copy + Clone + PartialEq + Default + fmt::Debug + AsRef<[usize]> + AsMut<[usize]>
+{
+}
+impl<T> MibArg for T where
+    T: Copy + Clone + PartialEq + Default + fmt::Debug + AsRef<[usize]> + AsMut<[usize]>
+{
+}
