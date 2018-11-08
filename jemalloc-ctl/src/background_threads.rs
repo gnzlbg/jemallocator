@@ -1,7 +1,7 @@
 //! Background thread operations.
 
 use error::Result;
-use keys::{Access, IntoName, Mib};
+use keys::{Access, AsName, Mib};
 
 const BACKGROUND_THREAD: &[u8] = b"background_thread\0";
 

@@ -6,7 +6,7 @@
 //! [`Epoch`]: ../struct.Epoch.html
 
 use error::Result;
-use keys::{Access, IntoName, Mib};
+use keys::{Access, AsName, Mib};
 
 const ALLOCATED: &[u8] = b"stats.allocated\0";
 

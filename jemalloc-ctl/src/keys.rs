@@ -1,7 +1,7 @@
 //! Key types to index the _MALLCTL NAMESPACE_.
 //!
 //! The [`Name`] and [`Mib`] types are provided as safe indices into the
-//! _MALLCTL NAMESPACE_. These are constructed from slices via the [`IntoName`]
+//! _MALLCTL NAMESPACE_. These are constructed from slices via the [`AsName`]
 //! and [`IntoMib`] traits. The [`Access`] trait provides provides safe access
 //! into the `_MALLCTL NAMESPACE_`.
 //!
@@ -16,7 +16,7 @@
 //! static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
 //!
 //! fn main() {
-//!     use jemalloc_ctl::{Access, IntoName, Name, Mib};
+//!     use jemalloc_ctl::{Access, AsName, Name, Mib};
 //!     use libc::{c_uint, c_char};
 //!     let name = b"arenas.nbins\0".name();
 //!     let nbins: c_uint = name.read().unwrap();
@@ -39,12 +39,12 @@ use {fmt, ops, raw};
 pub struct Name([u8]);
 
 /// Converts a null-terminated byte-string into a [`Name`].
-pub trait IntoName {
+pub trait AsName {
     /// Converts a null-terminated byte-string into a [`Name`].
     fn name(&self) -> &Name;
 }
 
-impl IntoName for [u8] {
+impl AsName for [u8] {
     fn name(&self) -> &Name {
         use str;
         assert!(
@@ -336,7 +336,7 @@ impl Access<&'static str> for Name {
 
 #[cfg(test)]
 mod tests {
-    use super::{Access, IntoName, Mib, MibStr};
+    use super::{Access, AsName, Mib, MibStr};
     #[test]
     fn bool_rw() {
         let name = b"thread.tcache.enabled\0".name();

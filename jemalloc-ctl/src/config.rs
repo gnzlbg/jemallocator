@@ -1,6 +1,6 @@
 //! Information about the jemalloc compile-time configuration
 use error::Result;
-use keys::{Access, IntoName, MibStr};
+use keys::{Access, AsName, MibStr};
 
 const MALLOC_CONF: &[u8] = b"config.malloc_conf\0";
 

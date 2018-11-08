@@ -104,5 +104,5 @@ mod version;
 pub use background_threads::*;
 pub use epoch::*;
 pub use error::{Error, Result};
-pub use keys::{Access, IntoName, Mib, MibStr, Name};
+pub use keys::{Access, AsName, Mib, MibStr, Name};
 pub use version::*;
