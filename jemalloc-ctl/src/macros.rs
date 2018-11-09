@@ -26,7 +26,7 @@ macro_rules! types {
                     Ok([<$id _mib>](Self::NAME.$name_to_mib()?))
                 }
 
-                /// Key [`Name`].
+                /// Key [`::keys::Name`].
                 pub fn name() -> &'static ::keys::Name {
                     Self::NAME
                 }
