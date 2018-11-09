@@ -70,7 +70,7 @@
 //!     }
 //! }
 //! ```
-#![deny(missing_docs)]
+#![deny(missing_docs, intra_doc_link_resolution_failure)]
 #![cfg_attr(not(feature = "use_std"), no_std)]
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::stutter))]
 #![feature(coerce_unsized)]
