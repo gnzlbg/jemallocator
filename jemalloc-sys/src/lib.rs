@@ -45,6 +45,7 @@
     feature = "cargo-clippy",
     allow(clippy::cast_possible_truncation, clippy::cast_possible_wrap)
 )]
+#![deny(missing_docs, intra_doc_link_resolution_failure)]
 
 extern crate libc;
 
@@ -596,6 +597,8 @@ pub type extent_hooks_t = extent_hooks_s;
 #[repr(C)]
 #[cfg(not(jemallocator_docs))]
 #[derive(Copy, Clone, Default)]
+#[doc(hidden)]
+#[allow(missing_docs)]
 pub struct extent_hooks_s {
     pub alloc: Option<
         unsafe extern "C" fn(
@@ -696,14 +699,23 @@ pub struct extent_hooks_s {
 #[cfg(jemallocator_docs)]
 #[derive(Copy, Clone, Default)]
 pub struct extent_hooks_s {
+    #[allow(missing_docs)]
     pub alloc: Option<extent_alloc_t>,
+    #[allow(missing_docs)]
     pub dalloc: Option<extent_dalloc_t>,
+    #[allow(missing_docs)]
     pub destroy: Option<extent_destroy_t>,
+    #[allow(missing_docs)]
     pub commit: Option<extent_commit_t>,
+    #[allow(missing_docs)]
     pub decommit: Option<extent_decommit_t>,
+    #[allow(missing_docs)]
     pub purge_lazy: Option<extent_purge_t>,
+    #[allow(missing_docs)]
     pub purge_forced: Option<extent_purge_t>,
+    #[allow(missing_docs)]
     pub split: Option<extent_split_t>,
+    #[allow(missing_docs)]
     pub merge: Option<extent_merge_t>,
 }
 
