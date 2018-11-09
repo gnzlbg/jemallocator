@@ -65,6 +65,7 @@ macro_rules! r {
             #[cfg(test)]
             #[test]
             #[cfg(not(target_arch = "mips64el"))]
+            #[allow(unused)]
             fn [<$id _read_test>]() {
                 match stringify!($id) {
                     "background_thread" |
@@ -78,6 +79,7 @@ macro_rules! r {
                 let mib = $id::mib().unwrap();
                 let b = mib.read().unwrap();
 
+                #[cfg(feature = "use_std")]
                 println!(
                     concat!(
                         stringify!($id),
@@ -125,6 +127,7 @@ macro_rules! w {
                 let mib = $id::mib().unwrap();
                 let _ = mib.write($ret_ty::default()).unwrap();
 
+                #[cfg(feature = "use_std")]
                 println!(
                     concat!(
                         stringify!($id),
@@ -160,6 +163,7 @@ macro_rules! u {
             #[cfg(test)]
             #[test]
             #[cfg(not(target_arch = "mips64el"))]
+            #[allow(unused)]
             fn [<$id _update_test>]() {
                 match stringify!($id) {
                     "background_thread" |
@@ -173,6 +177,7 @@ macro_rules! u {
                 let mib = $id::mib().unwrap();
                 let b = mib.update($ret_ty::default()).unwrap();
 
+                #[cfg(feature = "use_std")]
                 println!(
                     concat!(
                         stringify!($id),
