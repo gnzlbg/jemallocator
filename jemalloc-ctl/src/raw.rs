@@ -402,7 +402,7 @@ mod tests {
                 let rstr = ptr2str(cstr as *const _ as *const c_char);
                 assert!(rstr.is_ok());
                 let rstr = rstr.unwrap();
-                assert!(rstr.len() == 1);
+                assert_eq!(rstr.len(), 1);
                 assert_eq!(rstr, b"\0");
             }
             {
@@ -410,7 +410,7 @@ mod tests {
                 let rstr = ptr2str(cstr as *const _ as *const c_char);
                 assert!(rstr.is_ok());
                 let rstr = rstr.unwrap();
-                assert!(rstr.len() == b"foo  baaar\0".len());
+                assert_eq!(rstr.len(), b"foo  baaar\0".len());
                 assert_eq!(rstr, b"foo  baaar\0");
             }
         }
