@@ -273,7 +273,10 @@ pub fn write_str_mib(mib: &[usize], value: &'static [u8]) -> Result<()> {
 /// If the pointer is valid but it does not point to a null-terminated string,
 /// looking for `\0` will read garbage and might end up reading out-of-bounds,
 /// which is undefined behavior.
-pub unsafe fn update_str_mib(mib: &[usize], value: &'static [u8]) -> Result<&'static [u8]> {
+pub unsafe fn update_str_mib(
+    mib: &[usize],
+    value: &'static [u8],
+) -> Result<&'static [u8]> {
     let ptr: *const c_char = update_mib(mib, value.as_ptr() as *const c_char)?;
     ptr2str(ptr)
 }
@@ -340,7 +343,10 @@ pub fn write_str(name: &[u8], value: &'static [u8]) -> Result<()> {
 /// If the pointer is valid but it does not point to a null-terminated string,
 /// looking for `\0` will read garbage and might end up reading out-of-bounds,
 /// which is undefined behavior.
-pub unsafe fn update_str(name: &[u8], value: &'static [u8]) -> Result<&'static [u8]> {
+pub unsafe fn update_str(
+    name: &[u8],
+    value: &'static [u8],
+) -> Result<&'static [u8]> {
     let ptr: *const c_char = update(name, value.as_ptr() as *const c_char)?;
     ptr2str(ptr)
 }

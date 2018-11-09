@@ -40,7 +40,10 @@ impl fmt::Debug for Error {
                  small; in this case as much data as possible are read \
                  despite the error."
             ),
-            libc::ENOENT => write!(f, "`name` or `mib` specifies an unknown/invalid value."),
+            libc::ENOENT => write!(
+                f,
+                "`name` or `mib` specifies an unknown/invalid value."
+            ),
             libc::EPERM => write!(
                 f,
                 "Attempt to read or write `void` value, or attempt to \

@@ -68,7 +68,9 @@ where
         }
 
         let buf = CStr::from_ptr(buf);
-        match panic::catch_unwind(AssertUnwindSafe(|| state.writer.write_all(buf.to_bytes()))) {
+        match panic::catch_unwind(AssertUnwindSafe(|| {
+            state.writer.write_all(buf.to_bytes())
+        })) {
             Ok(Ok(_)) => {}
             Ok(Err(e)) => state.error = Err(e),
             Err(e) => state.panic = Err(e),
