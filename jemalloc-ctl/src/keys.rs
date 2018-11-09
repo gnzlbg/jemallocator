@@ -1,8 +1,8 @@
 //! Key types to index the _MALLCTL NAMESPACE_.
 //!
-//! The [`Name`] and [`Mib`] types are provided as safe indices into the
-//! _MALLCTL NAMESPACE_. These are constructed from slices via the [`AsName`]
-//! and [`IntoMib`] traits. The [`Access`] trait provides provides safe access
+//! The [`Name`] and [`Mib`]/[`MibStr`] types are provided as safe indices into
+//! the _MALLCTL NAMESPACE_. These are constructed from null-terminated strings
+//! via the [`AsName`] trait. The [`Access`] trait provides provides safe access
 //! into the `_MALLCTL NAMESPACE_`.
 //!
 //! # Example
@@ -57,7 +57,13 @@ impl AsName for [u8] {
             "cannot create Name from non-null-terminated byte-string \"{}\"",
             str::from_utf8(self).unwrap()
         );
-        unsafe { &*(self as *const [u8] as *const Name) }
+        unsafe { &*(self as *const Self as *const Name) }
+    }
+}
+
+impl AsName for str {
+    fn name(&self) -> &Name {
+        self.as_bytes().name()
     }
 }
 
@@ -108,6 +114,11 @@ impl Name {
             _ => false,
         }
     }
+
+    /// Returns the name as null-terminated byte-string.
+    pub fn as_bytes(&self) -> &'static [u8] {
+        unsafe { &*(self as *const Self as *const [u8]) }
+    }
 }
 
 impl fmt::Debug for Name {
@@ -124,15 +135,27 @@ impl fmt::Display for Name {
     }
 }
 
-/// Management Information Base.
+/// Management Information Base of a non-string value.
 #[repr(transparent)]
 #[derive(Copy, Clone, PartialEq, Debug, Default)]
 pub struct Mib<T: MibArg>(T);
 
-/// Management Information Base refering to a string value.
+/// Management Information Base of a string value.
 #[repr(transparent)]
 #[derive(Copy, Clone, PartialEq, Debug, Default)]
 pub struct MibStr<T: MibArg>(T);
+
+impl<T: MibArg> AsRef<[usize]> for Mib<T> {
+    fn as_ref(&self) -> &[usize] {
+        self.0.as_ref()
+    }
+}
+
+impl<T: MibArg> AsMut<[usize]> for Mib<T> {
+    fn as_mut(&mut self) -> &mut [usize] {
+        self.0.as_mut()
+    }
+}
 
 impl<T: MibArg> ops::Index<usize> for Mib<T> {
     type Output = usize;
@@ -167,31 +190,31 @@ pub trait Access<T> {
     /// Write `value` at the key `self`.
     fn write(&self, value: T) -> Result<()>;
     /// Write `value` at the key `self` returning its previous value.
-    fn read_write(&self, value: T) -> Result<T>;
+    fn update(&self, value: T) -> Result<T>;
 }
 
 macro_rules! impl_access {
     ($id:ty) => {
         impl<T: MibArg> Access<$id> for Mib<T> {
             fn read(&self) -> Result<$id> {
-                unsafe { raw::get_mib(self.0.as_ref()) }
+                unsafe { raw::read_mib(self.0.as_ref()) }
             }
             fn write(&self, value: $id) -> Result<()> {
-                unsafe { raw::set_mib(self.0.as_ref(), value) }
+                unsafe { raw::write_mib(self.0.as_ref(), value) }
             }
-            fn read_write(&self, value: $id) -> Result<$id> {
-                unsafe { raw::get_set_mib(self.0.as_ref(), value) }
+            fn update(&self, value: $id) -> Result<$id> {
+                unsafe { raw::update_mib(self.0.as_ref(), value) }
             }
         }
         impl Access<$id> for Name {
             fn read(&self) -> Result<$id> {
-                unsafe { raw::get(&self.0) }
+                unsafe { raw::read(&self.0) }
             }
             fn write(&self, value: $id) -> Result<()> {
-                unsafe { raw::set(&self.0, value) }
+                unsafe { raw::write(&self.0, value) }
             }
-            fn read_write(&self, value: $id) -> Result<$id> {
-                unsafe { raw::get_set(&self.0, value) }
+            fn update(&self, value: $id) -> Result<$id> {
+                unsafe { raw::update(&self.0, value) }
             }
         }
     };
@@ -205,17 +228,17 @@ impl_access!(usize);
 impl<T: MibArg> Access<bool> for Mib<T> {
     fn read(&self) -> Result<bool> {
         unsafe {
-            let v: u8 = raw::get_mib(self.0.as_ref())?;
+            let v: u8 = raw::read_mib(self.0.as_ref())?;
             assert!(v == 0 || v == 1);
             Ok(v == 1)
         }
     }
     fn write(&self, value: bool) -> Result<()> {
-        unsafe { raw::set_mib(self.0.as_ref(), value) }
+        unsafe { raw::write_mib(self.0.as_ref(), value) }
     }
-    fn read_write(&self, value: bool) -> Result<bool> {
+    fn update(&self, value: bool) -> Result<bool> {
         unsafe {
-            let v: u8 = raw::get_set_mib(self.0.as_ref(), value as u8)?;
+            let v: u8 = raw::update_mib(self.0.as_ref(), value as u8)?;
             Ok(v == 1)
         }
     }
@@ -224,17 +247,17 @@ impl<T: MibArg> Access<bool> for Mib<T> {
 impl Access<bool> for Name {
     fn read(&self) -> Result<bool> {
         unsafe {
-            let v: u8 = raw::get(&self.0)?;
+            let v: u8 = raw::read(&self.0)?;
             assert!(v == 0 || v == 1);
             Ok(v == 1)
         }
     }
     fn write(&self, value: bool) -> Result<()> {
-        unsafe { raw::set(&self.0, value) }
+        unsafe { raw::write(&self.0, value) }
     }
-    fn read_write(&self, value: bool) -> Result<bool> {
+    fn update(&self, value: bool) -> Result<bool> {
         unsafe {
-            let v: u8 = raw::get_set(&self.0, value as u8)?;
+            let v: u8 = raw::update(&self.0, value as u8)?;
             Ok(v == 1)
         }
     }
@@ -244,15 +267,15 @@ impl<T: MibArg> Access<&'static [u8]> for MibStr<T> {
     fn read(&self) -> Result<&'static [u8]> {
         // this is safe because the only safe way to construct a `MibStr` is by
         // validating that the key refers to a byte-string value
-        unsafe { raw::get_str_mib(self.0.as_ref()) }
+        unsafe { raw::read_str_mib(self.0.as_ref()) }
     }
     fn write(&self, value: &'static [u8]) -> Result<()> {
-        raw::set_str_mib(self.0.as_ref(), value)
+        raw::write_str_mib(self.0.as_ref(), value)
     }
-    fn read_write(&self, value: &'static [u8]) -> Result<&'static [u8]> {
+    fn update(&self, value: &'static [u8]) -> Result<&'static [u8]> {
         // this is safe because the only safe way to construct a `MibStr` is by
         // validating that the key refers to a byte-string value
-        unsafe { raw::get_set_str_mib(self.0.as_ref(), value) }
+        unsafe { raw::update_str_mib(self.0.as_ref(), value) }
     }
 }
 
@@ -264,7 +287,7 @@ impl Access<&'static [u8]> for Name {
             self
         );
         // this is safe because the key refers to a byte string:
-        unsafe { raw::get_str(&self.0) }
+        unsafe { raw::read_str(&self.0) }
     }
     fn write(&self, value: &'static [u8]) -> Result<()> {
         assert!(
@@ -272,16 +295,16 @@ impl Access<&'static [u8]> for Name {
             "the name \"{:?}\" does not refer to a byte string",
             self
         );
-        raw::set_str(&self.0, value)
+        raw::write_str(&self.0, value)
     }
-    fn read_write(&self, value: &'static [u8]) -> Result<&'static [u8]> {
+    fn update(&self, value: &'static [u8]) -> Result<&'static [u8]> {
         assert!(
             self.value_type_str(),
             "the name \"{:?}\" does not refer to a byte string",
             self
         );
         // this is safe because the key refers to a byte string:
-        unsafe { raw::get_set_str(&self.0, value) }
+        unsafe { raw::update_str(&self.0, value) }
     }
 }
 
@@ -289,16 +312,16 @@ impl<T: MibArg> Access<&'static str> for MibStr<T> {
     fn read(&self) -> Result<&'static str> {
         // this is safe because the only safe way to construct a `MibStr` is by
         // validating that the key refers to a byte-string value
-        let s = unsafe { raw::get_str_mib(self.0.as_ref())? };
+        let s = unsafe { raw::read_str_mib(self.0.as_ref())? };
         Ok(str::from_utf8(s).unwrap())
     }
     fn write(&self, value: &'static str) -> Result<()> {
-        raw::set_str_mib(self.0.as_ref(), value.as_bytes())
+        raw::write_str_mib(self.0.as_ref(), value.as_bytes())
     }
-    fn read_write(&self, value: &'static str) -> Result<&'static str> {
+    fn update(&self, value: &'static str) -> Result<&'static str> {
         // this is safe because the only safe way to construct a `MibStr` is by
         // validating that the key refers to a byte-string value
-        let s = unsafe { raw::get_set_str_mib(self.0.as_ref(), value.as_bytes())? };
+        let s = unsafe { raw::update_str_mib(self.0.as_ref(), value.as_bytes())? };
         Ok(str::from_utf8(s).unwrap())
     }
 }
@@ -311,7 +334,7 @@ impl Access<&'static str> for Name {
             self
         );
         // this is safe because the key refers to a byte string:
-        let s = unsafe { raw::get_str(&self.0)? };
+        let s = unsafe { raw::read_str(&self.0)? };
         Ok(str::from_utf8(s).unwrap())
     }
     fn write(&self, value: &'static str) -> Result<()> {
@@ -320,16 +343,16 @@ impl Access<&'static str> for Name {
             "the name \"{:?}\" does not refer to a byte string",
             self
         );
-        raw::set_str(&self.0, value.as_bytes())
+        raw::write_str(&self.0, value.as_bytes())
     }
-    fn read_write(&self, value: &'static str) -> Result<&'static str> {
+    fn update(&self, value: &'static str) -> Result<&'static str> {
         assert!(
             self.value_type_str(),
             "the name \"{:?}\" does not refer to a byte string",
             self
         );
         // this is safe because the key refers to a byte string:
-        let s = unsafe { raw::get_set_str(&self.0, value.as_bytes())? };
+        let s = unsafe { raw::update_str(&self.0, value.as_bytes())? };
         Ok(str::from_utf8(s).unwrap())
     }
 }
