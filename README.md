@@ -5,6 +5,16 @@
 > Links against `jemalloc` and provides a `Jemalloc` unit type that implements
 > the allocator APIs and can be set as the `#[global_allocator]`
 
+## Overview
+
+The `jemalloc` support ecosystem consists of the following crates:
+
+* `jemalloc-sys`: builds and links against `jemalloc` exposing raw C bindings to it.
+* `jemallocator`: provides the `Jemalloc` type which implements the
+  `GlobalAlloc` and `Alloc` traits. 
+* `jemalloc-ctl`: high-level wrapper over `jemalloc`'s control and introspection
+  APIs (the `mallctl*()` family of functions and the _MALLCTL NAMESPACE_)'
+
 ## Documentation
 
 * [Latest release (docs.rs)][docs.rs]
