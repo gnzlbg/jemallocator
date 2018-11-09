@@ -152,13 +152,14 @@ option! {
     /// # #[cfg(not(target_os = "macos"))] {
     /// #
     /// use jemalloc_ctl::background_thread;
-    /// let s = background_thread::read().unwrap();
+    /// let bg = background_thread::mib().unwrap();
+    /// let s = bg.read().unwrap();
     /// println!("background_threads enabled: {}", s);
     /// let p = background_thread::update(!s).unwrap();
+    /// println!("background_threads enabled: {} => {}", p, bg.read().unwrap());
     /// assert_eq!(p, s);
-    /// let s = background_thread::read().unwrap();
-    /// assert_ne!(p, s);
-    /// background_thread::write(!s).unwrap();
+    /// background_thread::write(s).unwrap();
+    /// println!("background_threads enabled: {}", bg.read().unwrap());
     /// assert_eq!(p, s);
     /// #
     /// # } // #[cfg(..)]
@@ -184,10 +185,10 @@ option! {
     /// # #[cfg(not(target_os = "macos"))] {
     /// #
     /// use jemalloc_ctl::max_background_threads;
-    /// let n = max_background_threads::read().unwrap();
-    /// println!("max_background_threads: {}", n);
-    /// max_background_threads::write(n + 1).unwrap();
-    /// assert_eq!(max_background_threads::read().unwrap(), n + 1);
+    /// let m = max_background_threads::mib().unwrap();
+    /// println!("max_background_threads: {}", m.read().unwrap());
+    /// m.write(0).unwrap();
+    /// assert_eq!(m.read().unwrap(), 0);
     /// #
     /// # } // #[cfg(..)]
     /// # }
