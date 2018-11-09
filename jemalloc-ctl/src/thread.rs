@@ -1,188 +1,115 @@
 //! Thread specific operations.
 
 use error::Result;
-use raw::{get, get_mib, name_to_mib};
+use raw::{read, read_mib};
 
-const ALLOCATEDP: &[u8] = b"thread.allocatedp\0";
-
-/// Returns a thread-local pointer to the total number of bytes allocated by the current thread.
-///
-/// Unlike [`stats::allocated`], the value returned by this type is not the number of bytes
-/// *currently* allocated, but rather the number of bytes that have *ever* been allocated by this
-/// thread.
-///
-/// This function doesn't return the value directly, but actually a pointer to the value. This
-/// allows for very fast repeated lookup, since there is no function call overhead. The pointer type
-/// cannot be sent to other threads, but `allocated` can be called on different threads and will
-/// return the appropriate pointer for each of them.
-///
-/// This corresponds to `thread.allocatedp` in jemalloc's API.
-///
-/// # Examples
-///
-/// ```
-/// extern crate jemallocator;
-/// extern crate jemalloc_ctl;
-///
-/// #[global_allocator]
-/// static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
-///
-/// fn main() {
-///     let allocated = jemalloc_ctl::thread::allocatedp().unwrap();
-///
-///     let a = allocated.get();
-///     let buf = vec![0; 1024 * 1024];
-///     let b = allocated.get();
-///     drop(buf);
-///     let c = allocated.get();
-///
-///     assert!(a < b);
-///     assert_eq!(b, c);
-/// }
-/// ```
-pub fn allocatedp() -> Result<ThreadLocal<u64>> {
-    unsafe { get(ALLOCATEDP).map(ThreadLocal) }
+option! {
+    allocatedp[ str: b"thread.allocatedp\0", non_str: 2 ] => *mut u64 |
+    ops:  |
+    docs:
+    /// Access to the total number of bytes allocated by the current thread.
+    ///
+    /// Unlike [`::stats::allocated`], the value returned by this type is not the
+    /// number of bytes *currently* allocated, but rather the number of bytes
+    /// that have *ever* been allocated by this thread.
+    ///
+    /// The `read` method doesn't return the value directly, but actually a
+    /// pointer to the value. This allows for very fast repeated lookup, since
+    /// there is no function call overhead. The pointer type cannot be sent to
+    /// other threads, but `allocated::read` can be called on different threads
+    /// and will return the appropriate pointer for each of them.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # extern crate jemallocator;
+    /// # extern crate jemalloc_ctl;
+    /// #
+    /// # #[global_allocator]
+    /// # static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
+    /// #
+    /// # fn main() {
+    /// use jemalloc_ctl::thread;
+    /// let allocated = thread::allocatedp::mib().unwrap();
+    /// let allocated = allocated.read().unwrap();
+    ///
+    /// let a = allocated.get();
+    /// let buf = vec![0; 1024 * 1024];
+    /// let b = allocated.get();
+    /// drop(    buf);
+    /// let c = allocated.get();
+    ///
+    /// assert!(a < b);
+    /// assert_eq!(b, c);
+    /// # }
+    /// ```
+    mib_docs: /// See [`allocatedp`].
 }
 
-/// A type providing access to the total number of bytes allocated by the current thread.
-///
-/// Unlike [`stats::Allocated`], the value returned by this type is not the number of bytes
-/// *currently* allocated, but rather the number of bytes that have *ever* been allocated by this
-/// thread.
-///
-/// The `get` method doesn't return the value directly, but actually a pointer to the value. This
-/// allows for very fast repeated lookup, since there is no function call overhead. The pointer type
-/// cannot be sent to other threads, but `Allocated::get` can be called on different threads and
-/// will return the appropriate pointer for each of them.
-///
-/// # Example
-///
-/// ```
-/// extern crate jemallocator;
-/// extern crate jemalloc_ctl;
-///
-/// use jemalloc_ctl::thread::AllocatedP;
-///
-/// #[global_allocator]
-/// static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
-///
-/// fn main() {
-///     let allocated = AllocatedP::new().unwrap();
-///     let allocated = allocated.get().unwrap();
-///
-///     let a = allocated.get();
-///     let buf = vec![0; 1024 * 1024];
-///     let b = allocated.get();
-///     drop(buf);
-///     let c = allocated.get();
-///
-///     assert!(a < b);
-///     assert_eq!(b, c);
-/// }
-/// ```
-///
-/// [`stats::Allocated`]: ../stats/struct.Allocated.html
-#[derive(Copy, Clone)]
-pub struct AllocatedP([usize; 2]);
-
-impl AllocatedP {
-    /// Returns a new `Allocated`.
-    pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(ALLOCATEDP, &mut mib)?;
-        Ok(AllocatedP(mib))
-    }
-
-    /// Returns a thread-local pointer to the total number of bytes allocated by this thread.
-    pub fn get(&self) -> Result<ThreadLocal<u64>> {
-        unsafe { get_mib(&self.0).map(ThreadLocal) }
+impl allocatedp {
+    /// Reads value using string API.
+    pub fn read() -> Result<ThreadLocal<u64>> {
+        unsafe { read(Self::name().as_bytes()).map(ThreadLocal) }
     }
 }
 
-const DEALLOCATEDP: &[u8] = b"thread.deallocatedp\0";
-
-/// Returns a pointer to the total number of bytes deallocated by the current thread.
-///
-/// This function doesn't return the value directly, but actually a pointer to the value. This
-/// allows for very fast repeated lookup, since there is no function call overhead. The pointer type
-/// cannot be sent to other threads, but `deallocatedp` can be called on different threads and will
-/// return the appropriate pointer for each of them.
-///
-/// This corresponds to `thread.deallocatedp` in jemalloc's API.
-///
-/// # Examples
-///
-/// ```
-/// extern crate jemallocator;
-/// extern crate jemalloc_ctl;
-///
-/// #[global_allocator]
-/// static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
-///
-/// fn main() {
-///     let deallocated = jemalloc_ctl::thread::deallocatedp().unwrap();
-///
-///     let a = deallocated.get();
-///     let buf = vec![0; 1024 * 1024];
-///     let b = deallocated.get();
-///     drop(buf);
-///     let c = deallocated.get();
-///
-///     assert_eq!(a, b);
-///     assert!(b < c);
-/// }
-/// ```
-pub fn deallocatedp() -> Result<ThreadLocal<u64>> {
-    unsafe { get(DEALLOCATEDP).map(ThreadLocal) }
+impl allocatedp_mib {
+    /// Reads value using MIB API.
+    pub fn read(&self) -> Result<ThreadLocal<u64>> {
+        unsafe { read_mib(self.0.as_ref()).map(ThreadLocal) }
+    }
 }
 
-/// A type providing access to the total number of bytes deallocated by the current thread.
-///
-/// The `get` method doesn't return the value directly, but actually a pointer to the value. This
-/// allows for very fast repeated lookup, since there is no function call overhead. The pointer type
-/// cannot be sent to other threads, but `DeallocatedP::get` can be called on different threads and
-/// will return the appropriate pointer for each of them.
-///
-/// # Example
-///
-/// ```
-/// extern crate jemallocator;
-/// extern crate jemalloc_ctl;
-///
-/// use jemalloc_ctl::thread::DeallocatedP;
-///
-/// #[global_allocator]
-/// static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
-///
-/// fn main() {
-///     let deallocated = DeallocatedP::new().unwrap();
-///     let deallocated = deallocated.get().unwrap();
-///
-///     let a = deallocated.get();
-///     let buf = vec![0; 1024 * 1024];
-///     let b = deallocated.get();
-///     drop(buf);
-///     let c = deallocated.get();
-///
-///     assert_eq!(a, b);
-///     assert!(b < c);
-/// }
-/// ```
-#[derive(Copy, Clone)]
-pub struct DeallocatedP([usize; 2]);
+option! {
+    deallocatedp[ str: b"thread.deallocatedp\0", non_str: 2 ] => *mut u64 |
+    ops:  |
+    docs:
+    /// Access to the total number of bytes deallocated by the current thread.
+    ///
+    /// The `read` method doesn't return the value directly, but actually a
+    /// pointer to the value. This allows for very fast repeated lookup, since
+    /// there is no function call overhead. The pointer type cannot be sent to
+    /// other threads, but [`deallocatedp::read`] can be called on different
+    /// threads and will return the appropriate pointer for each of them.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # extern crate jemallocator;
+    /// # extern crate jemalloc_ctl;
+    /// #
+    /// # #[global_allocator]
+    /// # static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
+    /// #
+    /// # fn main() {
+    /// use jemalloc_ctl::thread;
+    /// let deallocated = thread::deallocatedp::mib().unwrap();
+    /// let deallocated = deallocated.read().unwrap();
+    ///
+    /// let a = deallocated.get();
+    /// let buf = vec![0; 1024 * 1024];
+    /// let b = deallocated.get();
+    /// drop(buf);
+    /// let c = deallocated.get();
+    ///
+    /// assert_eq!(a, b);
+    /// assert!(b < c);
+    /// # }
+    /// ```
+    mib_docs: /// See [`deallocatedp`].
+}
 
-impl DeallocatedP {
-    /// Returns a new `Deallocated`.
-    pub fn new() -> Result<Self> {
-        let mut mib = [0; 2];
-        name_to_mib(DEALLOCATEDP, &mut mib)?;
-        Ok(DeallocatedP(mib))
+impl deallocatedp {
+    /// Reads value using string API.
+    pub fn read() -> Result<ThreadLocal<u64>> {
+        unsafe { read(Self::name().as_bytes()).map(ThreadLocal) }
     }
+}
 
-    /// Returns a thread-local pointer to the total number of bytes deallocated by this thread.
-    pub fn get(&self) -> Result<ThreadLocal<u64>> {
-        let ptr = unsafe { get_mib::<*mut u64>(&self.0)? };
-        Ok(ThreadLocal(ptr))
+impl deallocatedp_mib {
+    /// Reads value using MIB API.
+    pub fn read(&self) -> Result<ThreadLocal<u64>> {
+        unsafe { read_mib(self.0.as_ref()).map(ThreadLocal) }
     }
 }
 
@@ -190,6 +117,7 @@ impl DeallocatedP {
 ///
 /// It is neither `Sync` nor `Send`.
 // NB we need *const here specifically since it's !Sync + !Send
+#[repr(transparent)]
 #[derive(Copy, Clone)]
 pub struct ThreadLocal<T>(*const T);
 

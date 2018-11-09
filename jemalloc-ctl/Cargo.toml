@@ -24,6 +24,7 @@ maintenance = { status = "actively-developed" }
 [dependencies]
 jemalloc-sys = { path = "../jemalloc-sys", version = "0.3.0" }
 libc = { version = "0.2", default-features = false }
+paste = { version = "0.1" }
 
 [dev-dependencies]
 jemallocator = { path = "..", version = "0.3.0" }

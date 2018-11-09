@@ -1,4 +1,4 @@
-//! Raw `malloctl` getter/setters
+//! Raw `unsafe` access to the `malloctl` API.
 
 use error::{cvt, Result};
 use libc::c_char;
@@ -31,11 +31,11 @@ use {mem, ptr, slice};
 ///     use libc::{c_uint, c_char};
 ///     unsafe {
 ///         let mut mib = [0; 4];
-///         let nbins: c_uint = raw::get(b"arenas.nbins\0").unwrap();
+///         let nbins: c_uint = raw::read(b"arenas.nbins\0").unwrap();
 ///         raw::name_to_mib(b"arenas.bin.0.size\0", &mut mib).unwrap();
 ///         for i in 0..4 {
 ///             mib[2] = i;
-///             let bin_size: usize = raw::get_mib(&mut mib).unwrap();
+///             let bin_size: usize = raw::read_mib(&mut mib).unwrap();
 ///             println!("arena bin {} has size {}", i, bin_size);
 ///         }
 ///     }
@@ -67,7 +67,7 @@ pub fn name_to_mib(name: &[u8], mib: &mut [usize]) -> Result<()> {
 /// invalid `T`, for example, by passing `T=bool` for a key returning `u8`. The
 /// sizes of `bool` and `u8` match, but `bool` cannot represent all values that
 /// `u8` can.
-pub unsafe fn get_mib<T: Copy>(mib: &[usize]) -> Result<T> {
+pub unsafe fn read_mib<T: Copy>(mib: &[usize]) -> Result<T> {
     let mut value = MaybeUninit { init: () };
     let mut len = mem::size_of::<T>();
     cvt(jemalloc_sys::mallctlbymib(
@@ -91,7 +91,7 @@ pub unsafe fn get_mib<T: Copy>(mib: &[usize]) -> Result<T> {
 /// invalid `T`, for example, by passing `T=bool` for a key returning `u8`. The
 /// sizes of `bool` and `u8` match, but `bool` cannot represent all values that
 /// `u8` can.
-pub unsafe fn get<T: Copy>(name: &[u8]) -> Result<T> {
+pub unsafe fn read<T: Copy>(name: &[u8]) -> Result<T> {
     validate_name(name);
 
     let mut value = MaybeUninit { init: () };
@@ -107,7 +107,7 @@ pub unsafe fn get<T: Copy>(name: &[u8]) -> Result<T> {
     Ok(value.maybe_uninit)
 }
 
-/// Uses the MIB `mib` as key to the _MALLCTL NAMESPACE_ and sets its `value`.
+/// Uses the MIB `mib` as key to the _MALLCTL NAMESPACE_ and writes its `value`.
 ///
 /// The [`name_to_mib`] API translates a string of the key (e.g. `arenas.nbins`)
 /// to a `mib` (Management Information Base).
@@ -118,7 +118,7 @@ pub unsafe fn get<T: Copy>(name: &[u8]) -> Result<T> {
 /// invalid `T`, for example, by passing `T=u8` for a key expecting `bool`. The
 /// sizes of `bool` and `u8` match, but `bool` cannot represent all values that
 /// `u8` can.
-pub unsafe fn set_mib<T>(mib: &[usize], mut value: T) -> Result<()> {
+pub unsafe fn write_mib<T>(mib: &[usize], mut value: T) -> Result<()> {
     cvt(jemalloc_sys::mallctlbymib(
         mib.as_ptr(),
         mib.len(),
@@ -130,7 +130,7 @@ pub unsafe fn set_mib<T>(mib: &[usize], mut value: T) -> Result<()> {
 }
 
 /// Uses the null-terminated string `name` as the key to the _MALLCTL NAMESPACE_
-/// and sets it `value`
+/// and writes it `value`
 ///
 /// # Safety
 ///
@@ -138,7 +138,7 @@ pub unsafe fn set_mib<T>(mib: &[usize], mut value: T) -> Result<()> {
 /// invalid `T`, for example, by passing `T=u8` for a key expecting `bool`. The
 /// sizes of `bool` and `u8` match, but `bool` cannot represent all values that
 /// `u8` can.
-pub unsafe fn set<T>(name: &[u8], mut value: T) -> Result<()> {
+pub unsafe fn write<T>(name: &[u8], mut value: T) -> Result<()> {
     validate_name(name);
 
     cvt(jemalloc_sys::mallctl(
@@ -150,7 +150,7 @@ pub unsafe fn set<T>(name: &[u8], mut value: T) -> Result<()> {
     ))
 }
 
-/// Uses the MIB `mib` as key to the _MALLCTL NAMESPACE_ and sets its `value`
+/// Uses the MIB `mib` as key to the _MALLCTL NAMESPACE_ and writes its `value`
 /// returning its previous value.
 ///
 /// The [`name_to_mib`] API translates a string of the key (e.g. `arenas.nbins`)
@@ -162,7 +162,7 @@ pub unsafe fn set<T>(name: &[u8], mut value: T) -> Result<()> {
 /// invalid `T`, for example, by passing `T=u8` for a key expecting `bool`. The
 /// sizes of `bool` and `u8` match, but `bool` cannot represent all values that
 /// `u8` can.
-pub unsafe fn get_set_mib<T>(mib: &[usize], mut value: T) -> Result<T> {
+pub unsafe fn update_mib<T>(mib: &[usize], mut value: T) -> Result<T> {
     let mut len = mem::size_of::<T>();
     cvt(jemalloc_sys::mallctlbymib(
         mib.as_ptr(),
@@ -177,7 +177,7 @@ pub unsafe fn get_set_mib<T>(mib: &[usize], mut value: T) -> Result<T> {
 }
 
 /// Uses the null-terminated string `name` as key to the _MALLCTL NAMESPACE_ and
-/// sets its `value` returning its previous value.
+/// writes its `value` returning its previous value.
 ///
 /// # Safety
 ///
@@ -185,7 +185,7 @@ pub unsafe fn get_set_mib<T>(mib: &[usize], mut value: T) -> Result<T> {
 /// invalid `T`, for example, by passing `T=u8` for a key expecting `bool`. The
 /// sizes of `bool` and `u8` match, but `bool` cannot represent all values that
 /// `u8` can.
-pub unsafe fn get_set<T>(name: &[u8], mut value: T) -> Result<T> {
+pub unsafe fn update<T>(name: &[u8], mut value: T) -> Result<T> {
     validate_name(name);
 
     let mut len = mem::size_of::<T>();
@@ -225,12 +225,12 @@ pub unsafe fn get_set<T>(name: &[u8], mut value: T) -> Result<T> {
 /// If the pointer is valid but it does not point to a null-terminated string,
 /// looking for `\0` will read garbage and might end up reading out-of-bounds,
 /// which is undefined behavior.
-pub unsafe fn get_str_mib(mib: &[usize]) -> Result<&'static [u8]> {
-    let ptr: *const c_char = get_mib(mib)?;
+pub unsafe fn read_str_mib(mib: &[usize]) -> Result<&'static [u8]> {
+    let ptr: *const c_char = read_mib(mib)?;
     ptr2str(ptr)
 }
 
-/// Uses the MIB `mib` as key to the _MALLCTL NAMESPACE_ and sets its `value`.
+/// Uses the MIB `mib` as key to the _MALLCTL NAMESPACE_ and writes its `value`.
 ///
 /// The [`name_to_mib`] API translates a string of the key (e.g. `arenas.nbins`)
 /// to a `mib` (Management Information Base).
@@ -238,16 +238,16 @@ pub unsafe fn get_str_mib(mib: &[usize]) -> Result<&'static [u8]> {
 /// # Panics
 ///
 /// If `value` is not a non-empty null-terminated string.
-pub fn set_str_mib(mib: &[usize], value: &'static [u8]) -> Result<()> {
+pub fn write_str_mib(mib: &[usize], value: &'static [u8]) -> Result<()> {
     assert!(!value.is_empty(), "value cannot be empty");
     assert_eq!(*value.last().unwrap(), b'\0');
     // This is safe because `value` will always point to a null-terminated
     // string, which makes it safe for all key value types: pointers to
     // null-terminated strings, pointers, pointer-sized integers, etc.
-    unsafe { set_mib(mib, value.as_ptr() as *const c_char) }
+    unsafe { write_mib(mib, value.as_ptr() as *const c_char) }
 }
 
-/// Uses the MIB `mib` as key to the _MALLCTL NAMESPACE_ and sets its `value`
+/// Uses the MIB `mib` as key to the _MALLCTL NAMESPACE_ and writes its `value`
 /// returning its previous value.
 ///
 /// The [`name_to_mib`] API translates a string of the key (e.g. `arenas.nbins`)
@@ -273,8 +273,8 @@ pub fn set_str_mib(mib: &[usize], value: &'static [u8]) -> Result<()> {
 /// If the pointer is valid but it does not point to a null-terminated string,
 /// looking for `\0` will read garbage and might end up reading out-of-bounds,
 /// which is undefined behavior.
-pub unsafe fn get_set_str_mib(mib: &[usize], value: &'static [u8]) -> Result<&'static [u8]> {
-    let ptr: *const c_char = get_set_mib(mib, value.as_ptr() as *const c_char)?;
+pub unsafe fn update_str_mib(mib: &[usize], value: &'static [u8]) -> Result<&'static [u8]> {
+    let ptr: *const c_char = update_mib(mib, value.as_ptr() as *const c_char)?;
     ptr2str(ptr)
 }
 
@@ -301,24 +301,24 @@ pub unsafe fn get_set_str_mib(mib: &[usize], value: &'static [u8]) -> Result<&'s
 /// If the pointer is valid but it does not point to a null-terminated string,
 /// looking for `\0` will read garbage and might end up reading out-of-bounds,
 /// which is undefined behavior.
-pub unsafe fn get_str(name: &[u8]) -> Result<&'static [u8]> {
-    let ptr: *const c_char = get(name)?;
+pub unsafe fn read_str(name: &[u8]) -> Result<&'static [u8]> {
+    let ptr: *const c_char = read(name)?;
     ptr2str(ptr)
 }
 
 /// Uses the null-terminated string `name` as key to the _MALLCTL NAMESPACE_ and
-/// sets its `value`.
-pub fn set_str(name: &[u8], value: &'static [u8]) -> Result<()> {
+/// writes its `value`.
+pub fn write_str(name: &[u8], value: &'static [u8]) -> Result<()> {
     assert!(!value.is_empty(), "value cannot be empty");
     assert_eq!(*value.last().unwrap(), b'\0');
     // This is safe because `value` will always point to a null-terminated
     // string, which makes it safe for all key value types: pointers to
     // null-terminated strings, pointers, pointer-sized integers, etc.
-    unsafe { set(name, value.as_ptr() as *const c_char) }
+    unsafe { write(name, value.as_ptr() as *const c_char) }
 }
 
 /// Uses the null-terminated string `name` as key to the _MALLCTL NAMESPACE_ and
-/// sets its `value` returning its previous value.
+/// writes its `value` returning its previous value.
 ///
 /// # Safety
 ///
@@ -340,8 +340,8 @@ pub fn set_str(name: &[u8], value: &'static [u8]) -> Result<()> {
 /// If the pointer is valid but it does not point to a null-terminated string,
 /// looking for `\0` will read garbage and might end up reading out-of-bounds,
 /// which is undefined behavior.
-pub unsafe fn get_set_str(name: &[u8], value: &'static [u8]) -> Result<&'static [u8]> {
-    let ptr: *const c_char = get_set(name, value.as_ptr() as *const c_char)?;
+pub unsafe fn update_str(name: &[u8], value: &'static [u8]) -> Result<&'static [u8]> {
+    let ptr: *const c_char = update(name, value.as_ptr() as *const c_char)?;
     ptr2str(ptr)
 }
 

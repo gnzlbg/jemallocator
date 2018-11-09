@@ -11,7 +11,7 @@ static A: Jemalloc = Jemalloc;
 
 // Returns true if background threads are enabled.
 fn background_threads() -> bool {
-    jemalloc_ctl::opt::background_thread().unwrap()
+    jemalloc_ctl::opt::background_thread::read().unwrap()
 }
 
 #[test]
