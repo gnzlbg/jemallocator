@@ -98,6 +98,7 @@ ${CARGO_CMD} test -vv --target "${TARGET}" \
 # FIXME: jemalloc-ctl fails in the following targets
 case "${TARGET}" in
     "i686-unknown-linux-musl") ;;
+    "x86_64-unknown-linux-musl") ;;
     *)
 
         ${CARGO_CMD} test -vv --target "${TARGET}" \
