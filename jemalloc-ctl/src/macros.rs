@@ -73,10 +73,17 @@ macro_rules! r {
                     _ => (),
                 }
 
-                let _ = $id::read().unwrap();
+                let a = $id::read().unwrap();
 
                 let mib = $id::mib().unwrap();
-                let _ = mib.read().unwrap();
+                let b = mib.read().unwrap();
+
+                println!(
+                    concat!(
+                        stringify!($id),
+                        " (read): \"{}\" - \"{}\""),
+                    a, b
+                );
             }
         }
     };
@@ -117,6 +124,14 @@ macro_rules! w {
 
                 let mib = $id::mib().unwrap();
                 let _ = mib.write($ret_ty::default()).unwrap();
+
+                println!(
+                    concat!(
+                        stringify!($id),
+                        " (write): \"{}\""),
+                    $ret_ty::default()
+                );
+
             }
         }
     };
@@ -153,10 +168,17 @@ macro_rules! u {
                     _ => (),
                 }
 
-                let _ = $id::update($ret_ty::default()).unwrap();
+                let a = $id::update($ret_ty::default()).unwrap();
 
                 let mib = $id::mib().unwrap();
-                let _ = mib.update($ret_ty::default()).unwrap();
+                let b = mib.update($ret_ty::default()).unwrap();
+
+                println!(
+                    concat!(
+                        stringify!($id),
+                        " (update): (\"{}\", \"{}\") - \"{}\""),
+                    a, b, $ret_ty::default()
+                );
             }
         }
     };
