@@ -1,7 +1,10 @@
 [package]
 name = "jemalloc-ctl"
 version = "0.3.0"
-authors = ["Steven Fackler <sfackler@gmail.com>"]
+authors = [
+    "Steven Fackler <sfackler@gmail.com>",
+    "Gonzalo Brito Gadeschi <gonzalobg88@gmail.com>"
+]
 license = "MIT/Apache-2.0"
 readme = "README.md"
 categories = ["memory-management", "api-bindings", "development-tools" ]
