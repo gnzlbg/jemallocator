@@ -306,6 +306,7 @@ fn main() {
     let make = make_cmd(&host);
     run(Command::new(make)
         .current_dir(&build_dir)
+        .arg("srcroot=../jemalloc/")
         .arg("-j")
         .arg(num_jobs.clone()));
 
@@ -314,17 +315,22 @@ fn main() {
         // Make tests:
         run(Command::new(make)
             .current_dir(&build_dir)
+            .arg("srcroot=../jemalloc/")
             .arg("-j")
             .arg(num_jobs.clone())
             .arg("tests"));
 
         // Run tests:
-        run(Command::new(make).current_dir(&build_dir).arg("check"));
+        run(Command::new(make)
+            .current_dir(&build_dir)
+            .arg("srcroot=../jemalloc/")
+            .arg("check"));
     }
 
     // Make install:
     run(Command::new(make)
         .current_dir(&build_dir)
+        .arg("srcroot=../jemalloc/")
         .arg("install_lib_static")
         .arg("install_include")
         .arg("-j")
@@ -382,6 +388,8 @@ fn make_cmd(host: &str) -> &'static str {
     const GMAKE_HOSTS: &[&str] = &["bitrig", "dragonfly", "freebsd", "netbsd", "openbsd"];
     if GMAKE_HOSTS.iter().any(|i| host.contains(i)) {
         "gmake"
+    } else if host.contains("windows") {
+        "mingw32-make"
     } else {
         "make"
     }
