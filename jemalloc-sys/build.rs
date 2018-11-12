@@ -127,7 +127,7 @@ fn main() {
     copy_options.copy_inside = true;
     fs_extra::dir::copy(
         Path::new("jemalloc"),
-        jemalloc_src_dir.clone(),
+        &jemalloc_src_dir,
         &copy_options,
     )
     .expect("failed to copy jemalloc source code to OUT_DIR");
