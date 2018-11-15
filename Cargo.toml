@@ -23,6 +23,9 @@ members = ["systest"]
 jemalloc-sys = { path = "jemalloc-sys", version = "0.2.0", default-features = false }
 libc = { version = "^0.2.8", default-features = false }
 
+[dev-dependencies]
+paste = "0.1"
+
 [features]
 alloc_trait = []
 default = ["background_threads_runtime_support"]

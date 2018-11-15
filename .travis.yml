@@ -63,6 +63,12 @@ matrix:
       rust: stable
       install: rustup component add llvm-tools-preview
       addons: *valgrind
+    - name: "Benchmarks using x86_64-unknown-linux-gnu (nightly)"
+      env: TARGET=x86_64-unknown-linux-gnu
+      install: true
+      script:
+        - cargo bench
+        - cargo bench --features=alloc_trait
     - name: "x86_64-unknown-linux-musl"
       env: TARGET=x86_64-unknown-linux-musl NOBGT=1 NO_JEMALLOC_TESTS=1
 
@@ -132,8 +138,7 @@ matrix:
       install: true
       script: shellcheck ci/*.sh
 
-install:
-  - rustup target add ${TARGET}
+install: rustup target add ${TARGET}
 script: sh ci/run.sh
 env:
   global:
