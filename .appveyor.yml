@@ -18,6 +18,7 @@ matrix:
     - TARGET: i686-pc-windows-gnu
 
 install:
+  - git submodule update --init --recursive
   - set PATH=c:\msys64\%MSYSTEM%\bin;c:\msys64\usr\bin;%PATH%
   - pacman --noconfirm -Syu mingw-w64-%CPU%-make
   - appveyor-retry appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
@@ -25,12 +26,8 @@ install:
   - set PATH=%PATH%;C:\Users\appveyor\.cargo\bin
   - rustc -vV
   - cargo -vV
-  - git submodule update --init --recursive
-
 build: false
-
-test_script:
-  - sh ci\run.sh
+test_script: sh ci\run.sh
 
 branches:
   only:
