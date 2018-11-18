@@ -18,7 +18,3 @@ install:
   - cargo -vV
 build: false
 test_script: sh ci\run.sh
-
-branches:
-  only:
-    - master
