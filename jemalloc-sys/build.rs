@@ -125,12 +125,8 @@ fn main() {
     let mut copy_options = fs_extra::dir::CopyOptions::new();
     copy_options.overwrite = true;
     copy_options.copy_inside = true;
-    fs_extra::dir::copy(
-        Path::new("jemalloc"),
-        &jemalloc_src_dir,
-        &copy_options,
-    )
-    .expect("failed to copy jemalloc source code to OUT_DIR");
+    fs_extra::dir::copy(Path::new("jemalloc"), &jemalloc_src_dir, &copy_options)
+        .expect("failed to copy jemalloc source code to OUT_DIR");
     assert!(jemalloc_src_dir.exists());
 
     // Configuration files
