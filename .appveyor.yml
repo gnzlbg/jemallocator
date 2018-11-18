@@ -7,11 +7,6 @@ environment:
       MSYSTEM: MINGW32
       CPU: i686
 
-matrix:
-  allow_failures:
-    - TARGET: x86_64-pc-windows-gnu
-    - TARGET: i686-pc-windows-gnu
-
 install:
   - git submodule update --init --recursive
   - set PATH=c:\msys64\%MSYSTEM%\bin;c:\msys64\usr\bin;%PATH%
