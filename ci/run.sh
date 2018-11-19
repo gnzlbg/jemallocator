@@ -87,8 +87,18 @@ ${CARGO_CMD} test -vv --target "${TARGET}" --no-default-features \
 # https://github.com/alexcrichton/jemallocator/issues/85
 case "${TARGET}" in
     *"windows"*)
-        NO_JEMALLOC_TESTS=1 ${CARGO_CMD} test -vv \
-                         --target "${TARGET}" --features profiling
+        unset JEMALLOC_SYS_RUN_JEMALLOC_TESTS
+        
+        ${CARGO_CMD} test -vv \
+                     --target "${TARGET}" --features profiling
+
+        if [ "${NO_JEMALLOC_TESTS}" = "1" ]
+        then
+            :
+        else
+            export JEMALLOC_SYS_RUN_JEMALLOC_TESTS=1
+        fi
+
         ;;
     *)
         ${CARGO_CMD} test -vv --target "${TARGET}" --features profiling
