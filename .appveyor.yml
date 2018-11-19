@@ -17,4 +17,4 @@ install:
   - rustc -vV
   - cargo -vV
 build: false
-test_script: NOBGT=1 sh ci\run.sh
+test_script: sh ci\run.sh

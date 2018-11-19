@@ -28,7 +28,10 @@ fi
 # Use cargo on native CI platforms:
 case "${TARGET}" in
     "x86_64-unknown-linux-gnu") export CARGO_CMD=cargo ;;
-    *"windows"*) export CARGO_CMD=cargo ;;
+    *"windows"*)
+        export CARGO_CMD=cargo
+        export NOBGT=1
+        ;;
     *"apple"*) export CARGO_CMD=cargo ;;
 esac
 
