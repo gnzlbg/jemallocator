@@ -53,11 +53,11 @@ then
     esac
 fi
 
+${CARGO_CMD} test -vv --target "${TARGET}" 2>&1 | tee build_no_std.txt
+
 if [ "${TARGET}" = "x86_64-unknown-linux-gnu" ] \
        || [ "${TARGET}" = "x86_64-apple-darwin" ]
 then
-    ${CARGO_CMD} build -vv --target "${TARGET}" 2>&1 | tee build_no_std.txt
-
     # Check that the no-std builds are not linked against a libc with default
     # features or the `use_std` feature enabled:
     ! grep -q "default" build_no_std.txt
@@ -72,12 +72,10 @@ then
     done
 fi
 
-${CARGO_CMD} test -vv --target "${TARGET}"
-${CARGO_CMD} test -vv --target "${TARGET}" --features debug
-${CARGO_CMD} test -vv --target "${TARGET}" --features stats
 ${CARGO_CMD} test -vv --target "${TARGET}" \
-             --features unprefixed_malloc_on_supported_platforms
-${CARGO_CMD} test -vv --target "${TARGET}" --no-default-features
+             --no-default-features \
+             --features debug,stats,background_threads_runtime_support,\
+             unprefixed_malloc_on_supported_platforms
 ${CARGO_CMD} test -vv --target "${TARGET}" --no-default-features \
              --features background_threads_runtime_support
 
@@ -88,12 +86,9 @@ case "${TARGET}" in
     *"windows"*)
         NO_JEMALLOC_TESTS=1 ${CARGO_CMD} test -vv \
                          --target "${TARGET}" --features profiling
-        NO_JEMALLOC_TESTS=1 ${CARGO_CMD} test -vv \
-                         --target "${TARGET}" --features 'debug profiling'
         ;;
     *)
         ${CARGO_CMD} test -vv --target "${TARGET}" --features profiling
-        ${CARGO_CMD} test -vv --target "${TARGET}" --features 'debug profiling'
         ;;
 esac
 
