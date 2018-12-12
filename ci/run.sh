@@ -88,7 +88,7 @@ ${CARGO_CMD} test -vv --target "${TARGET}" --no-default-features \
 case "${TARGET}" in
     *"windows"*)
         unset JEMALLOC_SYS_RUN_JEMALLOC_TESTS
-        
+
         ${CARGO_CMD} test -vv \
                      --target "${TARGET}" --features profiling
 
