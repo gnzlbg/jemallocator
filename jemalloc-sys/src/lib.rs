@@ -614,20 +614,44 @@ pub struct extent_hooks_s {
     pub destroy:
         Option<unsafe extern "C" fn(*mut extent_hooks_t, *mut c_void, size_t, c_bool, c_uint)>,
     pub commit: Option<
-        unsafe extern "C" fn(*mut extent_hooks_t, *mut c_void, size_t, size_t, size_t, c_uint)
-            -> c_bool,
+        unsafe extern "C" fn(
+            *mut extent_hooks_t,
+            *mut c_void,
+            size_t,
+            size_t,
+            size_t,
+            c_uint,
+        ) -> c_bool,
     >,
     pub decommit: Option<
-        unsafe extern "C" fn(*mut extent_hooks_t, *mut c_void, size_t, size_t, size_t, c_uint)
-            -> c_bool,
+        unsafe extern "C" fn(
+            *mut extent_hooks_t,
+            *mut c_void,
+            size_t,
+            size_t,
+            size_t,
+            c_uint,
+        ) -> c_bool,
     >,
     pub purge_lazy: Option<
-        unsafe extern "C" fn(*mut extent_hooks_t, *mut c_void, size_t, size_t, size_t, c_uint)
-            -> c_bool,
+        unsafe extern "C" fn(
+            *mut extent_hooks_t,
+            *mut c_void,
+            size_t,
+            size_t,
+            size_t,
+            c_uint,
+        ) -> c_bool,
     >,
     pub purge_forced: Option<
-        unsafe extern "C" fn(*mut extent_hooks_t, *mut c_void, size_t, size_t, size_t, c_uint)
-            -> c_bool,
+        unsafe extern "C" fn(
+            *mut extent_hooks_t,
+            *mut c_void,
+            size_t,
+            size_t,
+            size_t,
+            c_uint,
+        ) -> c_bool,
     >,
     pub split: Option<
         unsafe extern "C" fn(
