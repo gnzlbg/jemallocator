@@ -117,6 +117,7 @@ matrix:
 
     # TOOLING
     - name: "Documentation"
+      install: true
       script: RUSTDOCFLAGS="--cfg jemallocator_docs" cargo doc
       deploy:
         provider: script
