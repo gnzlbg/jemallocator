@@ -3,7 +3,7 @@
 > Note: the Rust allocator API is implemented for `jemalloc` in the
 > [`jemallocator`](https://crates.io/crates/jemallocator) crate.
 
-`jemalloc` is a general purpose memory allocation, its documentation
+`jemalloc` is a general purpose memory allocator, its documentation
  can be found here:
 
 * [API documentation][jemalloc_docs]
