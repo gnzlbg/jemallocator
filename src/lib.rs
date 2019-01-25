@@ -73,6 +73,7 @@ fn layout_to_flags(align: usize, size: usize) -> c_int {
 ///
 /// When the `alloc_trait` feature of this crate is enabled, it also implements the `Alloc` trait,
 /// allowing usage in collections.
+#[derive(Copy, Clone, Default, Debug)]
 pub struct Jemalloc;
 
 unsafe impl GlobalAlloc for Jemalloc {
