@@ -72,7 +72,7 @@ This crate provides following cargo feature flags:
 `jemalloc` options taking values are passed via environment variables using the
 schema `JEMALLOC_SYS_{KEY}=VALUE` where the `KEY` names correspond to the
 `./configure` options of `jemalloc` where the words are capitalized and the
-diphens `-` are replaced with underscores `_`(see
+hyphens `-` are replaced with underscores `_`(see
 [`jemalloc/INSTALL.md`][jemalloc_install]):
 
 * `JEMALLOC_SYS_WITH_MALLOC_CONF=<malloc_conf>`: Embed `<malloc_conf>` as a
