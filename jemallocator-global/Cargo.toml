@@ -23,7 +23,7 @@ is-it-maintained-open-issues = { repository = "alexcrichton/jemallocator" }
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-jemallocator = { optional = true, path = "..", version = "0.2.0" }
+jemallocator = { optional = true, path = "..", version = "0.3.0" }
 cfg-if = "0.1"
 
 [features]
