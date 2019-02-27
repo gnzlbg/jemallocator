@@ -30,6 +30,12 @@ static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
 And that's it! Once you've defined this `static` then jemalloc will be used for
 all allocations requested by Rust code in the same program.
 
+For advanced uesrs, remember that the default value of `--with-jemalloc-prefix`
+configure option on building `jemalloc` is `_rjem_` unless you explicitly enable
+`unprefixed_malloc_on_supported_platforms` feature. So you have to use `_RJEM_MALLOC_CONF`
+environment variable to change jemalloc's configurations at runtime.
+See [jemalloc-sys README](/jemalloc-sys/readme.md) for more details.
+
 ## Platform support
 
 The following table describes the supported platforms: 
