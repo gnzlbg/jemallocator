@@ -76,6 +76,14 @@ This crate provides following cargo feature flags:
   libc. This usually causes C and C++ code linked in the same program to use
   `jemalloc` as well. On some platforms prefixes are always used because
   unprefixing is known to cause segfaults due to allocator mismatches.
+  
+* `disable_initial_exec_tls` (disabled by default): when enabled, jemalloc is
+  built with the `--disable-initial-exec-tls` option. It disables the 
+  initial-exec TLS model for jemalloc's internal thread-local storage (on those 
+  platforms that support explicit settings). This can allow jemalloc to be 
+  dynamically loaded after program startup (e.g. using dlopen). If you encounter
+  the error `yourlib.so: cannot allocate memory in static TLS block`, you'll 
+  likely want to enable this.
 
 ### Environment variables
 
