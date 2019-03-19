@@ -292,6 +292,11 @@ fn main() {
         cmd.arg("--enable-stats");
     }
 
+    if env::var("CARGO_FEATURE_DISABLE_INITIAL_EXEC_TLS").is_ok() {
+        info!("CARGO_FEATURE_DISABLE_INITIAL_EXEC_TLS set");
+        cmd.arg("--disable-initial-exec-tls");
+    }
+
     cmd.arg(format!("--host={}", gnu_target(&target)));
     cmd.arg(format!("--build={}", gnu_target(&host)));
     cmd.arg(format!("--prefix={}", out_dir.display()));
