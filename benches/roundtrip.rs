@@ -3,14 +3,14 @@
 #![feature(test, allocator_api)]
 #![cfg(feature = "alloc_trait")]
 
-extern crate jemallocator;
 extern crate jemalloc_sys;
+extern crate jemallocator;
 extern crate libc;
 extern crate paste;
 extern crate test;
 
+use jemalloc_sys::MALLOCX_ALIGN;
 use jemallocator::Jemalloc;
-use jemalloc_sys::MALLOCX_ALIGN; 
 use libc::c_int;
 use std::{
     alloc::{Alloc, Excess, Layout},
@@ -55,7 +55,7 @@ macro_rules! rt {
             #[bench]
             fn [<rt_mallocx_size_ $size _align_ $align>](b: &mut Bencher) {
                 b.iter(|| unsafe {
-                    use jemallocator::ffi as jemalloc;
+                    use jemalloc_sys as jemalloc;
                     let flags = layout_to_flags(&Layout::from_size_align($size, $align).unwrap());
                     let ptr = jemalloc::mallocx($size, flags);
                     test::black_box(ptr);
@@ -66,7 +66,7 @@ macro_rules! rt {
             #[bench]
             fn [<rt_mallocx_nallocx_size_ $size _align_ $align>](b: &mut Bencher) {
                 b.iter(|| unsafe {
-                    use jemallocator::ffi as jemalloc;
+                    use jemalloc_sys as jemalloc;
                     let flags = layout_to_flags(&Layout::from_size_align($size, $align).unwrap());
                     let ptr = jemalloc::mallocx($size, flags);
                     test::black_box(ptr);
@@ -120,7 +120,7 @@ macro_rules! rt {
             #[bench]
             fn [<rt_mallocx_zeroed_size_ $size _align_ $align>](b: &mut Bencher) {
                 b.iter(|| unsafe {
-                    use jemallocator::ffi as jemalloc;
+                    use jemalloc_sys as jemalloc;
                     let flags = layout_to_flags(&Layout::from_size_align($size, $align).unwrap());
                     let ptr = jemalloc::mallocx($size, flags | jemalloc::MALLOCX_ZERO);
                     test::black_box(ptr);
@@ -131,7 +131,7 @@ macro_rules! rt {
             #[bench]
             fn [<rt_calloc_size_ $size _align_ $align>](b: &mut Bencher) {
                 b.iter(|| unsafe {
-                    use jemallocator::ffi as jemalloc;
+                    use jemalloc_sys as jemalloc;
                     let flags = layout_to_flags(&Layout::from_size_align($size, $align).unwrap());
                     test::black_box(flags);
                     let ptr = jemalloc::calloc(1, $size);
