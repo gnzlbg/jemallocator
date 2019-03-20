@@ -4,11 +4,13 @@
 #![cfg(feature = "alloc_trait")]
 
 extern crate jemallocator;
+extern crate jemalloc_sys;
 extern crate libc;
 extern crate paste;
 extern crate test;
 
-use jemallocator::{ffi::MALLOCX_ALIGN, Jemalloc};
+use jemallocator::Jemalloc;
+use jemalloc_sys::MALLOCX_ALIGN; 
 use libc::c_int;
 use std::{
     alloc::{Alloc, Excess, Layout},

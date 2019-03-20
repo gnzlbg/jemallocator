@@ -40,7 +40,7 @@ libc = { version = "^0.2.8", default-features = false }
 
 [dev-dependencies]
 paste = "0.1"
-#jemalloc-ctl = { path = "jemalloc-ctl", version = "0.3.0" }
+jemalloc-ctl = { path = "jemalloc-ctl", version = "0.3.0" }
 
 [features]
 default = ["background_threads_runtime_support"]
