@@ -113,6 +113,26 @@ fn main() {
     info!("CC={:?}", compiler.path());
     info!("CFLAGS={:?}", cflags);
 
+    assert!(out_dir.exists(), "OUT_DIR does not exist");
+    let (jemalloc_repo_dir, run_autoconf) = if env::var("JEMALLOC_SYS_GIT_DEV_BRANCH").is_ok() {
+        let jemalloc_repo = out_dir.join("jemalloc_repo");
+        if jemalloc_repo.exists() {
+            fs::remove_dir_all(jemalloc_repo.clone()).unwrap();
+        }
+        let mut cmd = Command::new("git");
+        cmd.arg("clone")
+            .arg("--depth=1")
+            .arg("--branch=dev")
+            .arg("--")
+            .arg("https://github.com/jemalloc/jemalloc")
+            .arg(format!("{}", jemalloc_repo.display()));
+        run(&mut cmd);
+        (jemalloc_repo, true)
+    } else {
+        (PathBuf::from("jemalloc"), false)
+    };
+    info!("JEMALLOC_REPO_DIR={:?}", jemalloc_repo_dir);
+
     let jemalloc_src_dir = out_dir.join("jemalloc");
     info!("JEMALLOC_SRC_DIR={:?}", jemalloc_src_dir);
 
@@ -121,11 +141,10 @@ fn main() {
     }
 
     // Copy jemalloc submodule to the OUT_DIR
-    assert!(out_dir.exists(), "OUT_DIR does not exist");
     let mut copy_options = fs_extra::dir::CopyOptions::new();
     copy_options.overwrite = true;
     copy_options.copy_inside = true;
-    fs_extra::dir::copy(Path::new("jemalloc"), &jemalloc_src_dir, &copy_options)
+    fs_extra::dir::copy(&jemalloc_repo_dir, &jemalloc_src_dir, &copy_options)
         .expect("failed to copy jemalloc source code to OUT_DIR");
     assert!(jemalloc_src_dir.exists());
 
@@ -133,7 +152,8 @@ fn main() {
     let config_files = ["configure" /*"VERSION"*/];
 
     // Verify that the configuration files are up-to-date
-    if env::var("JEMALLOC_SYS_VERIFY_CONFIGURE").is_ok() {
+    let verify_configure = env::var("JEMALLOC_SYS_VERIFY_CONFIGURE").is_ok();
+    if verify_configure || run_autoconf {
         info!("Verifying that configuration files in `configure/` are up-to-date... ");
 
         // The configuration file from the configure/directory should be used.
@@ -163,13 +183,15 @@ fn main() {
                 content
             }
 
-            let current = read_content(&jemalloc_src_dir.join(f));
-            let reference = read_content(&Path::new("configure").join(f));
-            assert_eq!(
-                current, reference,
-                "the current and reference configuration files \"{}\" differ",
-                f
-            );
+            if verify_configure {
+                let current = read_content(&jemalloc_src_dir.join(f));
+                let reference = read_content(&Path::new("configure").join(f));
+                assert_eq!(
+                    current, reference,
+                    "the current and reference configuration files \"{}\" differ",
+                    f
+                );
+            }
         }
     } else {
         // Copy the configuration files to jemalloc's source directory
