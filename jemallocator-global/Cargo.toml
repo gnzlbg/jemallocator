@@ -1,5 +1,6 @@
 [package]
 name = "jemallocator-global"
+# Make sure to update the version in the readme as well:
 version = "0.3.0"
 authors = ["Gonzalo Brito Gadeschi <gonzalobg88@gmail.com>"]
 edition = "2015"

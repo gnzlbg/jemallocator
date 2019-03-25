@@ -25,7 +25,7 @@ To use `jemallocator` add it as a dependency:
 ```toml
 # Cargo.toml
 [dependencies]
-jemallocator = "0.1.8"
+jemallocator = "0.3.0"
 ```
 
 To set `jemallocator::Jemalloc` as the global allocator add this to your project:
