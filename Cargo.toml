@@ -1,5 +1,6 @@
 [package]
 name = "jemallocator"
+# Make sure to update the version in the README as well:
 version = "0.3.0"
 authors = [
     "Alex Crichton <alex@alexcrichton.com>",
