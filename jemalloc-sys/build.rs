@@ -42,7 +42,7 @@ const NO_BG_THREAD_TARGETS: &[&str] = &["musl"];
 // https://github.com/rust-lang/rust/commit/536011d929ecbd1170baf34e09580e567c971f95
 // https://github.com/rust-lang/rust/commit/9f3de647326fbe50e0e283b9018ab7c41abccde3
 // https://github.com/rust-lang/rust/commit/ed015456a114ae907a36af80c06f81ea93182a24
-const NO_UNPREFIXED_MALLOC: &[&str] = &["android", "dragonfly", "musl", "darwin"];
+const NO_UNPREFIXED_MALLOC: &[&str] = &["android", "dragonfly", "musl", "darwin", "windows"];
 
 macro_rules! info {
     ($($args:tt)*) => { println!($($args)*) }

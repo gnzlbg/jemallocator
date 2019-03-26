@@ -28,7 +28,10 @@ fi
 # Use cargo on native CI platforms:
 case "${TARGET}" in
     "x86_64-unknown-linux-gnu") export CARGO_CMD=cargo ;;
-    *"windows"*) export CARGO_CMD=cargo ;;
+    *"windows"*)
+        export CARGO_CMD=cargo
+        export NOBGT=1
+        ;;
     *"apple"*) export CARGO_CMD=cargo ;;
 esac
 
@@ -53,10 +56,11 @@ then
     esac
 fi
 
-if [ "${TARGET}" = "x86_64-unknown-linux-gnu" ] || [ "${TARGET}" = "x86_64-apple-darwin" ]
-then
-    ${CARGO_CMD} build -vv --target "${TARGET}" 2>&1 | tee build_no_std.txt
+${CARGO_CMD} test -vv --target "${TARGET}" 2>&1 | tee build_no_std.txt
 
+if [ "${TARGET}" = "x86_64-unknown-linux-gnu" ] \
+       || [ "${TARGET}" = "x86_64-apple-darwin" ]
+then
     # Check that the no-std builds are not linked against a libc with default
     # features or the `use_std` feature enabled:
     ! grep -q "default" build_no_std.txt
@@ -71,16 +75,35 @@ then
     done
 fi
 
-${CARGO_CMD} test -vv --target "${TARGET}"
-${CARGO_CMD} test -vv --target "${TARGET}" --features profiling
-${CARGO_CMD} test -vv --target "${TARGET}" --features debug
-${CARGO_CMD} test -vv --target "${TARGET}" --features stats
-${CARGO_CMD} test -vv --target "${TARGET}" --features 'debug profiling'
 ${CARGO_CMD} test -vv --target "${TARGET}" \
-             --features unprefixed_malloc_on_supported_platforms
-${CARGO_CMD} test -vv --target "${TARGET}" --no-default-features
+             --no-default-features \
+             --features debug,stats,background_threads_runtime_support,\
+             unprefixed_malloc_on_supported_platforms
 ${CARGO_CMD} test -vv --target "${TARGET}" --no-default-features \
              --features background_threads_runtime_support
+
+# jemalloc's tests fail on some targets when the profiling feature is enabled:
+# https://github.com/jemalloc/jemalloc/issues/1320
+# https://github.com/alexcrichton/jemallocator/issues/85
+case "${TARGET}" in
+    *"windows"*)
+        unset JEMALLOC_SYS_RUN_JEMALLOC_TESTS
+
+        ${CARGO_CMD} test -vv \
+                     --target "${TARGET}" --features profiling
+
+        if [ "${NO_JEMALLOC_TESTS}" = "1" ]
+        then
+            :
+        else
+            export JEMALLOC_SYS_RUN_JEMALLOC_TESTS=1
+        fi
+
+        ;;
+    *)
+        ${CARGO_CMD} test -vv --target "${TARGET}" --features profiling
+        ;;
+esac
 
 if [ "${NOBGT}" = "1" ]
 then

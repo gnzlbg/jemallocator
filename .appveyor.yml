@@ -1,9 +1,4 @@
 environment:
-  # We don't want to do identical comdat folding as it messes up the ability to
-  # generate lossless backtraces in some cases. This is enabled by rustc by
-  # default so pass a flag to disable it to ensure our tests work ok.
-  RUSTFLAGS: -Clink-args=/OPT:NOICF
-
   matrix:
     - TARGET: x86_64-pc-windows-gnu
       MSYSTEM: MINGW64
@@ -11,11 +6,6 @@ environment:
     - TARGET: i686-pc-windows-gnu
       MSYSTEM: MINGW32
       CPU: i686
-
-matrix:
-  allow_failures:
-    - TARGET: x86_64-pc-windows-gnu
-    - TARGET: i686-pc-windows-gnu
 
 install:
   - git submodule update --init --recursive
@@ -28,7 +18,3 @@ install:
   - cargo -vV
 build: false
 test_script: sh ci\run.sh
-
-branches:
-  only:
-    - master
