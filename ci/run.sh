@@ -72,10 +72,25 @@ then
 fi
 
 ${CARGO_CMD} test -vv --target "${TARGET}"
-${CARGO_CMD} test -vv --target "${TARGET}" --features profiling
+
+if [ "${JEMALLOC_SYS_GIT_DEV_BRANCH}" = "1" ]; then
+    # FIXME: profiling tests broken on dev-branch
+    # https://github.com/jemalloc/jemalloc/issues/1477
+    :
+else
+    ${CARGO_CMD} test -vv --target "${TARGET}" --features profiling
+fi
+
 ${CARGO_CMD} test -vv --target "${TARGET}" --features debug
 ${CARGO_CMD} test -vv --target "${TARGET}" --features stats
-${CARGO_CMD} test -vv --target "${TARGET}" --features 'debug profiling'
+if [ "${JEMALLOC_SYS_GIT_DEV_BRANCH}" = "1" ]; then
+    # FIXME: profiling tests broken on dev-branch
+    # https://github.com/jemalloc/jemalloc/issues/1477
+    :
+else
+    ${CARGO_CMD} test -vv --target "${TARGET}" --features 'debug profiling'
+fi
+
 ${CARGO_CMD} test -vv --target "${TARGET}" \
              --features unprefixed_malloc_on_supported_platforms
 ${CARGO_CMD} test -vv --target "${TARGET}" --no-default-features
