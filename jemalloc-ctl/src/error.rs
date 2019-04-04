@@ -54,11 +54,15 @@ impl StdError for Error {
     fn description(&self) -> &str {
         match description(self.0.get() as c_int) {
             Some(m) => m,
-            None => "Unknown error"
+            None => "Unknown error",
         }
     }
-    fn cause(&self) -> Option<&dyn StdError> { None }
-    fn source(&self) -> Option<&(dyn StdError + 'static)> { None }
+    fn cause(&self) -> Option<&dyn StdError> {
+        None
+    }
+    fn source(&self) -> Option<&(dyn StdError + 'static)> {
+        None
+    }
 }
 
 fn description(code: c_int) -> Option<&'static str> {
@@ -67,23 +71,21 @@ fn description(code: c_int) -> Option<&'static str> {
             "`newp` is not `NULL`, and `newlen` is too large or too \
              small. Alternatively, `*oldlenp` is too large or too \
              small; in this case as much data as possible are read \
-             despite the error."
+             despite the error.",
         ),
-        libc::ENOENT => Some(
-            "`name` or `mib` specifies an unknown/invalid value."
-        ),
+        libc::ENOENT => {
+            Some("`name` or `mib` specifies an unknown/invalid value.")
+        }
         libc::EPERM => Some(
             "Attempt to read or write `void` value, or attempt to \
-             write read-only value."
+             write read-only value.",
         ),
-        libc::EAGAIN => Some(
-            "A memory allocation failure occurred."
-        ),
+        libc::EAGAIN => Some("A memory allocation failure occurred."),
         libc::EFAULT => Some(
             "An interface with side effects failed in some way not \
-             directly related to `mallctl*()` read/write processing."
+             directly related to `mallctl*()` read/write processing.",
         ),
-        _ => None
+        _ => None,
     }
 }
 
