@@ -56,4 +56,4 @@ disable_initial_exec_tls = ["jemalloc-sys/disable_initial_exec_tls"]
 
 [package.metadata.docs.rs]
 features = [ "alloc_trait" ]
-rustdoc-args = [ "--cfg jemallocator_docs" ]
+rustdoc-args = [ "--cfg", "jemallocator_docs" ]
