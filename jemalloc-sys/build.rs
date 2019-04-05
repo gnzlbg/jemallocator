@@ -220,7 +220,7 @@ fn main() {
 
     if target.contains("ios") {
         // newer iOS deviced have 16kb page sizes:
-        // closed: https://github.com/alexcrichton/jemallocator/issues/68
+        // closed: https://github.com/gnzlbg/jemallocator/issues/68
         cmd.arg("--with-lg-page=14");
     }
 
