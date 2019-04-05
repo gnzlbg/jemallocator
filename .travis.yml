@@ -85,7 +85,7 @@ matrix:
     # OSX
     # FIXME: cannot jemalloc tests fail due to:
     # https://github.com/jemalloc/jemalloc/issues/1320
-    # https://github.com/alexcrichton/jemallocator/issues/85
+    # https://github.com/gnzlbg/jemallocator/issues/85
     - name: "i686-apple-darwin (nightly)"
       env: TARGET=i686-apple-darwin NO_JEMALLOC_TESTS=1
       os: osx
@@ -101,7 +101,7 @@ matrix:
       osx_image: xcode10
       rust: stable
     # FIXME: valgrind fails on OSX
-    # https://github.com/alexcrichton/jemallocator/issues/86
+    # https://github.com/gnzlbg/jemallocator/issues/86
     - name: "x86_64-apple-darwin (nightly)"
       env: TARGET=x86_64-apple-darwin NO_JEMALLOC_TESTS=1 JEMALLOC_SYS_VERIFY_CONFIGURE=1
       os: osx

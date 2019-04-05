@@ -82,7 +82,7 @@ other targets are only tested on Rust nightly.
 ## Features
 
 The `jemallocator` crate re-exports the [features of the `jemalloc-sys`
-dependency](https://github.com/alexcrichton/jemallocator/blob/master/jemalloc-sys/readme.md).
+dependency](https://github.com/gnzlbg/jemallocator/blob/master/jemalloc-sys/readme.md).
 
 ## License
 
@@ -101,12 +101,12 @@ Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in `jemallocator` by you, as defined in the Apache-2.0 license,
 shall be dual licensed as above, without any additional terms or conditions.
 
-[travis]: https://travis-ci.com/alexcrichton/jemallocator
-[Travis-CI Status]: https://travis-ci.com/alexcrichton/jemallocator.svg?branch=master
-[appveyor]: https://ci.appveyor.com/project/alexcrichton/jemallocator/branch/master
-[Appveyor Status]: https://ci.appveyor.com/api/projects/status/github/alexcrichton/jemallocator?branch=master&svg=true
+[travis]: https://travis-ci.com/gnzlbg/jemallocator
+[Travis-CI Status]: https://travis-ci.com/gnzlbg/jemallocator.svg?branch=master
+[appveyor]: https://ci.appveyor.com/project/gnzlbg/jemallocator/branch/master
+[Appveyor Status]: https://ci.appveyor.com/api/projects/status/github/gnzlbg/jemallocator?branch=master&svg=true
 [Latest Version]: https://img.shields.io/crates/v/jemallocator.svg
 [crates.io]: https://crates.io/crates/jemallocator
 [docs]: https://docs.rs/jemallocator/badge.svg
 [docs.rs]: https://docs.rs/jemallocator/
-[master_docs]: https://alexcrichton.github.io/jemallocator/jemallocator
+[master_docs]: https://gnzlbg.github.io/jemallocator/jemallocator

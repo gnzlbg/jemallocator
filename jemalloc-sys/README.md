@@ -166,12 +166,12 @@ Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in `jemalloc-sys` by you, as defined in the Apache-2.0 license,
 shall be dual licensed as above, without any additional terms or conditions.
 
-[travis]: https://travis-ci.org/alexcrichton/jemallocator
-[Travis-CI Status]: https://travis-ci.org/alexcrichton/jemallocator.svg?branch=master
-[appveyor]: https://ci.appveyor.com/project/alexcrichton/jemallocator/branch/master
-[Appveyor Status]: https://ci.appveyor.com/api/projects/status/github/alexcrichton/jemallocator?branch=master&svg=true
+[travis]: https://travis-ci.org/gnzlbg/jemallocator
+[Travis-CI Status]: https://travis-ci.org/gnzlbg/jemallocator.svg?branch=master
+[appveyor]: https://ci.appveyor.com/project/gnzlbg/jemallocator/branch/master
+[Appveyor Status]: https://ci.appveyor.com/api/projects/status/github/gnzlbg/jemallocator?branch=master&svg=true
 [Latest Version]: https://img.shields.io/crates/v/jemalloc-sys.svg
 [crates.io]: https://crates.io/crates/jemalloc-ctl
 [docs]: https://docs.rs/jemalloc-sys/badge.svg
 [docs.rs]: https://docs.rs/jemalloc-sys/
-[master_docs]: https://alexcrichton.github.io/jemallocator/jemalloc-sys
+[master_docs]: https://gnzlbg.github.io/jemallocator/jemalloc-sys

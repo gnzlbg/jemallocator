@@ -9,8 +9,8 @@ build = "build.rs"
 links = "jemalloc"
 license = "MIT/Apache-2.0"
 readme = "README.md"
-repository = "https://github.com/alexcrichton/jemallocator"
-homepage = "https://github.com/alexcrichton/jemallocator"
+repository = "https://github.com/gnzlbg/jemallocator"
+homepage = "https://github.com/gnzlbg/jemallocator"
 documentation = "https://docs.rs/jemallocator-sys"
 keywords = ["allocator", "jemalloc"]
 description = """
@@ -19,11 +19,11 @@ Rust FFI bindings to jemalloc
 edition = "2015"
 
 [badges]
-appveyor = { repository = "alexcrichton/jemallocator" }
-travis-ci = { repository = "alexcrichton/jemallocator" }
-codecov = { repository = "alexcrichton/jemallocator" }
-is-it-maintained-issue-resolution = { repository = "alexcrichton/jemallocator" }
-is-it-maintained-open-issues = { repository = "alexcrichton/jemallocator" }
+appveyor = { repository = "gnzlbg/jemallocator" }
+travis-ci = { repository = "gnzlbg/jemallocator" }
+codecov = { repository = "gnzlbg/jemallocator" }
+is-it-maintained-issue-resolution = { repository = "gnzlbg/jemallocator" }
+is-it-maintained-open-issues = { repository = "gnzlbg/jemallocator" }
 maintenance = { status = "actively-developed" }
 
 [lib]
