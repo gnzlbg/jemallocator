@@ -96,7 +96,8 @@ hyphens `-` are replaced with underscores `_`(see
 * `JEMALLOC_SYS_WITH_MALLOC_CONF=<malloc_conf>`: Embed `<malloc_conf>` as a
   run-time options string that is processed prior to the `malloc_conf` global
   variable, the `/etc/malloc.conf` symlink, and the `MALLOC_CONF` environment
-  variable. For example, to change the default decay time to 30 seconds:
+  variable (note: this variable might be prefixed as `_RJEM_MALLOC_CONF`). For
+  example, to change the default decay time to 30 seconds:
   
   ```
   JEMALLOC_SYS_WITH_MALLOC_CONF=decay_ms:30000
