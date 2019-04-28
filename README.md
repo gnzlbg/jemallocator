@@ -82,7 +82,7 @@ other targets are only tested on Rust nightly.
 ## Features
 
 The `jemallocator` crate re-exports the [features of the `jemalloc-sys`
-dependency](https://github.com/gnzlbg/jemallocator/blob/master/jemalloc-sys/readme.md).
+dependency](https://github.com/gnzlbg/jemallocator/blob/master/jemalloc-sys/README.md).
 
 ## License
 
