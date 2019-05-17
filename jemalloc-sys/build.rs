@@ -11,11 +11,12 @@
 extern crate cc;
 extern crate fs_extra;
 
-use std::env;
-use std::fs;
-use std::fs::File;
-use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::{
+    env,
+    fs::{self, File},
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 // `jemalloc` is known not to work on these targets:
 const UNSUPPORTED_TARGETS: &[&str] = &[
@@ -149,7 +150,7 @@ fn main() {
     assert!(jemalloc_src_dir.exists());
 
     // Configuration files
-    let config_files = ["configure" /*"VERSION"*/];
+    let config_files = ["configure" /* "VERSION" */];
 
     // Verify that the configuration files are up-to-date
     let verify_configure = env::var("JEMALLOC_SYS_VERIFY_CONFIGURE").is_ok();
@@ -217,6 +218,14 @@ fn main() {
     .env("LDFLAGS", cflags.clone())
     .env("CPPFLAGS", cflags.clone())
     .arg("--disable-cxx");
+
+    if env::var("JEMALLOC_SYS_DISABLE_STATIC").is_ok() {
+        cmd.arg("--disable-static");
+    };
+
+    if env::var("JEMALLOC_SYS_DISABLE_SHARED").is_ok() {
+        cmd.arg("--disable-shared");
+    };
 
     if target.contains("ios") {
         // newer iOS deviced have 16kb page sizes:
@@ -390,8 +399,7 @@ fn run(cmd: &mut Command) {
     };
     if !status.success() {
         panic!(
-            "command did not execute successfully: {:?}\n\
-             expected success, got: {}",
+            "command did not execute successfully: {:?}\nexpected success, got: {}",
             cmd, status
         );
     }
