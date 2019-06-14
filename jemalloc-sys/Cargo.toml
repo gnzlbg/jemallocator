@@ -1,6 +1,6 @@
 [package]
 name = "jemalloc-sys"
-version = "0.3.1"
+version = "0.3.2"
 authors = [
     "Alex Crichton <alex@alexcrichton.com>",
     "Gonzalo Brito Gadeschi <gonzalobg88@gmail.com>",
@@ -48,4 +48,4 @@ unprefixed_malloc_on_supported_platforms = []
 disable_initial_exec_tls = []
 
 [package.metadata.docs.rs]
-rustdoc-args = [ "--cfg jemallocator_docs" ]
+rustdoc-args = [ "--cfg",  "jemallocator_docs" ]
