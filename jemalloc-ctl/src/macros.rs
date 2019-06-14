@@ -33,7 +33,6 @@ macro_rules! types {
             }
 
             $(#[$doc_mib])*
-            #[doc(hidden)]
             #[repr(transparent)]
             #[derive(Copy, Clone)]
             #[allow(non_camel_case_types)]
