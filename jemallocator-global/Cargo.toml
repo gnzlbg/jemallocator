@@ -1,7 +1,7 @@
 [package]
 name = "jemallocator-global"
 # Make sure to update the version in the readme as well:
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Gonzalo Brito Gadeschi <gonzalobg88@gmail.com>"]
 edition = "2015"
 license = "MIT/Apache-2.0"
@@ -24,7 +24,7 @@ is-it-maintained-open-issues = { repository = "gnzlbg/jemallocator" }
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-jemallocator = { version = "0.3.0", path = "..", optional = true }
+jemallocator = { version = "0.3.1", path = "..", optional = true }
 cfg-if = "0.1"
 
 [features]
@@ -36,7 +36,7 @@ force_global_jemalloc = [ "jemallocator" ]
 # for a particular target, white-list the target explicitly here:
 
 [target.'cfg(any(target_os = "linux", target_os = "android", target_os = "macos", target_os = "ios", target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))'.dependencies]
-jemallocator = { version = "0.3.0", path = "..", optional = false }
+jemallocator = { version = "0.3.1", path = "..", optional = false }
 
 # FIXME: https://github.com/gnzlbg/jemallocator/issues/91
 # [target.'cfg(target_os = "windows")'.dependencies]

@@ -1,6 +1,6 @@
 [package]
 name = "jemalloc-ctl"
-version = "0.3.0"
+version = "0.3.1"
 authors = [
     "Steven Fackler <sfackler@gmail.com>",
     "Gonzalo Brito Gadeschi <gonzalobg88@gmail.com>"
@@ -25,12 +25,12 @@ is-it-maintained-open-issues = { repository = "gnzlbg/jemallocator" }
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-jemalloc-sys = { path = "../jemalloc-sys", version = "0.3.0" }
+jemalloc-sys = { path = "../jemalloc-sys", version = "0.3.1" }
 libc = { version = "0.2", default-features = false }
 paste = { version = "0.1" }
 
 [dev-dependencies]
-jemallocator = { path = "..", version = "0.3.0" }
+jemallocator = { path = "..", version = "0.3.1" }
 
 [features]
 default = []
