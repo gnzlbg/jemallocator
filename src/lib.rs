@@ -81,7 +81,7 @@ macro_rules! assume {
     ($e:expr) => {
         debug_assert!($e);
         if !($e) {
-            core::hint::unrachable_unchecked();
+            core::hint::unreachable_unchecked();
         }
     }
 }
