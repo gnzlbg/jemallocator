@@ -77,6 +77,21 @@ fn main() {
         warning!("jemalloc support for `{}` is untested", target);
     }
 
+    let mut use_prefix =
+        env::var("CARGO_FEATURE_UNPREFIXED_MALLOC_ON_SUPPORTED_PLATFORMS").is_err();
+
+    if !use_prefix && NO_UNPREFIXED_MALLOC.iter().any(|i| target.contains(i)) {
+        warning!(
+            "Unprefixed `malloc` requested on unsupported platform `{}` => using prefixed `malloc`",
+            target
+        );
+        use_prefix = true;
+    }
+
+    if use_prefix {
+        println!("cargo:rustc-cfg=prefixed");
+    }
+
     if let Some(jemalloc) = env::var_os("JEMALLOC_OVERRIDE") {
         info!("jemalloc override set");
         let jemalloc = PathBuf::from(jemalloc);
@@ -280,20 +295,8 @@ fn main() {
         cmd.arg(format!("--with-lg-vaddr={}", lg_vaddr));
     }
 
-    let mut use_prefix =
-        env::var("CARGO_FEATURE_UNPREFIXED_MALLOC_ON_SUPPORTED_PLATFORMS").is_err();
-
-    if !use_prefix && NO_UNPREFIXED_MALLOC.iter().any(|i| target.contains(i)) {
-        warning!(
-            "Unprefixed `malloc` requested on unsupported platform `{}` => using prefixed `malloc`",
-            target
-        );
-        use_prefix = true;
-    }
-
     if use_prefix {
         cmd.arg("--with-jemalloc-prefix=_rjem_");
-        println!("cargo:rustc-cfg=prefixed");
         info!("--with-jemalloc-prefix=_rjem_");
     }
 
