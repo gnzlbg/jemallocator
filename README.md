@@ -25,16 +25,21 @@ To use `jemallocator` add it as a dependency:
 ```toml
 # Cargo.toml
 [dependencies]
-jemallocator = "0.3.0"
+
+[target.'cfg(not(target_env = "msvc"))'.dependencies]
+jemallocator = "0.3.2"
 ```
 
 To set `jemallocator::Jemalloc` as the global allocator add this to your project:
 
 ```rust
-extern crate jemallocator;
+# main.rs
+#[cfg(not(target_env = "msvc"))]
+use jemallocator::Jemalloc;
 
+#[cfg(not(target_env = "msvc"))]
 #[global_allocator]
-static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
+static GLOBAL: Jemalloc = Jemalloc;
 ```
 
 And that's it! Once you've defined this `static` then jemalloc will be used for
