@@ -1,17 +1,188 @@
 name: CI
-
-on: [push]
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
 
 jobs:
-  build:
-
+  style:
+    name: Check Style
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v1
-    - name: Run a one-line script
-      run: echo Hello, world!
-    - name: Run a multi-line script
+    - uses: actions/checkout@master
+      with:
+        submodules: true
+    - name: Install Rust
+      run: rustup update nightly && rustup default nightly
+    - run: ci/style.sh
+
+  docs:
+    name: Build Documentation
+    needs: [style]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: true
+    - name: Install Rust
+      run: rustup update nightly && rustup default nightly
+    - run: ci/dox.sh
+      env:
+        CI: 1
+    - name: Publish documentation
       run: |
-        echo Add other actions to build,
-        echo test, and deploy your project.
+        cd target/doc
+        git init
+        git add .
+        git -c user.name='ci' -c user.email='ci' commit -m init
+        git push -f -q https://git:${{ secrets.github_token }}@github.com/${{ github.repository }} HEAD:gh-pages
+      if: github.event_name == 'push' && github.event.ref == 'refs/heads/master'
+
+  benches:
+    name: Build benchmarks
+    needs: [style]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: true
+    - name: Install Rust
+      run: rustup update nightly && rustup default nightly
+    - name: Benchmarks
+      run: |
+        cargo test --bench roundtrip
+        cargo test --features=alloc_trait --bench roundtrip
+
+  test:
+    needs: [style]
+    name: Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        target:
+          - aarch64-unknown-linux-gnu
+          - x86_64-apple-darwin
+          - x86_64-unknown-linux-gnu
+        include:
+        # - target: aarch64-linux-android
+        #   os: ubuntu-latest
+        #   rust: nightly
+        #   no_jemalloc_tests: 1
+        - target: aarch64-unknown-linux-gnu
+          os: ubuntu-latest
+          rust: nightly
+          no_jemalloc_tests: 1
+        # - target: arm-linux-androideabi
+        #   os: ubuntu-latest
+        #   rust: nightly
+        #   no_jemalloc_tests: 1
+        # - target: arm-unknown-linux-gnueabi
+        #   os: ubuntu-latest
+        #   rust: nightly
+        #   no_jemalloc_tests: 1
+        # - target: armv7-unknown-linux-gnueabihf
+        #   os: ubuntu-latest
+        #   rust: nightly
+        #   no_jemalloc_tests: 1
+        # - target: i586-unknown-linux-gnu
+        #   os: ubuntu-latest
+        #   rust: nightly
+        # - target: i686-pc-windows-gnu
+        #   os: windows-latest
+        #   rust: nightly
+        # - target: i686-pc-windows-msvc
+        #   os: windows-latest
+        #   rust: nightly
+        # - target: i686-unknown-linux-gnu
+        #   os: ubuntu-latest
+        #   rust: nightly
+        # - target: mips-unknown-linux-gnu
+        #   os: ubuntu-latest
+        #   rust: nightly
+        #   no_jemalloc_tests: 1
+        # - target: mips64-unknown-linux-gnuabi64
+        #   os: ubuntu-latest
+        #   rust: nightly
+        #   no_jemalloc_tests: 1
+        # - target: mips64el-unknown-linux-gnuabi64
+        #   os: ubuntu-latest
+        #   rust: nightly
+        #   no_jemalloc_tests: 1
+        # - target: mipsel-unknown-linux-gnu
+        #   os: ubuntu-latest
+        #   rust: nightly
+        #   no_jemalloc_tests: 1
+        # - target: s390x-unknown-linux-gnu
+        #   os: ubuntu-latest
+        #   rust: nightly
+        #   no_jemalloc_tests: 1
+        - target: x86_64-apple-darwin
+          os: macos-latest
+          rust: nightly
+        # - target: x86_64-apple-darwin
+        #   os: macos-latest
+        #   rust: beta
+        # - target: x86_64-apple-darwin
+        #   os: macos-latest
+        #   rust: stable
+        # - target: x86_64-linux-android
+        #   os: ubuntu-latest
+        #   rust: nightly
+        - target: x86_64-unknown-linux-gnu
+          os: ubuntu-latest
+          rust: nightly
+        # - target: x86_64-unknown-linux-gnu
+        #   os: ubuntu-latest
+        #   rust: nightly
+        #   valgrind: 1
+        - target: x86_64-unknown-linux-gnu
+          os: ubuntu-latest
+          rust: nightly
+          jemalloc-dev: 1
+          valgrind: 1
+        # - target: x86_64-unknown-linux-gnu
+        #   os: ubuntu-latest
+        #   rust: beta
+        - target: x86_64-unknown-linux-gnu
+          os: ubuntu-latest
+          rust: stable
+          
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: true
+    - name: Install Rust (rustup)
+      run: rustup update ${{ matrix.rust }} --no-self-update && rustup default ${{ matrix.rust }}
+      if: matrix.os != 'macos-latest'
+    - name: Install Rust (macos)
+      run: |
+        curl https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly
+        echo "##[add-path]$HOME/.cargo/bin"
+      if: matrix.os == 'macos-latest'
+    - run: rustup target add ${{ matrix.target }}
+    - run: cargo generate-lockfile
+
+    # Configure some env vars based on matrix configuration
+    - run: echo "##[set-env name=NO_JEMALLOC_TESTS]1"
+      if: matrix.no_jemalloc_tests != ''
+    - run: echo "##[set-env name=JEMALLOC_SYS_GIT_DEV_BRANCH]1"
+      if: matrix.jemalloc-dev != ''
+    - run: echo "##[set-env name=VALGRIND]1"
+      if: matrix.valgrind != ''
+
+    # Windows & OSX go straight to `run.sh` ...
+    - run: ./ci/run.sh
+      shell: bash
+      if: matrix.os != 'ubuntu-latest'
+      env:
+        TARGET: ${{ matrix.target }}
+
+    # ... while Linux goes to `run-docker.sh`
+    - run: ./ci/run-docker.sh ${{ matrix.target }}
+      shell: bash
+      if: "matrix.os == 'ubuntu-latest'"
+      env:
+        TARGET: ${{ matrix.target }}
