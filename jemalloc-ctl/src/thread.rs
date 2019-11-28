@@ -127,6 +127,7 @@ where
 {
     /// Returns the current value at the pointer.
     #[inline]
+    #[must_use]
     pub fn get(self) -> T {
         unsafe { *self.0 }
     }

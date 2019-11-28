@@ -27,6 +27,7 @@ macro_rules! types {
                 }
 
                 /// Key [`::keys::Name`].
+                #[must_use]
                 pub fn name() -> &'static ::keys::Name {
                     Self::NAME
                 }
