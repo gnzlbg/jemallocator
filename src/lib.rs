@@ -17,6 +17,7 @@
 
 #![cfg_attr(feature = "alloc_trait", feature(allocator_api))]
 #![deny(missing_docs, intra_doc_link_resolution_failure)]
+#![allow(non_upper_case_globals)]
 #![no_std]
 
 extern crate jemalloc_sys;
