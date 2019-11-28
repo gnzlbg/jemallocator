@@ -72,7 +72,10 @@
 //! ```
 #![deny(missing_docs, intra_doc_link_resolution_failure)]
 #![cfg_attr(not(feature = "use_std"), no_std)]
-#![cfg_attr(feature = "cargo-clippy", allow(clippy::module_name_repetitions))]
+#![allow(
+    clippy::module_name_repetitions,
+    clippy::needless_doctest_main // bug: https://github.com/rust-lang/rust-clippy/issues/4858
+)]
 
 extern crate jemalloc_sys;
 extern crate libc;
