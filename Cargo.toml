@@ -21,9 +21,6 @@ A Rust allocator backed by jemalloc
 edition = "2015"
 
 [badges]
-appveyor = { repository = "gnzlbg/jemallocator" }
-travis-ci = { repository = "gnzlbg/jemallocator" }
-codecov = { repository = "gnzlbg/jemallocator" }
 is-it-maintained-issue-resolution = { repository = "gnzlbg/jemallocator" }
 is-it-maintained-open-issues = { repository = "gnzlbg/jemallocator" }
 maintenance = { status = "actively-developed" }
