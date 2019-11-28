@@ -23,54 +23,23 @@
 extern crate jemalloc_sys;
 extern crate libc;
 
-#[cfg(feature = "alloc_trait")]
-use core::alloc::{Alloc, AllocErr, CannotReallocInPlace, Excess};
 use core::alloc::{GlobalAlloc, Layout};
 #[cfg(feature = "alloc_trait")]
-use core::ptr::NonNull;
-
+use core::{
+    alloc::{Alloc, AllocErr, CannotReallocInPlace, Excess},
+    ptr::NonNull,
+};
 use libc::{c_int, c_void};
 
-// This constant equals _Alignof(max_align_t) and is platform-specific. It
-// contains the _maximum_ alignment that the memory allocations returned by the
-// C standard library memory allocation APIs (e.g. `malloc`) are guaranteed to
-// have.
-//
-// The memory allocation APIs are required to return memory that can fit any
-// object whose fundamental aligment is <= _Alignof(max_align_t).
-//
-// In C, there are no ZSTs, and the size of all types is a multiple of their
-// alignment (size >= align). So for allocations with size <=
-// _Alignof(max_align_t), the malloc-APIs return memory whose alignment is
-// either the requested size if its a power-of-two, or the next smaller
-// power-of-two.
-#[cfg(all(any(
-    target_arch = "arm",
-    target_arch = "mips",
-    target_arch = "mipsel",
-    target_arch = "powerpc"
-)))]
-const alignof_max_align_t: usize = 8;
-#[cfg(all(any(
-    target_arch = "x86",
-    target_arch = "x86_64",
-    target_arch = "aarch64",
-    target_arch = "powerpc64",
-    target_arch = "powerpc64le",
-    target_arch = "mips64",
-    target_arch = "s390x",
-    target_arch = "sparc64"
-)))]
-const alignof_max_align_t: usize = 16;
-
 /// If `align` is less than `_Alignof(max_align_t)`, and if the requested
-/// allocation `size` is larger than the alignment, we are guaranteed to get a
-/// suitably aligned allocation by default, without passing extra flags, and
-/// this function returns `0`.
+/// allocation `size` is larger than the alignment, and if jemalloc was
+/// configured with a C standard compatible `--with-lg-quantum` value, we are
+/// guaranteed to get a suitably aligned allocation with jemallocs default
+/// options, without passing extra flags, and this function returns `0`.
 ///
 /// Otherwise, it returns the alignment flag to pass to the jemalloc APIs.
 fn layout_to_flags(align: usize, size: usize) -> c_int {
-    if align <= alignof_max_align_t && align <= size {
+    if align <= core::mem::align_of::<libc::max_align_t>() && align <= size {
         0
     } else {
         ffi::MALLOCX_ALIGN(align)
