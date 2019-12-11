@@ -366,8 +366,6 @@ extern "C" {
     ///
     /// This makes the space available for future allocations.
     ///
-    /// If `ptr` is null, no action occurs.
-    ///
     /// # Safety
     ///
     /// The behavior is _undefined_ if:
@@ -382,8 +380,6 @@ extern "C" {
     /// `size` hint.
     ///
     /// This makes the space available for future allocations.
-    ///
-    /// If `ptr` is null, no action occurs.
     ///
     /// # Safety
     ///
