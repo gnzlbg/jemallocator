@@ -372,6 +372,7 @@ extern "C" {
     ///
     /// * `ptr` does not match a pointer earlier returned by the memory
     ///   allocation functions of this crate, or
+    /// * `ptr` is null, or
     /// * the memory region referenced by `ptr` has been deallocated.
     #[cfg_attr(prefixed, link_name = "_rjem_dallocx")]
     pub fn dallocx(ptr: *mut c_void, flags: c_int);
@@ -391,6 +392,7 @@ extern "C" {
     /// [`xallocx`],
     /// * `ptr` does not match a pointer earlier returned by the memory
     ///   allocation functions of this crate, or
+    /// * `ptr` is null, or
     /// * the memory region referenced by `ptr` has been deallocated.
     #[cfg_attr(prefixed, link_name = "_rjem_sdallocx")]
     pub fn sdallocx(ptr: *mut c_void, size: size_t, flags: c_int);
