@@ -1,7 +1,8 @@
 //! Error type
-#![cfg_attr(
-    feature = "cargo-clippy",
-    allow(clippy::cast_sign_loss, clippy::cast_possible_wrap)
+#![allow(
+    clippy::cast_sign_loss,
+    clippy::cast_possible_wrap,
+clippy::use_self // https://github.com/rust-lang/rust-clippy/issues/2843
 )]
 
 use libc::c_int;

@@ -46,7 +46,6 @@ pub trait AsName {
 
 impl AsName for [u8] {
     fn name(&self) -> &Name {
-        use str;
         assert!(
             !self.is_empty(),
             "cannot create Name from empty byte-string"
@@ -89,6 +88,7 @@ impl Name {
 
     /// Returns `true` if `self` is a key in the _MALLCTL NAMESPCE_ referring to
     /// a null-terminated string.
+    #[must_use]
     pub fn value_type_str(&self) -> bool {
         // remove the null-terminator:
         let name = self.0.split_at(self.0.len() - 1).0;
@@ -118,6 +118,7 @@ impl Name {
     }
 
     /// Returns the name as null-terminated byte-string.
+    #[must_use]
     pub fn as_bytes(&self) -> &'static [u8] {
         unsafe { &*(self as *const Self as *const [u8]) }
     }
@@ -125,14 +126,12 @@ impl Name {
 
 impl fmt::Debug for Name {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use str;
         write!(f, "{}", str::from_utf8(&self.0).unwrap())
     }
 }
 
 impl fmt::Display for Name {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use str;
         write!(f, "{}", str::from_utf8(&self.0).unwrap())
     }
 }
