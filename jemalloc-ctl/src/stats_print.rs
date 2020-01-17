@@ -28,6 +28,11 @@ pub struct Options {
     /// This corresponds to the `m` character.
     pub skip_merged_arenas: bool,
 
+    /// If set, merged information about destroyed arenas will be skipped.
+    ///
+    /// This corresponds to the `d` character.
+    pub skip_destroyed_arenas: bool,
+
     /// If set, information about individual arenas will be skipped.
     ///
     /// This corresponds to the `a` character.
@@ -47,6 +52,11 @@ pub struct Options {
     ///
     /// This corresponds to the `x` character.
     pub skip_mutex_statistics: bool,
+
+    /// If set, extent statistics will be skipped.
+    ///
+    /// This corresponds to the `e` character.
+    pub skip_extent_statistics: bool,
 
     _p: (),
 }
@@ -93,7 +103,7 @@ where
             error: Ok(()),
             panic: Ok(()),
         };
-        let mut opts = [0; 8];
+        let mut opts = [0; 10];
         let mut i = 0;
         if options.json_format {
             opts[i] = b'J' as c_char;
@@ -105,6 +115,10 @@ where
         }
         if options.skip_merged_arenas {
             opts[i] = b'm' as c_char;
+            i += 1;
+        }
+        if options.skip_destroyed_arenas {
+            opts[i] = b'd' as c_char;
             i += 1;
         }
         if options.skip_per_arena {
@@ -121,6 +135,10 @@ where
         }
         if options.skip_mutex_statistics {
             opts[i] = b'x' as c_char;
+            i += 1;
+        }
+        if options.skip_extent_statistics {
+            opts[i] = b'e' as c_char;
             i += 1;
         }
         opts[i] = 0;
@@ -155,10 +173,12 @@ mod test {
             json_format: true,
             skip_constants: true,
             skip_merged_arenas: true,
+            skip_destroyed_arenas: true,
             skip_per_arena: true,
             skip_bin_size_classes: true,
             skip_large_size_classes: true,
             skip_mutex_statistics: true,
+            skip_extent_statistics: true,
             _p: (),
         };
         stats_print(&mut buf, options).unwrap();
