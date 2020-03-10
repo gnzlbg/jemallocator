@@ -10,7 +10,7 @@ static A: Jemalloc = Jemalloc;
 #[cfg(feature = "alloc_trait")]
 fn shrink_in_place() {
     unsafe {
-        use std::alloc::{Alloc, Layout};
+        use std::alloc::{AllocRef, Layout};
 
         // allocate 7 bytes which end up in the 8 byte size-class as long as
         // jemalloc's default size classes are used:

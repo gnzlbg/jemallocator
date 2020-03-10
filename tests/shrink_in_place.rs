@@ -11,7 +11,7 @@ static A: Jemalloc = Jemalloc;
 #[cfg(feature = "alloc_trait")]
 fn shrink_in_place() {
     unsafe {
-        use std::alloc::{Alloc, Layout};
+        use std::alloc::{AllocRef, Layout};
 
         // allocate a "large" block of memory:
         let orig_sz = 10 * 4096;
