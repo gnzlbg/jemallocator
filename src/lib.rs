@@ -23,7 +23,7 @@ extern crate jemalloc_sys;
 extern crate libc;
 
 #[cfg(feature = "alloc_trait")]
-use core::alloc::{AllocRef, AllocErr, CannotReallocInPlace, Excess};
+use core::alloc::{Alloc, AllocErr, CannotReallocInPlace, Excess};
 use core::alloc::{GlobalAlloc, Layout};
 #[cfg(feature = "alloc_trait")]
 use core::ptr::NonNull;
@@ -143,7 +143,7 @@ unsafe impl GlobalAlloc for Jemalloc {
 }
 
 #[cfg(feature = "alloc_trait")]
-unsafe impl AllocRef for Jemalloc {
+unsafe impl Alloc for Jemalloc {
     #[inline]
     unsafe fn alloc(&mut self, layout: Layout) -> Result<NonNull<u8>, AllocErr> {
         NonNull::new(GlobalAlloc::alloc(self, layout)).ok_or(AllocErr)
