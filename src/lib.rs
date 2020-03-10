@@ -49,7 +49,7 @@ use libc::{c_int, c_void};
     target_arch = "mipsel",
     target_arch = "powerpc"
 )))]
-const alignof_max_align_t: usize = 8;
+const ALIGNOF_MAX_ALIGN_T: usize = 8;
 #[cfg(all(any(
     target_arch = "x86",
     target_arch = "x86_64",
@@ -60,7 +60,7 @@ const alignof_max_align_t: usize = 8;
     target_arch = "s390x",
     target_arch = "sparc64"
 )))]
-const alignof_max_align_t: usize = 16;
+const ALIGNOF_MAX_ALIGN_T: usize = 16;
 
 /// If `align` is less than `_Alignof(max_align_t)`, and if the requested
 /// allocation `size` is larger than the alignment, we are guaranteed to get a
@@ -69,7 +69,7 @@ const alignof_max_align_t: usize = 16;
 ///
 /// Otherwise, it returns the alignment flag to pass to the jemalloc APIs.
 fn layout_to_flags(align: usize, size: usize) -> c_int {
-    if align <= alignof_max_align_t && align <= size {
+    if align <= ALIGNOF_MAX_ALIGN_T && align <= size {
         0
     } else {
         ffi::MALLOCX_ALIGN(align)
@@ -122,7 +122,7 @@ unsafe impl GlobalAlloc for Jemalloc {
 
     #[inline]
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-        assume!(!ptr.is_null())
+        assume!(!ptr.is_null());
         assume!(layout.size() != 0);
         let flags = layout_to_flags(layout.align(), layout.size());
         ffi::sdallocx(ptr as *mut c_void, layout.size(), flags)

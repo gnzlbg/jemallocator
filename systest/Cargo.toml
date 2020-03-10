@@ -9,4 +9,4 @@ jemalloc-sys = { path = "../jemalloc-sys" }
 libc = "0.2"
 
 [build-dependencies]
-ctest = "^0.2.6"
+ctest = "0.2.22"
