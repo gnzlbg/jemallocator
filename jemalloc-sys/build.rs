@@ -54,6 +54,8 @@ macro_rules! warning {
     }
 }
 
+// TODO: split main functions and remove following allow.
+#[allow(clippy::cognitive_complexity)]
 fn main() {
     let target = env::var("TARGET").expect("TARGET was not set");
     let host = env::var("HOST").expect("HOST was not set");
@@ -231,7 +233,7 @@ fn main() {
     .env("CC", compiler.path())
     .env("CFLAGS", cflags.clone())
     .env("LDFLAGS", cflags.clone())
-    .env("CPPFLAGS", cflags.clone())
+    .env("CPPFLAGS", cflags)
     .arg("--disable-cxx");
 
     if target.contains("ios") {
@@ -361,7 +363,7 @@ fn main() {
         .arg("install_lib_static")
         .arg("install_include")
         .arg("-j")
-        .arg(num_jobs.clone()));
+        .arg(num_jobs));
 
     println!("cargo:root={}", out_dir.display());
 

@@ -83,7 +83,7 @@ macro_rules! assume {
         if !($e) {
             core::hint::unreachable_unchecked();
         }
-    }
+    };
 }
 
 /// Handle to the jemalloc allocator
