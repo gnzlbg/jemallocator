@@ -13,7 +13,6 @@ extern crate fs_extra;
 
 use std::env;
 use std::fs;
-use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -187,28 +186,11 @@ fn main() {
         run(&mut cmd);
 
         for f in &config_files {
-            use std::io::Read;
-            fn read_content(file_path: &Path) -> String {
-                assert!(
-                    file_path.exists(),
-                    "config file path `{}` does not exist",
-                    file_path.display()
-                );
-                let mut file = File::open(file_path).expect("file not found");
-                let mut content = String::new();
-                file.read_to_string(&mut content)
-                    .expect("failed to read file");
-                content
-            }
-
             if verify_configure {
-                let current = read_content(&jemalloc_src_dir.join(f));
-                let reference = read_content(&Path::new("configure").join(f));
-                assert_eq!(
-                    current, reference,
-                    "the current and reference configuration files \"{}\" differ",
-                    f
-                );
+                let mut cmd = Command::new("diff");
+                run(cmd
+                    .arg(&jemalloc_src_dir.join(f))
+                    .arg(&Path::new("configure").join(f)));
             }
         }
     } else {
