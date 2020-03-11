@@ -133,8 +133,9 @@ ${CARGO_CMD} test -vv --target "${TARGET}" \
              --manifest-path jemallocator-global/Cargo.toml \
              --features force_global_jemalloc
 
-if [ "${TRAVIS_RUST_VERSION}" = "nightly"  ]
-then
-    # The Alloc trait is unstable:
-    ${CARGO_CMD} test -vv --target "${TARGET}" --features alloc_trait
-fi
+# FIXME: Re-enable following test when allocator API is stable again.
+# if [ "${TRAVIS_RUST_VERSION}" = "nightly"  ]
+# then
+#     # The Alloc trait is unstable:
+#     ${CARGO_CMD} test -vv --target "${TARGET}" --features alloc_trait
+# fi

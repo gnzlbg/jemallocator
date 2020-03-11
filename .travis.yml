@@ -72,7 +72,8 @@ matrix:
       install: true
       script:
         - cargo test --bench roundtrip
-        - cargo test --features=alloc_trait --bench roundtrip
+        # FIXME: Re-enable this when allocator API is stable.
+        # - cargo test --features=alloc_trait --bench roundtrip
     - name: "x86_64-unknown-linux-musl"
       env: TARGET=x86_64-unknown-linux-musl NOBGT=1 NO_JEMALLOC_TESTS=1
 
