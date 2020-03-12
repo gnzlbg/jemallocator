@@ -2,6 +2,11 @@ language: rust
 rust: nightly
 services: docker
 
+jobs:
+  allow_failures:
+    - if: branch != master
+      env: JEMALLOC_SYS_VERIFY_CONFIGURE=1
+
 matrix:
   include:
     # Linux
