@@ -87,11 +87,6 @@ jobs:
     # FIXME: cannot jemalloc tests fail due to:
     # https://github.com/jemalloc/jemalloc/issues/1320
     # https://github.com/gnzlbg/jemallocator/issues/85
-    - name: "i686-apple-darwin (stable)"
-      env: TARGET=i686-apple-darwin NO_JEMALLOC_TESTS=1
-      os: osx
-      osx_image: xcode10
-      rust: stable
     # FIXME: valgrind fails on OSX
     # https://github.com/gnzlbg/jemallocator/issues/86
     - name: "x86_64-apple-darwin (nightly)"
