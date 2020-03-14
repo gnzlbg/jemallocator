@@ -144,8 +144,7 @@ jobs:
       install: true
       script: shellcheck ci/*.sh
   allow_failures:
-    - if: env(TRAVIS_PULL_REQUEST) != "false"
-      env: JEMALLOC_SYS_VERIFY_CONFIGURE=1
+    - env: JEMALLOC_SYS_VERIFY_CONFIGURE=1
 
 install: rustup target add ${TARGET}
 script: sh ci/run.sh
