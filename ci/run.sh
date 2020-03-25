@@ -10,6 +10,11 @@ export RUST_TEST_THREADS=1
 export RUST_TEST_NOCAPTURE=1
 export CARGO_CMD=cross
 
+if [ "${JEMALLOC_SYS_VERIFY_CONFIGURE}" = "1" ]
+then
+    autoconf --version
+fi
+
 # FIXME: workaround cargo breaking Travis-CI again:
 # https://github.com/rust-lang/cargo/issues/5721
 if [ "$TRAVIS" = "true" ]
