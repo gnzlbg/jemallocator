@@ -62,9 +62,9 @@ fn main() {
     let out_dir = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR was not set"));
     let src_dir = env::current_dir().expect("failed to get current directory");
 
-    info!("TARGET={}", target.clone());
-    info!("HOST={}", host.clone());
-    info!("NUM_JOBS={}", num_jobs.clone());
+    info!("TARGET={}", target);
+    info!("HOST={}", host);
+    info!("NUM_JOBS={}", num_jobs);
     info!("OUT_DIR={:?}", out_dir);
     let build_dir = out_dir.join("build");
     info!("BUILD_DIR={:?}", build_dir);
