@@ -55,7 +55,11 @@ fi
 
 if [ "${TARGET}" = "x86_64-unknown-linux-gnu" ] || [ "${TARGET}" = "x86_64-apple-darwin" ]
 then
-    ${CARGO_CMD} build -vv --target "${TARGET}" 2>&1 | tee build_no_std.txt
+    # Not using tee to avoid too much logs that exceeds travis' limit.
+    if ! ${CARGO_CMD} build -vv --target "${TARGET}" > build_no_std.txt 2>&1; then
+        tail -n 1024 build_no_std.txt
+        exit 1
+    fi
 
     # Check that the no-std builds are not linked against a libc with default
     # features or the `use_std` feature enabled:
@@ -71,42 +75,42 @@ then
     done
 fi
 
-${CARGO_CMD} test -vv --target "${TARGET}"
+${CARGO_CMD} test --target "${TARGET}"
 
 if [ "${JEMALLOC_SYS_GIT_DEV_BRANCH}" = "1" ]; then
     # FIXME: profiling tests broken on dev-branch
     # https://github.com/jemalloc/jemalloc/issues/1477
     :
 else
-    ${CARGO_CMD} test -vv --target "${TARGET}" --features profiling
+    ${CARGO_CMD} test --target "${TARGET}" --features profiling
 fi
 
-${CARGO_CMD} test -vv --target "${TARGET}" --features debug
-${CARGO_CMD} test -vv --target "${TARGET}" --features stats
+${CARGO_CMD} test --target "${TARGET}" --features debug
+${CARGO_CMD} test --target "${TARGET}" --features stats
 if [ "${JEMALLOC_SYS_GIT_DEV_BRANCH}" = "1" ]; then
     # FIXME: profiling tests broken on dev-branch
     # https://github.com/jemalloc/jemalloc/issues/1477
     :
 else
-    ${CARGO_CMD} test -vv --target "${TARGET}" --features 'debug profiling'
+    ${CARGO_CMD} test --target "${TARGET}" --features 'debug profiling'
 fi
 
-${CARGO_CMD} test -vv --target "${TARGET}" \
+${CARGO_CMD} test --target "${TARGET}" \
              --features unprefixed_malloc_on_supported_platforms
-${CARGO_CMD} test -vv --target "${TARGET}" --no-default-features
-${CARGO_CMD} test -vv --target "${TARGET}" --no-default-features \
+${CARGO_CMD} test --target "${TARGET}" --no-default-features
+${CARGO_CMD} test --target "${TARGET}" --no-default-features \
              --features background_threads_runtime_support
 
 if [ "${NOBGT}" = "1" ]
 then
     echo "enabling background threads by default at run-time is not tested"
 else
-    ${CARGO_CMD} test -vv --target "${TARGET}" --features background_threads
+    ${CARGO_CMD} test --target "${TARGET}" --features background_threads
 fi
 
-${CARGO_CMD} test -vv --target "${TARGET}" --release
-${CARGO_CMD} test -vv --target "${TARGET}" --manifest-path jemalloc-sys/Cargo.toml
-${CARGO_CMD} test -vv --target "${TARGET}" \
+${CARGO_CMD} test --target "${TARGET}" --release
+${CARGO_CMD} test --target "${TARGET}" --manifest-path jemalloc-sys/Cargo.toml
+${CARGO_CMD} test --target "${TARGET}" \
              --manifest-path jemalloc-sys/Cargo.toml \
              --features unprefixed_malloc_on_supported_platforms
 
@@ -116,25 +120,26 @@ case "${TARGET}" in
     "x86_64-unknown-linux-musl") ;;
     *)
 
-        ${CARGO_CMD} test -vv --target "${TARGET}" \
+        ${CARGO_CMD} test --target "${TARGET}" \
                      --manifest-path jemalloc-ctl/Cargo.toml \
                      --no-default-features
         # FIXME: cross fails to pass features to jemalloc-ctl
-        # ${CARGO_CMD} test -vv --target "${TARGET}" \
+        # ${CARGO_CMD} test --target "${TARGET}" \
         #             --manifest-path jemalloc-ctl \
         #             --no-default-features --features use_std
         ;;
 esac
 
-${CARGO_CMD} test -vv --target "${TARGET}" -p systest
-${CARGO_CMD} test -vv --target "${TARGET}" \
+${CARGO_CMD} test --target "${TARGET}" -p systest
+${CARGO_CMD} test --target "${TARGET}" \
              --manifest-path jemallocator-global/Cargo.toml
-${CARGO_CMD} test -vv --target "${TARGET}" \
+${CARGO_CMD} test --target "${TARGET}" \
              --manifest-path jemallocator-global/Cargo.toml \
              --features force_global_jemalloc
 
-if [ "${TRAVIS_RUST_VERSION}" = "nightly"  ]
-then
-    # The Alloc trait is unstable:
-    ${CARGO_CMD} test -vv --target "${TARGET}" --features alloc_trait
-fi
+# FIXME: Re-enable following test when allocator API is stable again.
+# if [ "${TRAVIS_RUST_VERSION}" = "nightly"  ]
+# then
+#     # The Alloc trait is unstable:
+#     ${CARGO_CMD} test --target "${TARGET}" --features alloc_trait
+# fi
