@@ -90,7 +90,7 @@ jobs:
     # FIXME: valgrind fails on OSX
     # https://github.com/gnzlbg/jemallocator/issues/86
     - name: "x86_64-apple-darwin (nightly)"
-      env: TARGET=x86_64-apple-darwin NO_JEMALLOC_TESTS=1 JEMALLOC_SYS_VERIFY_CONFIGURE=1
+      env: TARGET=x86_64-apple-darwin NO_JEMALLOC_TESTS=1 # JEMALLOC_SYS_VERIFY_CONFIGURE=1
       os: osx
       osx_image: xcode10
       install: rustup component add llvm-tools-preview
@@ -143,8 +143,6 @@ jobs:
     - name: "Shellcheck"
       install: true
       script: shellcheck ci/*.sh
-  allow_failures:
-    - env: JEMALLOC_SYS_VERIFY_CONFIGURE=1
 
 install: rustup target add ${TARGET}
 script: sh ci/run.sh
