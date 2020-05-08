@@ -234,6 +234,13 @@ fn main() {
     .env("CPPFLAGS", cflags.clone())
     .arg("--disable-cxx");
 
+    // if the compiler is clang, add -E to run the preprocessor when configure checks it
+    if let Some(compiler_path) = compiler.path().to_str() {
+        if compiler_path.contains("clang") {
+            cmd.env("CPP", compiler_path.to_owned() + " -E");
+        }
+    }
+
     if target.contains("ios") {
         // newer iOS deviced have 16kb page sizes:
         // closed: https://github.com/gnzlbg/jemallocator/issues/68
