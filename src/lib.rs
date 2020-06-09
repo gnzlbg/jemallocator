@@ -88,7 +88,7 @@ macro_rules! assume {
 
 /// Handle to the jemalloc allocator
 ///
-/// This type implements the `GlobalAllocAlloc` trait, allowing usage a global allocator.
+/// This type implements the `GlobalAlloc` trait, allowing usage a global allocator.
 ///
 /// When the `alloc_trait` feature of this crate is enabled, it also implements the `Alloc` trait,
 /// allowing usage in collections.
@@ -122,7 +122,7 @@ unsafe impl GlobalAlloc for Jemalloc {
 
     #[inline]
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-        assume!(!ptr.is_null())
+        assume!(!ptr.is_null());
         assume!(layout.size() != 0);
         let flags = layout_to_flags(layout.align(), layout.size());
         ffi::sdallocx(ptr as *mut c_void, layout.size(), flags)
