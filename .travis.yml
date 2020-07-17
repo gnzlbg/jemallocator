@@ -2,7 +2,7 @@ language: rust
 rust: nightly
 services: docker
 
-matrix:
+jobs:
   include:
     # Linux
     - name: "aarch64-unknown-linux-gnu"
@@ -72,7 +72,8 @@ matrix:
       install: true
       script:
         - cargo test --bench roundtrip
-        - cargo test --features=alloc_trait --bench roundtrip
+        # FIXME: Re-enable this when allocator API is stable.
+        # - cargo test --features=alloc_trait --bench roundtrip
     - name: "x86_64-unknown-linux-musl"
       env: TARGET=x86_64-unknown-linux-musl NOBGT=1 NO_JEMALLOC_TESTS=1
 
@@ -86,24 +87,10 @@ matrix:
     # FIXME: cannot jemalloc tests fail due to:
     # https://github.com/jemalloc/jemalloc/issues/1320
     # https://github.com/gnzlbg/jemallocator/issues/85
-    - name: "i686-apple-darwin (nightly)"
-      env: TARGET=i686-apple-darwin NO_JEMALLOC_TESTS=1
-      os: osx
-      osx_image: xcode10
-    - name: "i686-apple-darwin (beta)"
-      env: TARGET=i686-apple-darwin NO_JEMALLOC_TESTS=1
-      os: osx
-      osx_image: xcode10
-      rust: beta
-    - name: "i686-apple-darwin (stable)"
-      env: TARGET=i686-apple-darwin NO_JEMALLOC_TESTS=1
-      os: osx
-      osx_image: xcode10
-      rust: stable
     # FIXME: valgrind fails on OSX
     # https://github.com/gnzlbg/jemallocator/issues/86
     - name: "x86_64-apple-darwin (nightly)"
-      env: TARGET=x86_64-apple-darwin NO_JEMALLOC_TESTS=1 JEMALLOC_SYS_VERIFY_CONFIGURE=1
+      env: TARGET=x86_64-apple-darwin NO_JEMALLOC_TESTS=1 # JEMALLOC_SYS_VERIFY_CONFIGURE=1
       os: osx
       osx_image: xcode10
       install: rustup component add llvm-tools-preview
@@ -132,7 +119,7 @@ matrix:
       deploy:
         provider: script
         script: curl -LsSf https://git.io/fhJ8n | rustc - && (cd target/doc && ../../rust_out)
-        skip_cleanup: true
+        cleanup: true
         on:
           branch: master
     - name: "rustfmt"
@@ -148,10 +135,10 @@ matrix:
       # allow(clippy::all) fails in the syscrate, so we can't use --all here:
       script: |
         if rustup component add clippy-preview ; then
-            cargo clippy -p jemalloc-sys -- -D clippy::pedantic
-            cargo clippy -p jemallocator -- -D clippy::pedantic
-            cargo clippy -p jemallocator-global -- -D clippy::pedantic
-            cargo clippy -p jemalloc-ctl -- -D clippy::pedantic
+            cargo clippy -p jemalloc-sys -- -D clippy::all
+            cargo clippy -p jemallocator -- -D clippy::all
+            cargo clippy -p jemallocator-global -- -D clippy::all
+            cargo clippy -p jemalloc-ctl -- -D clippy::all
         fi
     - name: "Shellcheck"
       install: true
