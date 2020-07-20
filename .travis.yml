@@ -46,7 +46,7 @@ jobs:
     - name: "powerpc64le-unknown-linux-gnu"
       env: TARGET=powerpc64le-unknown-linux-gnu NO_JEMALLOC_TESTS=1
     - name: "x86_64-unknown-linux-gnu (nightly)"
-      env: TARGET=x86_64-unknown-linux-gnu VALGRIND=1 JEMALLOC_SYS_VERIFY_CONFIGURE=1
+      env: TARGET=x86_64-unknown-linux-gnu VALGRIND=1 # JEMALLOC_SYS_VERIFY_CONFIGURE=1
       install: rustup component add llvm-tools-preview
       addons: &valgrind
         apt:
