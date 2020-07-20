@@ -46,7 +46,6 @@ pub trait AsName {
 
 impl AsName for [u8] {
     fn name(&self) -> &Name {
-        use str;
         assert!(
             !self.is_empty(),
             "cannot create Name from empty byte-string"
@@ -125,14 +124,12 @@ impl Name {
 
 impl fmt::Debug for Name {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use str;
         write!(f, "{}", str::from_utf8(&self.0).unwrap())
     }
 }
 
 impl fmt::Display for Name {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use str;
         write!(f, "{}", str::from_utf8(&self.0).unwrap())
     }
 }

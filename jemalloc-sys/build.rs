@@ -13,7 +13,6 @@ extern crate fs_extra;
 
 use std::env;
 use std::fs;
-use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -54,6 +53,8 @@ macro_rules! warning {
     }
 }
 
+// TODO: split main functions and remove following allow.
+#[allow(clippy::cognitive_complexity)]
 fn main() {
     let target = env::var("TARGET").expect("TARGET was not set");
     let host = env::var("HOST").expect("HOST was not set");
@@ -61,9 +62,9 @@ fn main() {
     let out_dir = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR was not set"));
     let src_dir = env::current_dir().expect("failed to get current directory");
 
-    info!("TARGET={}", target.clone());
-    info!("HOST={}", host.clone());
-    info!("NUM_JOBS={}", num_jobs.clone());
+    info!("TARGET={}", target);
+    info!("HOST={}", host);
+    info!("NUM_JOBS={}", num_jobs);
     info!("OUT_DIR={:?}", out_dir);
     let build_dir = out_dir.join("build");
     info!("BUILD_DIR={:?}", build_dir);
@@ -185,28 +186,11 @@ fn main() {
         run(&mut cmd);
 
         for f in &config_files {
-            use std::io::Read;
-            fn read_content(file_path: &Path) -> String {
-                assert!(
-                    file_path.exists(),
-                    "config file path `{}` does not exist",
-                    file_path.display()
-                );
-                let mut file = File::open(file_path).expect("file not found");
-                let mut content = String::new();
-                file.read_to_string(&mut content)
-                    .expect("failed to read file");
-                content
-            }
-
             if verify_configure {
-                let current = read_content(&jemalloc_src_dir.join(f));
-                let reference = read_content(&Path::new("configure").join(f));
-                assert_eq!(
-                    current, reference,
-                    "the current and reference configuration files \"{}\" differ",
-                    f
-                );
+                let mut cmd = Command::new("diff");
+                run(cmd
+                    .arg(&jemalloc_src_dir.join(f))
+                    .arg(&Path::new("configure").join(f)));
             }
         }
     } else {
@@ -231,7 +215,7 @@ fn main() {
     .env("CC", compiler.path())
     .env("CFLAGS", cflags.clone())
     .env("LDFLAGS", cflags.clone())
-    .env("CPPFLAGS", cflags.clone())
+    .env("CPPFLAGS", cflags)
     .arg("--disable-cxx");
 
     if target.contains("ios") {
@@ -361,7 +345,7 @@ fn main() {
         .arg("install_lib_static")
         .arg("install_include")
         .arg("-j")
-        .arg(num_jobs.clone()));
+        .arg(num_jobs));
 
     println!("cargo:root={}", out_dir.display());
 
