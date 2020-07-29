@@ -131,3 +131,56 @@ where
         unsafe { *self.0 }
     }
 }
+
+option! {
+    arena[ str: b"thread.arena\0", non_str: 2 ] => *mut u16 |
+    ops:  |
+    docs:
+    /// Access to the arena index allocated by the current thread.
+    ///
+    /// The `read` method doesn't return the value directly, but actually a
+    /// pointer to the value. This allows for very fast repeated lookup, since
+    /// there is no function call overhead. The pointer type cannot be sent to
+    /// other threads, but [`arena::read`] can be called on different threads
+    /// and will return the appropriate pointer for each of them.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # extern crate jemallocator;
+    /// # extern crate jemalloc_ctl;
+    /// #
+    /// # #[global_allocator]
+    /// # static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
+    /// #
+    /// # fn main() {
+    /// use jemalloc_ctl::thread;
+    /// let arena_index = thread::arena::mib().unwrap();
+    /// let arena_index = arena_index.read().unwrap();
+    ///
+    /// let a = arena_index.get();
+    /// let buf = vec![0; 1024 * 1024];
+    /// let b = arena_index.get();
+    /// drop(buf);
+    /// let c = arena_index.get();
+    ///
+    /// assert!(a < b);
+    /// assert_eq!(b, c);
+    /// # }
+    /// ```
+    mib_docs: /// See [`arena`].
+}
+
+impl arena {
+    /// Reads value using string API.
+    pub fn read() -> Result<ThreadLocal<u16>> {
+        unsafe { read(Self::name().as_bytes()).map(ThreadLocal) }
+    }
+}
+
+impl arena_mib {
+    /// Reads value using MIB API.
+    pub fn read(&self) -> Result<ThreadLocal<u16>> {
+        unsafe { read_mib(self.0.as_ref()).map(ThreadLocal) }
+    }
+}
