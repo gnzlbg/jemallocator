@@ -303,24 +303,34 @@ fn main() {
 
     cmd.arg("--with-private-namespace=_rjem_");
 
+    // Always pass explicit --enable or --disable so changes in jemalloc
+    // defaults don't break us.
     if env::var("CARGO_FEATURE_DEBUG").is_ok() {
         info!("CARGO_FEATURE_DEBUG set");
         cmd.arg("--enable-debug");
+    } else {
+        cmd.arg("--disable-debug");
     }
 
     if env::var("CARGO_FEATURE_PROFILING").is_ok() {
         info!("CARGO_FEATURE_PROFILING set");
         cmd.arg("--enable-prof");
+    } else {
+        cmd.arg("--disable-prof");
     }
 
     if env::var("CARGO_FEATURE_STATS").is_ok() {
         info!("CARGO_FEATURE_STATS set");
         cmd.arg("--enable-stats");
+    } else {
+        cmd.arg("--disable-stats");
     }
 
     if env::var("CARGO_FEATURE_DISABLE_INITIAL_EXEC_TLS").is_ok() {
         info!("CARGO_FEATURE_DISABLE_INITIAL_EXEC_TLS set");
         cmd.arg("--disable-initial-exec-tls");
+    } else {
+        cmd.arg("--enable-initial-exec-tls");
     }
 
     cmd.arg(format!("--host={}", gnu_target(&target)));
