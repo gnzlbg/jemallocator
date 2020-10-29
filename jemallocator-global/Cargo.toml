@@ -36,7 +36,7 @@ force_global_jemalloc = [ "jemallocator" ]
 # for a particular target, white-list the target explicitly here:
 
 [target.'cfg(any(target_os = "linux", target_os = "android", target_os = "macos", target_os = "ios", target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))'.dependencies]
-jemallocator = { version = "0.3.2", path = "..", optional = false }
+jemallocator = { path = "..", optional = false }
 
 # FIXME: https://github.com/gnzlbg/jemallocator/issues/91
 # [target.'cfg(target_os = "windows")'.dependencies]
