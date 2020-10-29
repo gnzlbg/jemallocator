@@ -36,7 +36,7 @@ bench = false
 members = ["systest", "jemallocator-global", "jemalloc-ctl", "jemalloc-sys" ]
 
 [dependencies]
-jemalloc-sys = { path = "jemalloc-sys", version = "0.3.2", default-features = false }
+jemalloc-sys = { path = "jemalloc-sys", default-features = false }
 libc = { version = "^0.2.8", default-features = false }
 
 [dev-dependencies]
