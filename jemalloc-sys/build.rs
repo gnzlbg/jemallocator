@@ -232,7 +232,7 @@ fn main() {
     .env("CFLAGS", cflags.clone())
     .env("LDFLAGS", cflags.clone())
     .env("CPPFLAGS", cflags.clone())
-    .arg("--disable-cxx");
+    .arg("--disable-cxx")
     .arg("--disable-shared");
 
     if target.contains("ios") {
