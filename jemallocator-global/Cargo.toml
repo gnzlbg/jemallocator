@@ -24,7 +24,7 @@ is-it-maintained-open-issues = { repository = "gnzlbg/jemallocator" }
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-jemallocator = { path = "..", optional = true }
+jemallocator = { version = "0.3.2", path = "..", optional = true }
 cfg-if = "0.1"
 
 [features]
