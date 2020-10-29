@@ -25,12 +25,12 @@ is-it-maintained-open-issues = { repository = "gnzlbg/jemallocator" }
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-jemalloc-sys = { path = "../jemalloc-sys" }
+jemalloc-sys = { path = "../jemalloc-sys", version = "0.3.2" }
 libc = { version = "0.2", default-features = false }
 paste = { version = "0.1" }
 
 [dev-dependencies]
-jemallocator = { path = ".." }
+jemallocator = { path = "..", version = "0.3.2" }
 
 [features]
 default = []
