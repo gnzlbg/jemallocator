@@ -232,8 +232,11 @@ fn main() {
     .env("CFLAGS", cflags.clone())
     .env("LDFLAGS", cflags.clone())
     .env("CPPFLAGS", cflags.clone())
-    .arg("--disable-cxx")
-    .arg("--disable-shared");
+    .arg("--disable-cxx");
+
+    if env::var("JEMALLOC_SYS_DISABLE_SHARED").is_ok() {
+        cmd.arg("--disable-shared");
+    }
 
     if target.contains("ios") {
         // newer iOS deviced have 16kb page sizes:
