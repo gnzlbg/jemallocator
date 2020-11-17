@@ -364,6 +364,7 @@ fn main() {
         .arg(num_jobs.clone()));
 
     println!("cargo:root={}", out_dir.display());
+    println!("cargo:include={}/include", out_dir.display());
 
     // Linkage directives to pull in jemalloc and its dependencies.
     //
