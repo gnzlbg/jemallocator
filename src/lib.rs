@@ -122,7 +122,7 @@ unsafe impl GlobalAlloc for Jemalloc {
 
     #[inline]
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-        assume!(!ptr.is_null())
+        assume!(!ptr.is_null());
         assume!(layout.size() != 0);
         let flags = layout_to_flags(layout.align(), layout.size());
         ffi::sdallocx(ptr as *mut c_void, layout.size(), flags)
